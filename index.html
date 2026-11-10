@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es" data-tema="claro">
+<head>
+<meta charset="utf-8">
+<title>Ronda</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ronda">
+<meta name="theme-color" content="#FFFDF7" id="tc">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="preload" href="fonts/nunito-extrabold.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="fonts/nunito-bold.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="app.css">
+<script>
+/* Tema antes de pintar nada, para que no haya un fogonazo de color al abrir. */
+try{var t=localStorage.getItem('ronda-tema')||'auto';var o=t==='oscuro'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.tema=o?'oscuro':'claro';document.getElementById('tc').content=o?'#1B262C':'#FFFDF7';}catch(e){}
+</script>
+<style>html,body{background:#FFFDF7}html[data-tema="oscuro"],html[data-tema="oscuro"] body{background:#1B262C}</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="capa"></div>
+<div id="arranque"></div>
+<noscript>Ronda necesita JavaScript.</noscript>
+<script src="app.js"></script>
+</body>
+</html>
