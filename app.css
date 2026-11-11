@@ -1,4 +1,4 @@
-/* RONDA · estilos · 1.5.2 */
+/* RONDA · estilos · 1.6.0 */
 @font-face{font-family:Nunito;font-weight:400;font-display:block;src:url('fonts/nunito-regular.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:600;font-display:block;src:url('fonts/nunito-semibold.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:700;font-display:block;src:url('fonts/nunito-bold.woff') format('woff')}
@@ -963,3 +963,66 @@ html[data-tema="oscuro"] .grid .mod{box-shadow:none}
 /* La franja de la 1.5.0/1.5.1 ya no se usa */
 #franja{display:none}
 .hd.hdi .hdic .ic, .pg .minit .hdic .ic, .pgc:has(> .hd.hdi) > .top .ic{color:#fff}
+
+/* ===================== 1.6.0 · Feedback ===================== */
+.fbexp{display:inline-flex;align-items:center;gap:6px;border:0;font:inherit;font-weight:800;font-size:14px;padding:7px 12px;border-radius:10px;background:rgba(255,255,255,.22);color:#fff}
+.pgc:has(> .hd.hdi) > .top .fbexp svg circle{fill:#fff}
+.fbch{margin:0 0 12px}
+.fbl{display:flex;flex-direction:column;gap:8px}
+.fbn{display:block;width:100%;text-align:left;font:inherit;color:inherit;border:0;padding:12px 14px}
+.fbn.hecha{opacity:.72}
+.fbh{display:flex;align-items:center;gap:8px;min-width:0}.fbh b{font-size:14.5px;font-weight:800;white-space:nowrap}.fbh small{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbsc{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;padding:4px 8px;border-radius:7px;background:var(--ln);flex:none;white-space:nowrap}.fbsc i{width:8px;height:8px;border-radius:2px;flex:none}
+.fbn p,.fbtx{font-size:15px;font-weight:600;line-height:1.35;margin:8px 0 2px;white-space:pre-wrap;overflow-wrap:anywhere}
+.fbtx{font-size:16px;margin:12px 0}
+.fbad{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.fbad.big{gap:8px;margin:4px 0 10px}
+.fbm{position:relative;display:inline-block;border-radius:8px;background:var(--ln) center/cover no-repeat;box-shadow:0 0 0 1px rgba(43,58,66,.08);overflow:hidden;flex:none}
+.fbm.vd::after{content:'';position:absolute;inset:0;background:rgba(27,38,44,.25)}
+.fbm em{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:rgba(27,38,44,.6);display:flex;align-items:center;justify-content:center;z-index:2}
+.fbm u{position:absolute;right:5px;bottom:4px;z-index:2;text-decoration:none;color:#fff;font-size:11px;font-weight:800}
+.fbmas{display:inline-flex;align-items:center;justify-content:center;width:40px;font-weight:800;color:var(--mu)}
+.fbok{display:flex!important;align-items:center;gap:4px;margin-top:8px}
+.fbab{border:0;background:none;padding:0}
+.fbta{width:100%;border:0;border-radius:12px;background:var(--sf);color:var(--ink);font:inherit;font-size:16px;font-weight:600;line-height:1.4;padding:12px 14px;resize:none;box-shadow:0 0 0 1.5px var(--ln);min-height:104px}
+.fbta:focus{outline:0;box-shadow:0 0 0 1.5px var(--ink)}
+.fbsecs{display:flex;flex-wrap:wrap;gap:6px}
+.fbsecs button{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:9px;background:var(--sf);border:0;font:inherit;font-size:14px;font-weight:800;color:var(--ink);box-shadow:0 0 0 1px var(--ln)}
+.fbsecs i{width:9px;height:9px;border-radius:2px}
+.fbsecs button.on{background:var(--ink);color:var(--bg)}
+.fbadj{display:flex;flex-wrap:wrap;gap:10px}
+.fbw{position:relative;display:inline-block}
+.fbq{position:absolute;top:-7px;right:-7px;width:24px;height:24px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;z-index:3;padding:0}
+.fbq .ic{color:var(--bg)}
+.fbadd{width:72px;height:112px;border-radius:8px;border:1.5px dashed color-mix(in srgb,var(--ink) 30%,transparent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}.fbadd small{font-size:11.5px;color:var(--ink)}
+.fbnota{text-align:left;margin:12px 2px 14px}
+.fbprog{margin-top:14px}.fbprog small{margin-top:6px}
+.fbvid{display:block;width:100%;border-radius:12px;margin-top:6px;background:#000}
+.bts2{display:flex;gap:8px;margin:14px 0 8px}.bts2 .btn{flex:1}
+.fbres{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}.fbres div{background:var(--sf);border-radius:12px;padding:10px;box-shadow:0 0 0 1px var(--ln)}.fbres b{font-size:18px;font-weight:800;display:block;white-space:nowrap}
+.fbarb{background:var(--sf);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:9px;box-shadow:0 0 0 1px var(--ln)}
+.fbarb div{display:flex;align-items:flex-start;gap:8px;font-size:14.5px;font-weight:800;min-width:0}.fbarb span{min-width:0;overflow-wrap:anywhere}.fbarb .s1{margin-left:22px;font-weight:700}.fbarb .s1 small{font-size:12px}.fbarb .mu{color:var(--mu);font-size:13px}
+.fbexh .btn svg circle,.fbexh .btn .ic{color:currentColor}
+.fbhj,.fbver,.fbexh{text-align:left}
+.fbhj h3,.fbexh h3{font-size:21px;font-weight:800;margin:2px 0 14px}
+.fbarb small{display:block;margin-top:1px}
+.fbver .fbh{margin-top:4px}
+.fbtx{color:var(--ink)}
+
+/* ===================== 1.6.0 · Plantas ===================== */
+.agp{padding:14px 0 12px;margin-bottom:12px}
+.agt{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 14px 10px}.agt b{font-size:15.5px;font-weight:800}
+.agw{position:relative}
+.ags{display:flex;gap:4px;overflow-x:auto;padding:0 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.ags::-webkit-scrollbar{display:none}
+.agi{flex:none;width:76px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;border:0;background:none;font:inherit;color:inherit;padding:0;scroll-snap-align:start}
+.agem{width:46px;height:46px;border-radius:12px;background:color-mix(in srgb,#2E8B57 12%,var(--sf));display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1}
+.agi b{font-size:12.5px;font-weight:800;line-height:1.2;height:2.4em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.agb{width:14px;height:56px;border-radius:7px;background:var(--ln);position:relative;overflow:hidden;display:block}
+.agb i{position:absolute;left:0;right:0;bottom:0;background:#3C78C8;border-radius:7px}
+.agi small{font-size:12.5px}.agi small.r{color:#C8402B}
+.agbar{display:none;height:4px;margin:10px 14px 0;border-radius:2px;background:var(--ln);position:relative;overflow:hidden}
+.agw.hay .agbar{display:block}
+.agbar i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:color-mix(in srgb,var(--ink) 28%,transparent)}
+/* Tarjeta de Inicio: emoji y nombre en dos líneas */
+.pem{font-size:26px;line-height:30px;height:30px}
+.pl b.pn2{white-space:normal;text-overflow:clip;font-size:11.5px;line-height:1.2;height:2.4em;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
