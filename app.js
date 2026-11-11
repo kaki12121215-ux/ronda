@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.6.0 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.6.1 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.6.0';
+const VERSION = '1.6.1';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -3821,9 +3821,11 @@ wd('regar', 'Toca regar', 'Plantas', 'S', cVE, 'Las de hoy', () => {
   return { vacio: !l.length, h: lab('Toca regar') + '<button class="wbody" data-a="wPlantas">' + big(t.length, t.length === 1 ? 'planta' : 'plantas') + t.slice(0, 2).map(x => '<div class="cu">' + ic('gota', 20, 5) + '<div><b>' + esc(x.nombre) + '</b><small>' + cuando(x.proximo).toLowerCase() + '</small></div></div>').join('') + (t.length ? '' : '<small class="mu2">Todas regadas</small>') + '</button>' };
 });
 wd('plantas', 'Mis plantas', 'Plantas', 'L', cVE, 'Cuánta agua les queda', () => {
-  const l = lista('plantas').slice(0, 5);
+  /* 1.6.1: por orden de riego (la que antes toca, primero) */
+  const l = lista('plantas').sort((a, b) => (a.proximo || '9').localeCompare(b.proximo || '9') || String(a.nombre).localeCompare(String(b.nombre), 'es')).slice(0, 5);
+  const largos = l.some(x => String(x.nombre).length > 18);
   const nivel = x => { const n = diasHasta(x.proximo); return n === null ? 1 : Math.max(0.06, Math.min(1, n / Math.max(1, x.cada || 1))); };
-  return { vacio: !l.length, h: lab('Plantas', wlink(lista('plantas').length + '', 'wPlantas')) + '<div class="pl">' + l.map(x => '<button data-a="rutVer" data-col="plantas" data-id="' + x.id + '">' + (x.emoji ? '<span class="pem">' + esc(x.emoji) + '</span>' : ic('modulo-plantas', 26, 3)) + '<b class="pn2">' + esc(x.nombre) + '</b><div class="wl2"><i style="height:' + Math.round(100 * nivel(x)) + '%' + (tocaHoy('plantas', x) ? ';background:#E0563C' : '') + '"></i></div></button>').join('') + '</div><small class="mu2">El agua baja hasta el día de riego</small>' };
+  return { vacio: !l.length, h: lab('Plantas', wlink(lista('plantas').length + '', 'wPlantas')) + '<div class="pl' + (largos ? ' tres' : '') + '">' + l.map(x => '<button data-a="rutVer" data-col="plantas" data-id="' + x.id + '">' + (x.emoji ? '<span class="pem">' + esc(x.emoji) + '</span>' : ic('modulo-plantas', 26, 3)) + '<b class="pn2">' + esc(x.nombre) + '</b><div class="wl2"><i style="height:' + Math.round(100 * nivel(x)) + '%' + (tocaHoy('plantas', x) ? ';background:#E0563C' : '') + '"></i></div></button>').join('') + '</div><small class="mu2">El agua baja hasta el día de riego</small>' };
 });
 
 /* Medicación */
@@ -5884,5 +5886,73 @@ function barraAgua(s) {
 document.addEventListener('scroll', ev => { const s = ev.target; if (s && s.classList && s.classList.contains('ags')) barraAgua(s); }, true);
 new MutationObserver(() => { $$('.ags').forEach(s => { if (!s._ag) { s._ag = 1; requestAnimationFrame(() => barraAgua(s)); } }); }).observe(document.documentElement, { childList: true, subtree: true });
 Object.assign(window.RONDA || (window.RONDA = {}), { panelAgua: panelAgua, faltaRiego: faltaRiego });
+
+/* ---- 24_masrapido161.js ---- */
+/* ===================== 1.6.1 · Más rápido =====================
+   Mantener pulsado «Más» en la barra de abajo, desde cualquier pantalla: sale una cuadrícula con todas las secciones.
+   Se puede soltar encima de una para ir directo, o soltar fuera y tocar después. Un toque normal sigue abriendo Más. */
+let MR = null;
+function mrSecciones() {
+  /* Solo las de la pestaña Más: las que ya están en la barra de abajo no salen */
+  const enBarra = raices().map(x => x[0]);
+  return Object.keys(MODS).filter(k => k !== 'buscar' && enBarra.indexOf(k) < 0).map(k => { const s = SECC[k], ci = s ? s[0] : MODS[k][2]; return [k, MODS[k][0], MODS[k][1], ci < 0 ? 6 : ci]; });
+}
+function mrAbrir(desde) {
+  if (MR) return;
+  const v = document.createElement('div'); v.id = 'mrapido';
+  v.innerHTML = '<div class="mrv"></div><div class="mrc" role="dialog" aria-label="Ir a"><p>Ir a</p><div class="mrg">' + mrSecciones().map(x => '<button data-k="' + x[0] + '"><span style="color:' + (x[0] === 'mas' ? TINTA : COL[x[3]]) + '">' + ic(x[2], 26, x[3]) + '</span><b>' + esc(x[1]) + '</b></button>').join('') + '</div></div>';
+  document.body.appendChild(v);
+  const r = desde.getBoundingClientRect(), c = $('.mrc', v);
+  c.style.setProperty('--ox', Math.max(0, r.left + r.width / 2 - c.getBoundingClientRect().left) + 'px');
+  MR = { v: v, sobre: null };
+  requestAnimationFrame(() => v.classList.add('ab'));
+  v.addEventListener('click', ev => { const b = ev.target.closest('.mrg button'); if (b) mrIr(b.dataset.k); else if (!ev.target.closest('.mrc')) mrCerrar(); });
+}
+function mrCerrar() {
+  if (!MR) return; const v = MR.v; MR = null;
+  v.classList.remove('ab'); setTimeout(() => v.remove(), 220);
+}
+function mrIr(k) {
+  mrCerrar();
+  if (hojaAbierta) cerrarHoja(true);
+  const enBarra = raices().some(x => x[0] === k);
+  if (enBarra) Nav.raiz(k);
+  else { if (Nav.actual().id !== 'mas') Nav.raiz('mas'); ACC.abrirMod({ dataset: { id: k } }); }
+}
+function mrMarcar(x, y) {
+  if (!MR) return; const el = document.elementFromPoint(x, y), b = el && el.closest('.mrg button');
+  if (MR.sobre && MR.sobre !== b) MR.sobre.classList.remove('sob');
+  if (b) b.classList.add('sob'); MR.sobre = b;
+}
+(function () {
+  let t = null, x0 = 0, y0 = 0, hecho = false;
+  const masDe = ev => ev.target.closest && ev.target.closest('#nav [data-a="raiz"][data-id="mas"]');
+  document.addEventListener('touchstart', ev => {
+    const m = masDe(ev); if (!m) return;
+    hecho = false; x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY;
+    clearTimeout(t); t = setTimeout(() => { hecho = true; mrAbrir(m); }, 420);
+  }, { passive: true });
+  document.addEventListener('touchmove', ev => {
+    const p = ev.touches[0];
+    if (!hecho) { if (Math.hypot(p.clientX - x0, p.clientY - y0) > 12) clearTimeout(t); return; }
+    if (MR) { ev.preventDefault(); mrMarcar(p.clientX, p.clientY); }
+  }, { passive: false });
+  document.addEventListener('touchend', ev => {
+    clearTimeout(t);
+    if (!hecho) return;
+    ev.preventDefault();
+    const b = MR && MR.sobre; if (b) mrIr(b.dataset.k);
+    setTimeout(() => { hecho = false; }, 60);
+  }, { passive: false });
+  document.addEventListener('contextmenu', ev => { if (masDe(ev)) ev.preventDefault(); });
+  /* Con ratón (y en las pruebas): mantener pulsado también vale */
+  document.addEventListener('mousedown', ev => { const m = masDe(ev); if (!m) return; hecho = false; clearTimeout(t); t = setTimeout(() => { hecho = true; mrAbrir(m); }, 420); });
+  document.addEventListener('mouseup', () => clearTimeout(t));
+  /* El toque que abre la cuadrícula no debe abrir además Más */
+  document.addEventListener('click', ev => { if (hecho && masDe(ev)) { ev.stopPropagation(); ev.preventDefault(); hecho = false; } }, true);
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') mrCerrar(); });
+})();
+
+Object.assign(window.RONDA || (window.RONDA = {}), { mrAbrir: mrAbrir, mrCerrar: mrCerrar, mrIr: mrIr });
 
 })();

@@ -1,4 +1,4 @@
-/* RONDA · estilos · 1.6.0 */
+/* RONDA · estilos · 1.6.1 */
 @font-face{font-family:Nunito;font-weight:400;font-display:block;src:url('fonts/nunito-regular.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:600;font-display:block;src:url('fonts/nunito-semibold.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:700;font-display:block;src:url('fonts/nunito-bold.woff') format('woff')}
@@ -1026,3 +1026,27 @@ html[data-tema="oscuro"] .grid .mod{box-shadow:none}
 /* Tarjeta de Inicio: emoji y nombre en dos líneas */
 .pem{font-size:26px;line-height:30px;height:30px}
 .pl b.pn2{white-space:normal;text-overflow:clip;font-size:11.5px;line-height:1.2;height:2.4em;text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+
+/* ===================== 1.6.1 ===================== */
+/* Tarjeta de plantas: con nombres largos, hasta tres líneas (todas a la misma altura) */
+.pl.tres b.pn2{-webkit-line-clamp:3;height:3.6em}
+/* Más rápido: cuadrícula al mantener pulsado «Más» */
+#mrapido{position:fixed;inset:0;z-index:60;pointer-events:none}
+#mrapido.ab{pointer-events:auto}
+.mrv{position:absolute;inset:0;background:rgba(27,38,44,.38);opacity:0;transition:opacity .2s ease;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+#mrapido.ab .mrv{opacity:1}
+.mrc{position:absolute;left:12px;right:12px;bottom:calc(var(--nb,12px) + var(--navalt,64px) + 10px);background:var(--bg);border-radius:20px;padding:14px 10px 10px;box-shadow:0 18px 40px rgba(27,38,44,.25);transform-origin:var(--ox,90%) 100%;transform:scale(.6) translateY(30px);opacity:0;transition:transform .22s cubic-bezier(.2,.9,.25,1.15),opacity .16s ease}
+#mrapido.ab .mrc{transform:none;opacity:1}
+.mrc p{font-size:14px;font-weight:800;color:var(--mu);margin:0 6px 8px}
+.mrg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.mrg button{border:0;background:none;font:inherit;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px 8px;border-radius:12px;transition:background .12s}
+.mrg button span{width:46px;height:46px;border-radius:12px;background:var(--sf);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px var(--ln)}
+.mrg button b{font-size:11.5px;font-weight:800;line-height:1.15;text-align:center;max-width:100%;overflow-wrap:anywhere}
+.mrg button.sob,.mrg button:active{background:color-mix(in srgb,var(--ink) 9%,transparent)}
+@media (prefers-reduced-motion:reduce){.mrc{transition:opacity .15s}}
+.mrg button span .ic{color:inherit}
+/* 1.6.1 · En las cabeceras de color, el punto de cada icono con un borde del color de la cabecera:
+   sin él, el punto blanco se juntaba con los trazos (en Menú el plato parecía relleno) */
+.hd.hdi .hdic svg circle, .pg .minit svg circle, .pgc:has(> .hd.hdi) > .top svg circle{stroke:var(--hc,var(--bg));stroke-width:1.6}
+/* Botones de la nota de feedback: en una línea */
+.bts2 .btn{font-size:16px;white-space:nowrap;padding-left:8px;padding-right:8px}
