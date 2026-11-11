@@ -1,4 +1,4 @@
-/* RONDA · estilos · 1.4.2 */
+/* RONDA · estilos · 1.5.0 */
 @font-face{font-family:Nunito;font-weight:400;font-display:block;src:url('fonts/nunito-regular.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:600;font-display:block;src:url('fonts/nunito-semibold.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:700;font-display:block;src:url('fonts/nunito-bold.woff') format('woff')}
@@ -852,3 +852,74 @@ input::-webkit-date-and-time-value{text-align:left}
 .aparece .pg.raiz .pgc{transform:translateY(10px)}
 .aparece.ya{opacity:1;transition:opacity .6s cubic-bezier(.2,.7,.2,1)}
 .aparece.ya .pg.raiz .pgc{transform:none;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+/* 1.4.3 · Tarjeta pequeña «Mis tareas» con casillas */
+.tlc{font-size:12.5px;font-weight:800;color:var(--mu);background:color-mix(in srgb,var(--sf) 70%,transparent);border-radius:999px;padding:1px 8px;letter-spacing:0;text-transform:none}
+.tlw{position:relative;margin-top:2px}
+.tls{max-height:184px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-right:8px}
+.tls::-webkit-scrollbar{display:none}
+.tlw.hay:not(.abajo)::after{content:'';position:absolute;left:0;right:8px;bottom:0;height:22px;background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--a,#E3EDF3) 22%,var(--bg)));pointer-events:none}
+html[data-tema="oscuro"] .tlw.hay:not(.abajo)::after{background:linear-gradient(to bottom,transparent,color-mix(in srgb,var(--a,#3C4F59) 20%,var(--sf)))}
+.tlbar{position:absolute;right:0;top:4px;bottom:4px;width:3px;border-radius:2px;background:color-mix(in srgb,var(--ink) 8%,transparent);display:none}
+.tlw.hay .tlbar{display:block}
+.tlbar i{position:absolute;left:0;top:0;width:3px;border-radius:2px;background:color-mix(in srgb,var(--ink) 38%,transparent)}
+.tlr{display:flex;align-items:flex-start;gap:9px;padding:6px 0}
+.tlr .ck{width:22px;height:22px;border-radius:7px;flex:none;margin-top:1px}
+.tlt{flex:1;min-width:0;border:0;background:none;padding:0;text-align:left;font:inherit;color:inherit;display:flex;flex-direction:column;gap:1px}
+.tlt b{font-size:14.5px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.tlx{font-size:12px;font-weight:700;color:var(--mu)}
+.tlx.pas{color:#C8402B}
+.tlr.dn b{text-decoration:line-through;opacity:.5}
+html[data-tema="oscuro"] .tlx.pas{color:#F28A73}
+
+/* ===================== 1.5.0 ===================== */
+/* Franja de color arriba (la zona de la hora) */
+#franja{position:fixed;left:0;right:0;top:0;height:var(--st);z-index:40;pointer-events:none;transition:background-color .35s ease}
+/* Título con el icono de la sección */
+.hd.hdi{align-items:center;gap:12px}
+.hd.hdi .hdt{flex:1;min-width:0}
+.hdic{display:inline-flex;flex:none;margin:-4px 0 -4px -4px}
+.hd h1{letter-spacing:-.02em}
+/* Título pequeño al deslizar */
+.minit{position:absolute;left:0;right:0;top:0;z-index:6;padding:calc(max(var(--st),8px) + 6px) 12px 8px;min-height:calc(max(var(--st),8px) + 50px);display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);box-shadow:0 6px 14px rgba(27,38,44,.07);opacity:0;transform:translateY(-6px);transition:opacity .18s linear,transform .18s ease;pointer-events:none}
+html[data-tema="oscuro"] .minit{box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.minit.ver{opacity:1;transform:none;pointer-events:auto}
+.minit b{font-size:17px;font-weight:800;display:flex;align-items:center;gap:7px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.minit .hdic{margin:0}
+.minit .bk{border:0;background:none;padding:6px;color:var(--ink);display:inline-flex}
+.minit .hu{width:36px;flex:none}
+/* Inicio: anillo, saludo y resumen */
+.ini150{padding:0 0 14px}
+.itop{display:flex;justify-content:space-between;align-items:center;margin:2px 0 18px}
+.marca{display:flex;align-items:center;gap:8px;min-width:0}.marca b{font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ini150 .eye{margin:0}
+.sal{font-size:32px;font-weight:800;letter-spacing:-.025em;line-height:1.08;margin:4px 0 16px}
+.resf{display:grid;gap:8px}
+.rs{border:0;font:inherit;color:inherit;text-align:left;background:var(--sf);border-radius:12px;padding:10px;box-shadow:var(--sombra);min-width:0}
+.rs i{display:block;width:16px;height:4px;border-radius:2px;margin-bottom:8px}
+.rs b{display:block;font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs small{display:block;font-size:12px;font-weight:700;color:var(--mu);line-height:1.25;margin-top:1px}
+html[data-tema="oscuro"] .rs{background:var(--sf)}
+/* Casillas siempre neutras; en rojo solo las que se han pasado de fecha */
+.ck:not(.on){border-color:var(--ink)!important}
+.ck.pas:not(.on){border-color:#E0563C!important}
+.ck.on{background:var(--ink)!important;border-color:var(--ink)!important}
+.ck.on svg path{stroke:var(--bg)}
+/* Menos redondeo, más profesional */
+.card{border-radius:14px}
+.w{border-radius:16px}
+.fld{border-radius:12px}
+.btn{border-radius:14px}
+.chip{border-radius:10px}
+.seg{border-radius:12px}.seg button{border-radius:9px}
+.hoja{border-radius:20px 20px 0 0}
+.sq{border-radius:12px}
+.ck{border-radius:7px}
+.mini{border-radius:9px}
+.addbar{border-radius:14px}
+.halves>div{border-radius:12px}
+.crd{border-radius:16px}
+.btn3{border-radius:10px}
+.post{border-radius:4px 12px 12px 12px}
+.ev,.it{border-radius:12px}
+.toast{border-radius:14px}
+.eyeb{border-radius:0 15px 0 12px!important}

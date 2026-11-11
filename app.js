@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.4.2 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.5.0 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.4.2';
+const VERSION = '1.5.0';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -441,7 +441,7 @@ function av(p, s) {
 }
 /* Cabecera con flecha. En una pantalla de la barra de abajo (raíz) y sin título, no se pinta: así todos los títulos quedan a la misma altura. */
 const tope = (t, der) => (!t && !der && Nav.pintando && Nav.pintando.raiz) ? '' : '<div class="top"><button class="bk" data-a="atras" aria-label="Atrás">' + ic('atras', 26) + '</button><b>' + esc(t) + '</b><span class="rt">' + (der || '') + '</span></div>';
-const head = (t, sub, der) => '<div class="hd"><div><h1>' + esc(t) + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>' + (der || '') + '</div>';
+const head = (t, sub, der) => { const i = iconoCabecera(); return '<div class="hd' + (i ? ' hdi' : '') + '">' + i + '<div class="hdt"><h1>' + esc(t) + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>' + (der || '') + '</div>'; };
 const sq = (icono, ci, sm) => '<span class="sq' + (sm === false ? '' : ' sm') + '" style="background:' + COL[ci] + '22">' + ic(icono, sm === false ? 30 : 26, ci) + '</span>';
 const btn = (t, a, cls, extra) => '<button class="btn ' + (cls || 'pri') + '" data-a="' + a + '"' + (extra || '') + '>' + t + '</button>';
 
@@ -472,6 +472,8 @@ const Nav = {
       let h = P[e.id].html(e.params, e);
       /* 1.4.2: si la pantalla se abre encima (no está en la barra), siempre lleva flecha para volver */
       if (!e.raiz && this.pila.length && String(h).indexOf('data-a="atras"') < 0) h = tope('') + h;
+      /* 1.5.0: la flecha y los botones de arriba siempre lo primero (nunca debajo de pestañas) */
+      if (String(h).indexOf('class="top"') > 0) { const t = document.createElement('template'); t.innerHTML = h; const tp = [...t.content.children].find(x => x.classList.contains('top')); if (tp && t.content.firstElementChild !== tp) { t.content.insertBefore(tp, t.content.firstChild); h = t.innerHTML; } }
       return h;
     } catch (x) { anotar('pintar ' + e.id, x); return '<div class="aviso mal">' + ic('error', 22, 0) + '<span>No he podido pintar esta pantalla: ' + esc(x.message) + '</span></div>'; }
   },
@@ -546,7 +548,7 @@ const Nav = {
 };
 
 /* Color de la cápsula de cada pestaña (1.4.0). */
-const COLBARRA = { inicio: 0, tareas: 2, gastos: 7, menu: 1, mas: 6, compra: 2, agenda: 5, acuario: 4, notas: 6, documentos: 6, plantas: 3, medicacion: 7, coche: 5, coches: 5 };
+const COLBARRA = { inicio: 0, tareas: 2, gastos: 7, menu: 1, mas: 6, compra: 1, agenda: 5, acuario: 4, notas: 6, documentos: 6, plantas: 3, medicacion: 3, coche: 5, coches: 5, turnos: 2, listasr: 6 };
 const colorBarra = x => COLBARRA[x[0]] !== undefined ? COLBARRA[x[0]] : (x[3] || 0);
 
 /* Aviso de conexión arriba de las pantallas principales. */
@@ -1313,7 +1315,7 @@ P.lista = {
       if (e) e.vistos[x.id] = 1;
       return '<div class="row it' + (x.hecho ? ' dn' : '') + (nuevo ? ' nuevo' : '') + '" data-a="marcar" data-lp="menuProducto" data-id="' + x.id + '">' +
         '<span class="ck' + (x.hecho ? ' on' : '') + '" style="' + (x.hecho ? 'background:' + ((dato('personas', x.hechoPor) || {}).color || '#2E8B57') + ';border-color:transparent' : '') + '">' + tick(16) + '</span>' +
-        '<div class="f"><b>' + esc(x.nombre) + '</b>' + ((x.cantidad || quien || (x.para && !x.hecho)) ? '<small>' + [x.cantidad ? esc(x.cantidad) : '', x.para && !x.hecho ? esc(x.para) : '', quien ? '<span class="quien">' + dot(quien.color, 8) + esc(quien.nombre) + '</span>' : ''].filter(Boolean).join(' · ') + '</small>' : '') + '</div></div>';
+        '<div class="f"><b>' + esc(x.nombre) + '</b>' + ((x.cantidad || quien || (x.para && !x.hecho)) ? '<small>' + [x.cantidad ? esc(textoCantidad(x.cantidad)) : '', x.para && !x.hecho ? esc(textoPara(x.para)) : '', quien ? '<span class="quien">' + dot(quien.color, 8) + esc(quien.nombre) + '</span>' : ''].filter(Boolean).join(' · ') + '</small>' : '') + '</div></div>';
     };
     const orden = (a, b) => (a.orden || 0) - (b.orden || 0);
     if (L.secciones) SECCIONES.forEach(s => {
@@ -1936,7 +1938,7 @@ P.tareas = {
       const nuevo = e && e.pintado && !e.vistos[x.id]; if (e) e.vistos[x.id] = 1;
       const atras = !x.hecho && x.fecha && x.fecha < hoyISO();
       return '<div class="row card it' + (x.hecho ? ' dn' : '') + (nuevo ? ' nuevo' : '') + '" data-a="verTarea" data-lp="menuTarea" data-id="' + x.id + '">' +
-        '<button class="ck' + (x.hecho ? ' on' : '') + '" data-a="hacerTarea" data-id="' + x.id + '" style="' + (x.hecho ? 'background:' + colorDe(x.hechoPor) + ';border-color:transparent' : 'border-color:' + c) + '" aria-label="Hecha">' + tick(16) + '</button>' +
+        '<button class="ck' + (x.hecho ? ' on' : '') + (atras ? ' pas' : '') + '" data-a="hacerTarea" data-id="' + x.id + '" style="' + (x.hecho ? 'background:' + colorDe(x.hechoPor) + ';border-color:transparent' : 'border-color:' + c) + '" aria-label="Hecha">' + tick(16) + '</button>' +
         '<div class="f"><b>' + esc(x.titulo) + '</b><small' + (atras ? ' style="color:#C8402B"' : '') + '>' + (x.hecho ? 'Hecha por ' + esc(nombreDe(x.hechoPor)) : cuando(x.fecha, x.hora)) + (x.turno ? ' · Turno' : '') + (x.repite && x.repite.cada ? ' · ' + textoRepe(x.repite).toLowerCase() : '') + (x.cal ? ' · en el calendario' : '') + '</small>' + (!x.hecho && x.limite ? textoLimite(x.limite) : '') + '</div>' +
         avQuien(x.para, 28) + '</div>';
     };
@@ -3282,19 +3284,19 @@ ACC.cambiarPin = () => Nav.ir('pin', { nuevo: true, clave: DOC.clave, pasos: 1 }
 /* ---- 12_resto.js ---- */
 /* ============================ MÓDULOS, BARRA DE ABAJO, MÁS, NOTAS Y BUSCAR ============================ */
 const MODS = {
-  tareas: ['Tareas', 'modulo-tareas', 1, () => { const n = lista('tareas').filter(t => !t.hecho).length; return n ? n + ' pendientes' : 'Nada pendiente'; }],
-  compra: ['Compra', 'modulo-compra', 2, () => resumenCompra()],
+  tareas: ['Tareas', 'modulo-tareas', 2, () => { const n = lista('tareas').filter(t => !t.hecho).length; return n ? n + ' pendientes' : 'Nada pendiente'; }],
+  compra: ['Compra', 'modulo-compra', 1, () => resumenCompra()],
   agenda: ['Agenda', 'modulo-calendario', 5, () => { const n = eventosDia(hoyISO()).length; return n ? n + ' hoy' : 'Nada hoy'; }],
   gastos: ['Gastos', 'modulo-gastos', 7, () => { const p = lista('fijos').filter(f => f.proximo && f.proximo <= isoDia(sumaDias(new Date(), 7))).length; return p ? p + ' esta semana' : lista('fijos').length + ' fijos'; }],
   documentos: ['Documentos', 'modulo-documentos', 6, () => lista('documentos').length + ' cifrados'],
-  notas: ['Notas', 'modulo-notas', 0, () => lista('notas').length + ' notas'],
+  notas: ['Notas', 'modulo-notas', 6, () => lista('notas').length + ' notas'],
   menu: ['Menú semanal', 'modulo-menu-semanal', 1, () => { const m = menuDe(new Date()).filter(x => x[1]); return m.length ? m[0][1] : 'Sin menú hoy'; }],
   plantas: ['Plantas', 'modulo-plantas', 3, () => { const n = lista('plantas').filter(x => tocaHoy('plantas', x)).length; return n ? n + ' para regar' : lista('plantas').length + ' plantas'; }],
-  medicacion: ['Medicación', 'modulo-medicacion', 7, () => { const n = lista('medicacion').filter(x => tocaHoy('medicacion', x)).length; return n ? n + ' hoy' : lista('medicacion').length + ' en la lista'; }],
+  medicacion: ['Medicación', 'modulo-medicacion', 3, () => { const n = lista('medicacion').filter(x => tocaHoy('medicacion', x)).length; return n ? n + ' hoy' : lista('medicacion').length + ' en la lista'; }],
   acuario: ['Acuario', 'pez-betta', 4, () => { const n = lista('acuario').filter(x => tocaHoy('acuario', x)).length; return n ? n + ' para hoy' : 'Al día'; }],
   coche: ['Coches', 'modulo-coche', 5, () => { const n = coches().length; return n ? n + (n === 1 ? ' coche' : ' coches') : 'Sin coches'; }],
   turnos: ['Turnos', 'turno', 2, () => { const n = lista('turnos').length; return n ? n + (n === 1 ? ' turno' : ' turnos') : 'Lo que os alternáis'; }],
-  listasr: ['Listas', 'lista-repetir', 4, () => { const n = lista('listasr').length; return n ? n + (n === 1 ? ' lista' : ' listas') : 'Maleta, limpieza…'; }],
+  listasr: ['Listas', 'lista-repetir', 6, () => { const n = lista('listasr').length; return n ? n + (n === 1 ? ' lista' : ' listas') : 'Maleta, limpieza…'; }],
   personas: ['Personas', 'personas', 4, () => personas().length + ' personas'],
   buscar: ['Buscar', 'buscar', 5, () => 'En todo el espacio']
 };
@@ -3904,7 +3906,7 @@ P.inicio = {
         '<button class="rst" data-a="inicioRestablecer">Restablecer orden original</button>';
     }
     let h = '<div data-r="banda">' + banda() + '</div>' +
-      '<div class="hd"><div><p class="eye">' + fechaLarga(new Date()) + '</p><h1' + (e.nombre.length > 22 ? ' style="font-size:26px"' : '') + '>' + esc(e.nombre) + (e.emoji ? ' ' + esc(e.emoji) : '') + '</h1></div>' + pilaAvatares() + '</div>';
+      cabeceraInicio(e); /* 1.5.0: anillo, saludo y resumen del día */
     if (esAdmin() && ps.length < 2) h += '<button class="row card" data-a="ir" data-id="invitar" style="margin-bottom:12px">' + sq('invitar', 4) + '<div class="f"><b>Invita a los tuyos</b><small>Crea un código para que se unan</small></div>' + chev + '</button>';
     if (esAdmin() && (!S.cal || !S.cal.id)) h += '<button class="row card" data-a="ir" data-id="avisos" style="margin-bottom:12px">' + sq('modulo-calendario', 5) + '<div class="f"><b>Elige vuestro calendario</b><small>Para la agenda y los avisos</small></div>' + chev + '</button>';
     /* 1.4.0: las tarjetas con el ojo abierto salen siempre (antes, las que no tenían nada desaparecían al pulsar «Listo»). */
@@ -4656,7 +4658,7 @@ P.acuario.html = (p, e) => {
   const tabs = '<div class="seg" style="margin-bottom:12px">' + [['cuidados', 'Cuidados'], ['medidas', 'Medidas'], ['calendario', 'Calendario']].map(t => '<button class="' + (p.tab === t[0] ? 'on' : '') + '" data-a="pSet" data-k="tab" data-v="' + t[0] + '">' + t[1] + '</button>').join('') + '</div>';
   if (p.tab === 'medidas') return tope('', '<span style="display:flex;gap:4px"><button class="rt" data-a="ir" data-id="acGraficas" aria-label="Gráficas">' + ic('grafica-linea', 24, 5) + '</button><button class="rt" data-a="ir" data-id="acParams" aria-label="Parámetros">' + ic('ajustes', 24, 5) + '</button></span>') + head('Acuario', '') + tabs + htmlMedidas(p);
   if (p.tab === 'calendario') return tope('') + head('Acuario', '') + tabs + htmlCalAcuario(p);
-  const h = _acHtml(p, e), i = h.indexOf('<div class="hd">'), j = i >= 0 ? h.indexOf('</div></div>', i) : -1;
+  const h = _acHtml(p, e), i = h.indexOf('<div class="hd'), j = i >= 0 ? h.indexOf('</div></div>', i) : -1;
   return j >= 0 ? h.slice(0, j + 12) + tabs + h.slice(j + 12) : tabs + h;
 };
 P.acuario.tras = (el, p) => { if (p.tab === 'medidas') montarMedidas(el, p); };
@@ -5384,5 +5386,210 @@ const _acParamsHtml = P.acParams.html;
 P.acParams.html = p => _acParamsHtml(p) + '<button class="row card" data-a="acImportar" style="margin-top:12px">' + sq('subir', 5) + '<div class="f"><b>Importar medidas de otra app</b><small>Un archivo CSV con parámetro, valor y fecha</small></div>' + chev + '</button>';
 
 Object.assign(window.RONDA, { analizarMedidas: analizarMedidas, importarMedidas: importarMedidas, moverEmojis: moverEmojis, textoLimite: textoLimite });
+
+/* ---- 20_tareaslista.js ---- */
+/* ===================== 1.4.3 · Tarjeta pequeña «Mis tareas» con casillas =====================
+   Las tuyas y las de Todos sin hacer: primero las de hoy (y las que se han pasado), luego las que vienen y al final las sin fecha.
+   Si hay muchas, la lista se desliza por dentro de la tarjeta con una barrita fina. */
+function tareasMiasOrden() {
+  const h = hoyISO();
+  const g = t => !t.fecha ? 2 : t.fecha <= h ? 0 : 1;
+  return lista('tareas').filter(t => mias(t) && !t.hecho).sort((a, b) => g(a) - g(b) || ((a.fecha || '') + (a.hora || '99')).localeCompare((b.fecha || '') + (b.hora || '99')) || (a.orden || 0) - (b.orden || 0));
+}
+const extraTarea = t => {
+  const h = hoyISO();
+  if (t.fecha && t.fecha < h) return '<small class="tlx pas">' + esc(fechaCortaTxt(t.fecha)) + '</small>';
+  if (t.fecha === h) return t.hora ? '<small class="tlx">' + esc(t.hora) + '</small>' : '';
+  if (t.fecha) return '<small class="tlx">' + esc(fechaCortaTxt(t.fecha)) + (t.hora ? ' · ' + esc(t.hora) : '') + '</small>';
+  return '';
+};
+wd('tareasLista', 'Mis tareas en lista', 'Tareas', 'S', cLI, 'Tus tareas con su casilla. Si hay muchas, se desliza por dentro', () => {
+  const l = tareasMiasOrden();
+  return {
+    vacio: !l.length,
+    h: lab('Mis tareas', '<span class="tlc">' + l.length + '</span>') +
+      (l.length ? '<div class="tlw"><div class="tls">' + l.map(t => '<div class="tlr it">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tlt" data-a="verTarea" data-id="' + t.id + '"><b>' + esc(t.titulo) + '</b>' + extraTarea(t) + '</button></div>').join('') + '</div><span class="tlbar"><i></i></span></div>'
+        : '<p class="mu2">Nada pendiente</p>')
+  };
+});
+W.tareasLista.ir = 'wTareasMias';
+/* La barrita: alto y posición según lo que se ve de la lista */
+function barraTareas(s) {
+  const w = s.closest('.tlw'); if (!w) return;
+  const bar = $('.tlbar', w), th = $('.tlbar i', w); if (!bar || !th) return;
+  const sobra = s.scrollHeight - s.clientHeight;
+  w.classList.toggle('hay', sobra > 2);
+  if (sobra <= 2) return;
+  const alto = Math.max(18, bar.clientHeight * s.clientHeight / s.scrollHeight);
+  th.style.height = alto + 'px';
+  th.style.transform = 'translateY(' + ((bar.clientHeight - alto) * s.scrollTop / sobra) + 'px)';
+  w.classList.toggle('abajo', s.scrollTop >= sobra - 2);
+}
+document.addEventListener('scroll', ev => { const s = ev.target; if (s && s.classList && s.classList.contains('tls')) barraTareas(s); }, true);
+new MutationObserver(() => { $$('.tls').forEach(s => { if (!s._tl) { s._tl = 1; requestAnimationFrame(() => barraTareas(s)); } }); }).observe(document.documentElement, { childList: true, subtree: true });
+
+/* ---- 21_diseno150.js ---- */
+/* ===================== 1.5.0 · Diseño: franja de color por sección, título con icono, Inicio nuevo =====================
+   - Cada sección tiene su color (cabecera, barra, Más). Las tarjetas de Inicio no cambian.
+   - Franja de color arriba (la zona de la hora) y título oscuro con el icono de la sección en su color.
+   - Al deslizar, el título grande sube y aparece uno pequeño fijo arriba.
+   - Inicio sin franja: el anillo, el saludo y un resumen del día. */
+
+/* ---------- Colores por sección ---------- */
+const TINTA = '#2B3A42';
+const SECC = {
+  tareas: [2, 'modulo-tareas'], turnos: [2, 'turno'],
+  compra: [1, 'modulo-compra'], menu: [1, 'modulo-menu-semanal'],
+  plantas: [3, 'modulo-plantas'], medicacion: [3, 'modulo-medicacion'],
+  acuario: [4, 'pez-betta'],
+  agenda: [5, 'modulo-calendario'], coche: [5, 'modulo-coche'],
+  notas: [6, 'modulo-notas'], documentos: [6, 'modulo-documentos'], listasr: [6, 'lista-repetir'],
+  gastos: [7, 'modulo-gastos'],
+  mas: [-1, 'menu']
+};
+/* Pantallas que van con su sección */
+const PAG_SEC = {
+  tarea: 'tareas', tareaVer: 'tareas', repetir: 'tareas', turno: 'turnos', turnoEditar: 'turnos',
+  lista: 'compra', listaEditar: 'compra', producto: 'compra', compartir: 'compra',
+  menuDia: 'menu', menuAjustes: 'menu',
+  acGraficas: 'acuario', acParams: 'acuario', acDia: 'acuario',
+  evento: 'agenda', eventoVer: 'agenda', agendaDia: 'agenda',
+  cocheVer: 'coche', cocheEditar: 'coche', cocheFecha: 'coche',
+  nota: 'notas', docNuevo: 'documentos', docVer: 'documentos', docCarpeta: 'documentos', docClave: 'documentos', pin: 'documentos',
+  listar: 'listasr',
+  cuenta: 'gastos', cuentaEditar: 'gastos', mov: 'gastos', fijo: 'gastos', fijoVer: 'gastos', fijosResumen: 'gastos', archivadas: 'gastos', pagos: 'gastos', saldos: 'gastos', saldar: 'gastos',
+  ajustes: 'mas', personas: 'mas', persona: 'mas', invitar: 'mas', miperfil: 'mas', avisos: 'mas', sincronizacion: 'mas', apariencia: 'mas', comprobaciones: 'mas', barra: 'mas', acerca: 'mas', buscar: 'mas',
+  actividad: 'mas', tiempoAj: 'mas', resumenAj: 'mas', copia: 'mas', hogarAj: 'mas', tarjetasC: 'mas', tarjeta: 'mas', tarjetaConectar: 'mas', tarjetas: 'mas', tarjetasSec: 'mas', plantillas: 'mas'
+};
+function seccionDe(e) {
+  if (!e) return null;
+  if (e.id === 'rutina') return (e.params && e.params.col) || null;
+  if (SECC[e.id]) return e.id;
+  if (PAG_SEC[e.id]) return PAG_SEC[e.id];
+  return null;
+}
+const colorSecc = k => k && SECC[k] ? (SECC[k][0] < 0 ? TINTA : COL[SECC[k][0]]) : null;
+/* Mezcla dos colores (para la franja en modo oscuro, un poco más apagada) */
+function mezcla(a, b, p) {
+  const h = x => [1, 3, 5].map(i => parseInt(x.slice(i, i + 2), 16));
+  const A = h(a), B = h(b);
+  return '#' + A.map((v, i) => Math.round(v * p + B[i] * (1 - p)).toString(16).padStart(2, '0')).join('');
+}
+const oscuro = () => document.documentElement.dataset.tema === 'oscuro';
+function colorFranja() {
+  const k = seccionDe(Nav.actual && Nav.actual());
+  const c = colorSecc(k);
+  if (!c) return null;
+  return oscuro() ? (k === 'mas' ? '#2B3A42' : mezcla(c, '#1B262C', .82)) : c;
+}
+/* La franja: un bloque fijo arriba del color de la sección y, en el iPhone, la etiqueta theme-color */
+let franjaHecha = '';
+function ponerFranja() {
+  let f = $('#franja');
+  if (!f) { f = document.createElement('div'); f.id = 'franja'; document.body.appendChild(f); }
+  const c = colorFranja();
+  f.style.background = c || 'transparent';
+  document.documentElement.classList.toggle('confranja', !!c);
+  const tc = c || (oscuro() ? '#1B262C' : '#FFFDF7');
+  if (franjaHecha === tc) return;
+  franjaHecha = tc;
+  const m = $('#tc');
+  if (m && m.content !== tc) { const n = document.createElement('meta'); n.name = 'theme-color'; n.id = 'tc'; n.content = tc; m.parentNode.replaceChild(n, m); }
+}
+/* Cada vez que cambia la pantalla (entra o sale una página) */
+new MutationObserver(() => { requestAnimationFrame(() => { try { ponerFranja(); prepararMinis(); } catch (e) { anotar('franja', e); } }); }).observe($('#app'), { childList: true });
+const _aplicarTema150 = aplicarTema;
+aplicarTema = function () { _aplicarTema150(); franjaHecha = ''; try { ponerFranja(); } catch (e) { } };
+
+/* ---------- Título con el icono de la sección (lo usa head()) ---------- */
+function iconoCabecera() {
+  const k = seccionDe(Nav.pintando);
+  if (!k || !SECC[k]) return '';
+  const c = SECC[k][0] < 0 ? 'var(--ink)' : COL[SECC[k][0]];
+  return '<span class="hdic" style="color:' + c + '">' + icFino(SECC[k][1], 36, SECC[k][0] < 0 ? null : SECC[k][0]) + '</span>';
+}
+/* Icono con trazo más fino y puntos más pequeños (para tamaños grandes) */
+function icFino(id, s, ci) {
+  const o = ICONOS[id]; if (!o) return '';
+  const bolas = o[1].map(b => '<circle cx="' + b[0] + '" cy="' + b[1] + '" r="2" fill="' + (b[2] === 'c' && ci !== null && ci !== undefined ? COL[ci % 8] : 'currentColor') + '" stroke="none"/>').join('');
+  return '<i class="ic" style="width:' + s + 'px;height:' + s + 'px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + o[0] + bolas + '</svg></i>';
+}
+
+/* ---------- Título pequeño al deslizar ---------- */
+function prepararMinis() {
+  $$('#app > .pg').forEach(pg => {
+    const c = $('.pgc', pg); if (!c || c._mini) return;
+    c._mini = 1;
+    c.addEventListener('scroll', () => miniTitulo(pg, c), { passive: true });
+  });
+}
+function miniTitulo(pg, c) {
+  const h1 = $('.hd.hdi h1', pg);
+  if (!h1) return;
+  const ver = c.scrollTop > h1.offsetTop + h1.offsetHeight - 8;
+  let m = $('.minit', pg);
+  if (ver && !m) {
+    const e = Nav.pila.find(x => x.el === pg);
+    const atras = e && !e.raiz;
+    m = document.createElement('div');
+    m.className = 'minit';
+    m.innerHTML = (atras ? '<button class="bk" data-a="atras" aria-label="Atrás">' + ic('atras', 24) + '</button>' : '<span class="hu"></span>') + '<b>' + ($('.hdic', pg) ? $('.hdic', pg).outerHTML.replace('width:36px;height:36px', 'width:22px;height:22px').replace(/width:36px;height:36px/g, 'width:22px;height:22px') : '') + esc(h1.textContent) + '</b><span class="hu"></span>';
+    pg.appendChild(m);
+    requestAnimationFrame(() => m.classList.add('ver'));
+  } else if (m) m.classList.toggle('ver', ver);
+}
+
+/* ---------- Gastos: dos monedas apiladas ---------- */
+ICONOS['modulo-gastos'] = ['<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v4a7 3 0 0 0 14 0V7"/><path d="M5 11v4a7 3 0 0 0 14 0v-4"/>', [[12, 7, 'c']]];
+
+/* ---------- Inicio: anillo, saludo y resumen del día ---------- */
+function anilloMarca(s) {
+  let o = '';
+  for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; o += '<circle cx="' + (s / 2 + s * .36 * Math.sin(a)).toFixed(1) + '" cy="' + (s / 2 - s * .36 * Math.cos(a)).toFixed(1) + '" r="' + (s * .105).toFixed(1) + '" fill="' + COL[i] + '"/>'; }
+  return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 ' + s + ' ' + s + '" aria-hidden="true">' + o + '</svg>';
+}
+function saludo() { const h = new Date().getHours(); return h < 6 ? 'Buenas noches' : h < 14 ? 'Buenos días' : h < 21 ? 'Buenas tardes' : 'Buenas noches'; }
+function resumenInicio() {
+  const h = hoyISO(), out = [];
+  if (modOn('tareas')) { const n = lista('tareas').filter(t => !t.hecho && mias(t) && t.fecha && t.fecha <= h).length; out.push([COL[2], n, n === 1 ? 'tarea hoy' : 'tareas hoy', 'wTareasMias']); }
+  if (modOn('compra')) { const n = lista('compra').filter(x => !x.hecho).length; out.push([COL[1], n, 'en la compra', 'wCompra']); }
+  if (modOn('agenda')) { let n = 0; try { n = eventosDia(h).length; } catch (e) { } out.push([COL[5], n, n === 1 ? 'evento hoy' : 'eventos hoy', 'wAgenda']); }
+  try {
+    const c = typeof cuentaInicio === 'function' ? cuentaInicio() : null;
+    if (c) {
+      const [s, yoP] = miSaldo(c), r = reembolsos(s), mio = r.find(x => yoP && (x.de === yoP.id || x.a === yoP.id));
+      const txt = !mio ? 'estáis en paz' : mio.a === yoP.id ? partNombre(c, mio.de) + ' te debe' : 'debes a ' + partNombre(c, mio.a);
+      out.push([COL[7], mio ? euros(mio.importe) : '0 €', txt, 'wGastos']);
+    }
+  } catch (e) { }
+  return out;
+}
+function modOn(k) { try { return typeof modActivo === 'function' ? modActivo(k) : true; } catch (e) { return true; } }
+function cabeceraInicio(e) {
+  const yoN = ((yo() || {}).nombre || '').split(' ')[0];
+  const r = resumenInicio();
+  return '<div class="ini150"><div class="itop"><div class="marca">' + anilloMarca(30) + '<b>' + esc(e.nombre) + (e.emoji ? ' ' + esc(e.emoji) : '') + '</b></div>' + pilaAvatares() + '</div>' +
+    '<p class="eye">' + fechaLarga(new Date()) + '</p><h1 class="sal">' + saludo() + (yoN ? ', ' + esc(yoN) : '') + '</h1>' +
+    (r.length ? '<div class="resf" style="grid-template-columns:repeat(' + r.length + ',1fr)">' + r.map(x => '<button class="rs" data-a="' + x[3] + '"><i style="background:' + x[0] + '"></i><b>' + esc(String(x[1])) + '</b><small>' + esc(x[2]) + '</small></button>').join('') + '</div>' : '') + '</div>';
+}
+
+/* ---------- Compra: «6 unidades» y «Para preparar «Lentejas» el miércoles» ---------- */
+function textoCantidad(c) {
+  c = String(c || '').trim();
+  if (/^\d+([.,]\d+)?$/.test(c)) return c + (c === '1' ? ' unidad' : ' unidades');
+  return c;
+}
+function textoPara(p) {
+  p = String(p || '').trim(); if (!p) return '';
+  const m = p.match(/^(.*?)\s*·\s*(.+)$/);
+  return m ? 'Para preparar «' + m[1] + '» el ' + m[2].toLowerCase() : 'Para ' + p;
+}
+
+Object.assign(window.RONDA, { seccionDe: seccionDe, colorFranja: colorFranja, textoCantidad: textoCantidad, textoPara: textoPara, resumenInicio: resumenInicio, ICONOS: ICONOS });
+
+/* Más: cada sección con su color siempre (antes se cambiaban para no repetir al lado) */
+coloresRejilla = prefs => prefs.slice();
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(() => { franjaHecha = ''; ponerFranja(); }, 50)); } catch (e) { }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(() => { franjaHecha = ''; ponerFranja(); }, 60); });
 
 })();
