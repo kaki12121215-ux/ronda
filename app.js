@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.5.0 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.5.1 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.5.0';
+const VERSION = '1.5.1';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -5489,6 +5489,11 @@ function ponerFranja() {
   if (!f) { f = document.createElement('div'); f.id = 'franja'; document.body.appendChild(f); }
   const c = colorFranja();
   f.style.background = c || 'transparent';
+  /* 1.5.1 · iOS 26 ya no usa theme-color: pinta la zona de la hora con el fondo de la página.
+     El fondo de html y body lleva el color de la sección; #app, con el fondo claro, lo tapa todo menos esa zona. */
+  const fondo = c || (oscuro() ? '#1B262C' : '#FFFDF7');
+  document.documentElement.style.backgroundColor = fondo;
+  document.body.style.backgroundColor = fondo;
   document.documentElement.classList.toggle('confranja', !!c);
   const tc = c || (oscuro() ? '#1B262C' : '#FFFDF7');
   if (franjaHecha === tc) return;
@@ -5567,10 +5572,9 @@ function resumenInicio() {
 function modOn(k) { try { return typeof modActivo === 'function' ? modActivo(k) : true; } catch (e) { return true; } }
 function cabeceraInicio(e) {
   const yoN = ((yo() || {}).nombre || '').split(' ')[0];
-  const r = resumenInicio();
   return '<div class="ini150"><div class="itop"><div class="marca">' + anilloMarca(30) + '<b>' + esc(e.nombre) + (e.emoji ? ' ' + esc(e.emoji) : '') + '</b></div>' + pilaAvatares() + '</div>' +
     '<p class="eye">' + fechaLarga(new Date()) + '</p><h1 class="sal">' + saludo() + (yoN ? ', ' + esc(yoN) : '') + '</h1>' +
-    (r.length ? '<div class="resf" style="grid-template-columns:repeat(' + r.length + ',1fr)">' + r.map(x => '<button class="rs" data-a="' + x[3] + '"><i style="background:' + x[0] + '"></i><b>' + esc(String(x[1])) + '</b><small>' + esc(x[2]) + '</small></button>').join('') + '</div>' : '') + '</div>';
+    '</div>'; /* 1.5.1: sin la fila de resumen */
 }
 
 /* ---------- Compra: «6 unidades» y «Para preparar «Lentejas» el miércoles» ---------- */

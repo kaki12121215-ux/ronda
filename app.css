@@ -1,4 +1,4 @@
-/* RONDA · estilos · 1.5.0 */
+/* RONDA · estilos · 1.5.1 */
 @font-face{font-family:Nunito;font-weight:400;font-display:block;src:url('fonts/nunito-regular.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:600;font-display:block;src:url('fonts/nunito-semibold.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:700;font-display:block;src:url('fonts/nunito-bold.woff') format('woff')}
@@ -923,3 +923,16 @@ html[data-tema="oscuro"] .rs{background:var(--sf)}
 .ev,.it{border-radius:12px}
 .toast{border-radius:14px}
 .eyeb{border-radius:0 15px 0 12px!important}
+
+/* ===================== 1.5.1 ===================== */
+/* iOS 26: la zona de la hora toma el fondo de html/body (color de la sección); la app va encima con su fondo */
+#app{background:var(--bg)}
+html,body{transition:background-color .3s ease}
+/* Inicio: el nombre y las fotos más arriba */
+.pg[data-p="inicio"] .pgc{padding-top:calc(max(var(--st),8px) + 6px)}
+.itop{margin:0 0 16px}
+/* Más: fichas blancas, el color solo en el icono */
+.mod{border-radius:14px}
+.grid .mod{background:var(--sf)!important;box-shadow:0 0 0 1px rgba(43,58,66,.05),0 4px 14px rgba(43,58,66,.05)}
+html[data-tema="oscuro"] .grid .mod{box-shadow:none}
+.grid .mod .ic{color:var(--c)}
