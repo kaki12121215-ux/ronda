@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.5.1 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.5.2 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.5.1';
+const VERSION = '1.5.2';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -5476,42 +5476,28 @@ function mezcla(a, b, p) {
   return '#' + A.map((v, i) => Math.round(v * p + B[i] * (1 - p)).toString(16).padStart(2, '0')).join('');
 }
 const oscuro = () => document.documentElement.dataset.tema === 'oscuro';
-function colorFranja() {
-  const k = seccionDe(Nav.actual && Nav.actual());
-  const c = colorSecc(k);
+/* Color de la cabecera de una pantalla (en oscuro, un poco más apagado; Más siempre gris oscuro) */
+function colorCab(e) {
+  const k = seccionDe(e), c = colorSecc(k);
   if (!c) return null;
-  return oscuro() ? (k === 'mas' ? '#2B3A42' : mezcla(c, '#1B262C', .82)) : c;
+  return k === 'mas' ? TINTA : oscuro() ? mezcla(c, '#1B262C', .82) : c;
 }
-/* La franja: un bloque fijo arriba del color de la sección y, en el iPhone, la etiqueta theme-color */
-let franjaHecha = '';
+function colorFranja() { return colorCab(Nav.actual && Nav.actual()); }
+/* 1.5.2 · Cabecera entera de color (la franja arriba no salía en iOS 26).
+   Cada pantalla lleva su color en --hc; el CSS pinta la flecha, el título y lo que haya entre medias. */
 function ponerFranja() {
-  let f = $('#franja');
-  if (!f) { f = document.createElement('div'); f.id = 'franja'; document.body.appendChild(f); }
-  const c = colorFranja();
-  f.style.background = c || 'transparent';
-  /* 1.5.1 · iOS 26 ya no usa theme-color: pinta la zona de la hora con el fondo de la página.
-     El fondo de html y body lleva el color de la sección; #app, con el fondo claro, lo tapa todo menos esa zona. */
-  const fondo = c || (oscuro() ? '#1B262C' : '#FFFDF7');
-  document.documentElement.style.backgroundColor = fondo;
-  document.body.style.backgroundColor = fondo;
-  document.documentElement.classList.toggle('confranja', !!c);
-  const tc = c || (oscuro() ? '#1B262C' : '#FFFDF7');
-  if (franjaHecha === tc) return;
-  franjaHecha = tc;
-  const m = $('#tc');
-  if (m && m.content !== tc) { const n = document.createElement('meta'); n.name = 'theme-color'; n.id = 'tc'; n.content = tc; m.parentNode.replaceChild(n, m); }
+  (Nav.pila || []).forEach(e => { if (!e.el) return; const c = colorCab(e); if (c) e.el.style.setProperty('--hc', c); else e.el.style.removeProperty('--hc'); });
 }
-/* Cada vez que cambia la pantalla (entra o sale una página) */
-new MutationObserver(() => { requestAnimationFrame(() => { try { ponerFranja(); prepararMinis(); } catch (e) { anotar('franja', e); } }); }).observe($('#app'), { childList: true });
+/* Cada vez que entra o sale una página: sin esperar al siguiente fotograma, para que no se vea sin color */
+new MutationObserver(() => { try { ponerFranja(); } catch (e) { anotar('cabecera', e); } requestAnimationFrame(() => { try { prepararMinis(); } catch (e) { } }); }).observe($('#app'), { childList: true });
 const _aplicarTema150 = aplicarTema;
-aplicarTema = function () { _aplicarTema150(); franjaHecha = ''; try { ponerFranja(); } catch (e) { } };
+aplicarTema = function () { _aplicarTema150(); try { ponerFranja(); } catch (e) { } };
 
 /* ---------- Título con el icono de la sección (lo usa head()) ---------- */
 function iconoCabecera() {
   const k = seccionDe(Nav.pintando);
   if (!k || !SECC[k]) return '';
-  const c = SECC[k][0] < 0 ? 'var(--ink)' : COL[SECC[k][0]];
-  return '<span class="hdic" style="color:' + c + '">' + icFino(SECC[k][1], 36, SECC[k][0] < 0 ? null : SECC[k][0]) + '</span>';
+  return '<span class="hdic">' + icFino(SECC[k][1], 38, null) + '</span>';
 }
 /* Icono con trazo más fino y puntos más pequeños (para tamaños grandes) */
 function icFino(id, s, ci) {
@@ -5531,17 +5517,18 @@ function prepararMinis() {
 function miniTitulo(pg, c) {
   const h1 = $('.hd.hdi h1', pg);
   if (!h1) return;
-  const ver = c.scrollTop > h1.offsetTop + h1.offsetHeight - 8;
+  const st = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--st')) || 0;
+  const ver = c.scrollTop > 4 && h1.getBoundingClientRect().bottom < c.getBoundingClientRect().top + Math.max(st, 8) + 48;
   let m = $('.minit', pg);
   if (ver && !m) {
     const e = Nav.pila.find(x => x.el === pg);
     const atras = e && !e.raiz;
     m = document.createElement('div');
     m.className = 'minit';
-    m.innerHTML = (atras ? '<button class="bk" data-a="atras" aria-label="Atrás">' + ic('atras', 24) + '</button>' : '<span class="hu"></span>') + '<b>' + ($('.hdic', pg) ? $('.hdic', pg).outerHTML.replace('width:36px;height:36px', 'width:22px;height:22px').replace(/width:36px;height:36px/g, 'width:22px;height:22px') : '') + esc(h1.textContent) + '</b><span class="hu"></span>';
+    m.innerHTML = (atras ? '<button class="bk" data-a="atras" aria-label="Atrás">' + ic('atras', 24) + '</button>' : '<span class="hu"></span>') + '<b>' + ($('.hdic', pg) ? $('.hdic', pg).outerHTML.replace(/width:38px;height:38px/g, 'width:22px;height:22px') : '') + esc(h1.textContent) + '</b><span class="hu"></span>';
     pg.appendChild(m);
-    requestAnimationFrame(() => m.classList.add('ver'));
-  } else if (m) m.classList.toggle('ver', ver);
+    requestAnimationFrame(() => m.classList.add('vis'));
+  } else if (m) m.classList.toggle('vis', ver);
 }
 
 /* ---------- Gastos: dos monedas apiladas ---------- */
@@ -5593,7 +5580,6 @@ Object.assign(window.RONDA, { seccionDe: seccionDe, colorFranja: colorFranja, te
 
 /* Más: cada sección con su color siempre (antes se cambiaban para no repetir al lado) */
 coloresRejilla = prefs => prefs.slice();
-try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(() => { franjaHecha = ''; ponerFranja(); }, 50)); } catch (e) { }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(() => { franjaHecha = ''; ponerFranja(); }, 60); });
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(ponerFranja, 50)); } catch (e) { }
 
 })();
