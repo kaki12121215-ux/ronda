@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Lista de la compra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFDF7">
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:Nunito;font-weight:600;src:url('fonts/nunito-semibold.woff') format('woff')}
+@font-face{font-family:Nunito;font-weight:800;src:url('fonts/nunito-extrabold.woff') format('woff')}
+:root{--bg:#FFFDF7;--sf:#fff;--ink:#2B3A42;--mu:#6B7B84;--ln:#E3EDF3;--ac:#F2B824}
+@media (prefers-color-scheme:dark){:root{--bg:#1B262C;--sf:#2B3A42;--ink:#F4F8F2;--mu:#9FB0B8;--ln:#3C4F59}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;padding:max(env(safe-area-inset-top),20px) 16px 40px;max-width:560px;margin:0 auto}
+.saf{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:var(--mu);margin-bottom:14px}
+.saf i{width:8px;height:8px;border-radius:50%;background:#2E8B57}
+.eye{color:var(--mu);font-weight:800;font-size:14px}
+h1{font-size:32px;font-weight:800;margin:2px 0 4px}
+.sub{color:var(--mu);font-weight:600;font-size:15px}
+.card{background:var(--sf);border-radius:20px;box-shadow:0 1px 2px rgba(27,38,44,.05),0 6px 18px rgba(27,38,44,.06);margin-top:14px;overflow:hidden}
+.row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--ln);width:100%;border-left:0;border-right:0;border-top:0;background:none;font:inherit;color:inherit;text-align:left}
+.row:last-child{border-bottom:0}
+.ck{width:26px;height:26px;border-radius:9px;border:2.5px solid var(--ac);flex:none;display:flex;align-items:center;justify-content:center}
+.on .ck{background:var(--ac);border-color:transparent}
+.ck svg{display:none}.on .ck svg{display:block}
+.row b{font-size:17px;font-weight:800;flex:1}.row small{color:var(--mu);font-weight:600}
+.on b{text-decoration:line-through;color:var(--mu)}
+.vacio,.err{text-align:center;color:var(--mu);font-weight:600;margin-top:40px;line-height:1.4}
+.err{color:#C8402B}
+.pie{text-align:center;color:var(--mu);font-weight:600;font-size:13px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="saf"><i></i>Enlace de Ronda · solo esta lista</div>
+<div id="c"><p class="vacio">Cargando la lista…</p></div>
+<script>
+/* Lista de la compra compartida: la ve quien tenga el enlace, sin cuenta. Se actualiza sola cada 10 s. */
+(function () {
+  'use strict';
+  var h = {}; location.hash.slice(1).split('&').forEach(function (x) { var p = x.split('='); if (p[0]) h[p[0]] = decodeURIComponent(p[1] || ''); });
+  var url = /^https?:/.test(h.u || '') ? h.u : 'https://script.google.com/macros/s/' + (h.u || '') + '/exec';
+  var c = h.c || '', datos = null, ocupado = false;
+  var $c = document.getElementById('c');
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (x) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[x]; }); };
+  var tick = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>';
+  function llamar(cuerpo) {
+    return fetch(url, { method: 'POST', body: JSON.stringify(cuerpo), redirect: 'follow', cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
+      var j; try { j = JSON.parse(t); } catch (e) { throw new Error('No se puede abrir la lista ahora mismo.'); }
+      if (!j.ok) throw new Error(j.error || 'No se puede abrir la lista.');
+      return j;
+    });
+  }
+  function pintar() {
+    if (!datos) return;
+    var pend = datos.items.filter(function (x) { return !x.hecho; }).length;
+    document.title = datos.lista + ' · lista de la compra';
+    $c.innerHTML = '<p class="eye">Lista de ' + esc(datos.espacio || 'casa') + '</p><h1>' + esc(datos.lista) + '</h1><p class="sub">' + (pend ? pend + ' por comprar' : 'Nada por comprar') + ' · actualizada hace un momento</p>' +
+      (datos.items.length ? '<div class="card">' + datos.items.map(function (x) { return '<button class="row' + (x.hecho ? ' on' : '') + '" data-id="' + esc(x.id) + '"' + (datos.marcar ? '' : ' disabled') + '><span class="ck">' + tick + '</span><b>' + esc(x.nombre) + '</b>' + (x.cantidad ? '<small>' + esc(x.cantidad) + '</small>' : '') + '</button>'; }).join('') + '</div>' : '<p class="vacio">No falta nada.</p>') +
+      '<p class="pie">' + (datos.marcar ? 'Toca un producto cuando lo metas en el carro.' : 'Solo se puede ver.') + '</p>';
+  }
+  function cargar() {
+    if (ocupado) return;
+    llamar({ a: 'lista-ver', c: c }).then(function (j) { datos = j; pintar(); }).catch(function (e) { if (!datos) $c.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
+  $c.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('.row'); if (!b || !datos || !datos.marcar) return;
+    var x = datos.items.filter(function (y) { return y.id === b.dataset.id; })[0]; if (!x) return;
+    x.hecho = !x.hecho; pintar(); ocupado = true;
+    llamar({ a: 'lista-marcar', c: c, id: x.id, hecho: x.hecho }).then(function (j) { datos = j; }).catch(function (e) { x.hecho = !x.hecho; setTimeout(function () { var p = document.querySelector('.pie'); if (p) { p.textContent = e.message; p.style.color = '#C8402B'; } }, 30); }).then(function () { ocupado = false; pintar(); });
+  });
+  if (!c || !h.u) { $c.innerHTML = '<p class="err">Este enlace está incompleto. Pide que te lo vuelvan a mandar.</p>'; return; }
+  cargar();
+  setInterval(function () { if (!document.hidden) cargar(); }, 10000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) cargar(); });
+})();
+</script>
+</body>
+</html>
