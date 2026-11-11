@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.4.0 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.4.2 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.4.0';
+const VERSION = '1.4.2';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -468,7 +468,12 @@ const Nav = {
   },
   contenido(e) {
     this.pintando = e;
-    try { return P[e.id].html(e.params, e); } catch (x) { anotar('pintar ' + e.id, x); return '<div class="aviso mal">' + ic('error', 22, 0) + '<span>No he podido pintar esta pantalla: ' + esc(x.message) + '</span></div>'; }
+    try {
+      let h = P[e.id].html(e.params, e);
+      /* 1.4.2: si la pantalla se abre encima (no está en la barra), siempre lleva flecha para volver */
+      if (!e.raiz && this.pila.length && String(h).indexOf('data-a="atras"') < 0) h = tope('') + h;
+      return h;
+    } catch (x) { anotar('pintar ' + e.id, x); return '<div class="aviso mal">' + ic('error', 22, 0) + '<span>No he podido pintar esta pantalla: ' + esc(x.message) + '</span></div>'; }
   },
   /* Cambiar de sección (barra de abajo): fundido suave. */
   raiz(id, params) {
@@ -784,8 +789,15 @@ function centroPantalla(H) {
 }
 function quitarArranque() {
   const ar = $('#arranque');
-  ar.classList.add('fuera');
-  setTimeout(() => ar.remove(), 400);
+  /* 1.4.2: la app no aparece de golpe: se funde suavemente mientras se va la animación */
+  const capas = [$('#app'), $('#nav')].filter(Boolean);
+  if (!REDUCIR) capas.forEach(c => c.classList.add('aparece'));
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    ar.classList.add('fuera');
+    capas.forEach(c => c.classList.add('ya'));
+    setTimeout(() => { capas.forEach(c => c.classList.remove('aparece', 'ya')); }, 850);
+  }));
+  setTimeout(() => ar.remove(), 750);
 }
 
 /* Teclado del iPhone: las pantallas terminan encima del teclado, para que la barra de añadir y los botones se vean. */
@@ -809,7 +821,7 @@ const enIcono = () => { try { return navigator.standalone === true || matchMedia
 function prepararCampos(root) {
   $$('.fld', root).forEach(l => {
     const i = $('input:not([type=file]):not([type=checkbox]):not([type=range]),textarea', l);
-    if (!i || l.hasAttribute('data-nox') || $('.xb', l)) return;
+    if (!i || l.hasAttribute('data-nox') || $('.xb', l) || $('button', l)) return; /* 1.4.1: si el campo ya lleva un botón (Buscar…), sin ✕ */
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'xb'; b.dataset.a = 'limpiarCampo'; b.setAttribute('aria-label', 'Borrar');
     b.innerHTML = ic('cerrar', 14);
@@ -1925,7 +1937,7 @@ P.tareas = {
       const atras = !x.hecho && x.fecha && x.fecha < hoyISO();
       return '<div class="row card it' + (x.hecho ? ' dn' : '') + (nuevo ? ' nuevo' : '') + '" data-a="verTarea" data-lp="menuTarea" data-id="' + x.id + '">' +
         '<button class="ck' + (x.hecho ? ' on' : '') + '" data-a="hacerTarea" data-id="' + x.id + '" style="' + (x.hecho ? 'background:' + colorDe(x.hechoPor) + ';border-color:transparent' : 'border-color:' + c) + '" aria-label="Hecha">' + tick(16) + '</button>' +
-        '<div class="f"><b>' + esc(x.titulo) + '</b><small' + (atras ? ' style="color:#C8402B"' : '') + '>' + (x.hecho ? 'Hecha por ' + esc(nombreDe(x.hechoPor)) : cuando(x.fecha, x.hora)) + (x.turno ? ' · Turno' : '') + (x.repite && x.repite.cada ? ' · ' + textoRepe(x.repite).toLowerCase() : '') + (x.cal ? ' · en el calendario' : '') + '</small></div>' +
+        '<div class="f"><b>' + esc(x.titulo) + '</b><small' + (atras ? ' style="color:#C8402B"' : '') + '>' + (x.hecho ? 'Hecha por ' + esc(nombreDe(x.hechoPor)) : cuando(x.fecha, x.hora)) + (x.turno ? ' · Turno' : '') + (x.repite && x.repite.cada ? ' · ' + textoRepe(x.repite).toLowerCase() : '') + (x.cal ? ' · en el calendario' : '') + '</small>' + (!x.hecho && x.limite ? textoLimite(x.limite) : '') + '</div>' +
         avQuien(x.para, 28) + '</div>';
     };
     h += '<div class="list">' + l.slice(0, 300).map(fila).join('') + '</div>';
@@ -1994,6 +2006,7 @@ P.tarea = {
       fldTxt('tTit', 'Qué hay que hacer', pv(p, 'tTit', p.titulo), 'Por ejemplo, cambiar la bombilla', 'maxlength="120"') +
       '<p class="lab2">Para quién</p>' + chipsPersonas(p.para, 'tPara', true) +
       '<div style="display:flex;gap:10px"><label class="fld" style="flex:1.4"><small>Cuándo</small><input type="date" id="tFec" value="' + esc(pv(p, 'tFec', p.fecha || '')) + '"></label><label class="fld" style="flex:1"><small>Hora</small><input type="time" id="tHor" value="' + esc(pv(p, 'tHor', p.hora || '')) + '"></label></div>' +
+      '<label class="fld"><small>Fecha límite (opcional)</small><input type="date" id="tLim" value="' + esc(pv(p, 'tLim', p.limite || '')) + '"></label>' +
       '<div class="list" style="margin-top:6px"><button class="row card" data-a="tRepe">' + sq('repetir', 4) + '<div class="f"><b>Repetir</b><small>' + esc(textoRepe(p.repite)) + '</small></div>' + chev + '</button>' +
       filaCal(!!p.cal, 'tCal') + (p.cal ? filaAviso(p.aviso, 'tAviso') : '') + '</div>' +
       fldArea('tNot', 'Notas', pv(p, 'tNot', p.notas), 'Opcional') +
@@ -2013,7 +2026,7 @@ ACC.guardarTarea = () => {
   if (p.cal && !fecha) return toast('Para añadirla al calendario, ponle fecha.');
   if (p.repite && p.repite.cada && !fecha) return toast('Para repetirla, ponle la primera fecha.');
   const id = p.id || 't' + uid();
-  const campos = { titulo: titulo, para: p.para || S.cfg.persona, fecha: fecha, hora: hora, repite: p.repite && p.repite.cada ? p.repite : null, cal: !!p.cal, aviso: p.cal ? (p.aviso === undefined ? '0' : p.aviso) : '', notas: val('tNot') };
+  const campos = { titulo: titulo, para: p.para || S.cfg.persona, fecha: fecha, hora: hora, repite: p.repite && p.repite.cada ? p.repite : null, cal: !!p.cal, aviso: p.cal ? (p.aviso === undefined ? '0' : p.aviso) : '', notas: val('tNot'), limite: val('tLim') };
   if (!p.id) Object.assign(campos, { hecho: false, creadoPor: S.cfg.persona, orden: Date.now() });
   cambiar('tareas', id, campos);
   const antes = p.id ? dato('tareas', id) : null;
@@ -2049,7 +2062,7 @@ P.tareaVer = {
   html: p => {
     const x = dato('tareas', p.id);
     if (!x) return tope('Tarea') + '<p class="mu">Esta tarea ya no existe.</p>';
-    const kv = [['Para', nombreDe(x.para)], ['Cuándo', cuando(x.fecha, x.hora)], ['Repite', textoRepe(x.repite)], ['Calendario', x.cal ? 'Sí · ' + textoAviso(x.aviso).toLowerCase() : 'No']];
+    const kv = [['Para', nombreDe(x.para)], ['Cuándo', cuando(x.fecha, x.hora)]].concat(x.limite ? [['Fecha límite', textoLimite(x.limite, true)]] : []).concat([ ['Repite', textoRepe(x.repite)], ['Calendario', x.cal ? 'Sí · ' + textoAviso(x.aviso).toLowerCase() : 'No']]);
     if (x.veces) kv.push(['Hecha', x.veces + (x.veces === 1 ? ' vez' : ' veces') + ' · la última ' + esc(nombreDe(x.ultimaPor))]);
     kv.push(['Añadida por', nombreDe(x.creadoPor)]);
     return tope('Tarea', '<button class="rt" data-a="editarTarea" data-id="' + x.id + '" style="border:0;background:none">' + ic('editar', 24) + '</button>') +
@@ -2421,7 +2434,7 @@ P.cuenta = {
       if (!movs.length) return h + vacio('sin-gastos', 'Sin gastos', 'Añade el primero con el botón +.');
       let dia = '';
       h += movs.map(m => {
-        let sep = ''; if (m.fecha !== dia) { dia = m.fecha; sep = '<h3>' + cuando(m.fecha) + '</h3>'; }
+        let sep = ''; if (m.fecha !== dia) { dia = m.fecha; sep = '<h3>' + cuando(m.fecha).replace(/^Atrasada · /, '') + '</h3>'; }
         const k = catM(m.categoria);
         return sep + '<button class="row card" data-a="verMov" data-id="' + m.id + '" style="margin-bottom:8px">' + (m.tipo === 'transferencia' ? sq('dividir-cuentas', 3) : sq(k[2], k[3])) + '<div class="f"><b>' + esc(m.tipo === 'transferencia' ? partNombre(c, m.pagadoPor) + ' → ' + partNombre(c, m.para) : m.concepto) + '</b><small>' + (m.tipo === 'transferencia' ? 'Transferencia' : 'Pagó ' + esc(partNombre(c, m.pagadoPor))) + (m.foto ? ' · con foto' : '') + (m.tarjeta ? ' · ' + ic('tarjeta', 14, 7) + ' ' + esc(m.tarjetaNom || 'tarjeta') : '') + '</small></div><b style="flex:none">' + euros(m.importe) + '</b></button>';
       }).join('');
@@ -3818,6 +3831,7 @@ wd('medHoy', 'Medicación de hoy', 'Medicación', 'S', cRO, 'Tomas de hoy, para 
 });
 wd('medSem', 'Medicación de la semana', 'Medicación', 'L', cRO, 'Qué se ha tomado cada día', () => {
   const l = lista('medicacion').filter(x => conRecuerdo('medicacion', x)).slice(0, 4), lun = lunesDe(new Date());
+  if (!l.length) return { vacio: true, h: lab('Tomas de la semana') + '<p class="mu2">Sin medicación con recordatorio</p>' };
   return { vacio: !l.length, h: lab('Tomas de la semana') + '<div class="msem"><span></span>' + LETRAS.map(x => '<small>' + x + '</small>').join('') + l.map(x => '<b>' + esc(x.nombre) + '</b>' + [0, 1, 2, 3, 4, 5, 6].map(i => { const iso = isoDia(sumaDias(lun, i)); return '<i class="' + ((x.hist || []).indexOf(iso) >= 0 ? 'on' : iso === hoyISO() ? 'hoy' : '') + '"></i>'; }).join('')).join('') + '</div>' };
 });
 
@@ -3953,7 +3967,7 @@ function montarArrastre(el, p) {
   const soltar = () => {
     cancelar();
     if (!d) return;
-    const w = d.w; w.classList.remove('lift'); w.style.cssText = '';
+    const w = d.w; w.classList.remove('lift'); ['width', 'left', 'top', 'height', 'transform'].forEach(x => w.style.removeProperty(x));
     cont.insertBefore(w, d.ph); d.ph.remove(); d = null;
     const orden = $$('.w', cont).map(x => x.dataset.w).filter(Boolean);
     fijarInicio(orden, ocultasInicio());
@@ -4444,7 +4458,7 @@ P.pagos = {
     if (!l.length) return h + vacio('todo-hecho', 'Nada por confirmar', 'Los pagos de las tarjetas en modo «Por confirmar» esperan aquí.');
     return h + '<div class="list">' + l.map(x => {
       const t = dato('tarjetas', x.tarjeta) || {};
-      return '<div class="card pc"><div class="cr1">' + emo(t.emoji, sq('tarjeta', 7), 44) + '<div class="f"><b>' + esc(x.comercio || 'Pago con tarjeta') + '</b><small>' + cuando(x.fecha || hoyISO(), x.hora) + ' · ' + esc(t.nombre || x.tarjetaNom || 'Tarjeta') + (t.dueno ? ' · ' + esc(nombreDe(t.dueno)) : '') + '</small></div><b class="amt2">' + euros(x.importe) + '</b></div>' +
+      return '<div class="card pc"><div class="cr1">' + emo(t.emoji, sq('tarjeta', 7), 44) + '<div class="f"><b>' + esc(x.comercio || 'Pago con tarjeta') + '</b><small>' + cuando(x.fecha || hoyISO(), x.hora).replace(/^Atrasada · /, '') + ' · ' + esc(t.nombre || x.tarjetaNom || 'Tarjeta') + (t.dueno ? ' · ' + esc(nombreDe(t.dueno)) : '') + '</small></div><b class="amt2">' + euros(x.importe) + '</b></div>' +
         '<div class="btns2"><button class="btn sec" data-a="pagoDescartar" data-id="' + x.id + '">Descartar</button><button class="btn pri" data-a="pagoAnadir" data-id="' + x.id + '" style="flex:1.4">Añadir a una cuenta</button></div></div>';
     }).join('') + '</div>';
   }
@@ -4544,11 +4558,11 @@ P.tarjetaConectar = {
     const dir = (S.cfg && S.cfg.url) || '';
     return tope('Conectar en el iPhone') + '<p class="texto">Una sola vez, en el iPhone de ' + esc(nombreDe(t.dueno) || 'quien tiene la tarjeta') + '. Unos 3 minutos.</p>' +
       '<div class="card grp" style="margin-top:12px">' + [
-        'Abre <b>Atajos</b> › pestaña <b>Automatización</b> › <b>+</b> › <b>Transacción</b>.',
-        'Elige la tarjeta <b>' + esc(t.nombre || '') + '</b> y marca <b>Ejecutar inmediatamente</b>. Siguiente › <b>Nueva automatización en blanco</b>.',
-        'Añade la acción <b>Obtener contenido de URL</b>. En URL pega la <b>dirección</b> (botón de abajo).',
-        'Toca la flecha de la acción: Método <b>POST</b>, Cuerpo de la solicitud <b>JSON</b>. Añade 4 campos de texto: <b>a</b> = pago · <b>k</b> = el <b>código</b> · <b>importe</b> = variable <i>Importe</i> · <b>comercio</b> = variable <i>Comercio</i>.',
-        'Guarda. Haz un pago pequeño con el móvil o el reloj y mira si llega.'
+        'Abre <b>Atajos</b> › pestaña <b>Automatización</b> › <b>+</b> › <b>Cartera</b> (en versiones antiguas, <b>Transacción</b>).',
+        'Elige la tarjeta de Wallet que es <b>' + esc(t.nombre || '') + '</b>. Si lo pregunta, marca <b>Ejecutar inmediatamente</b>. Arriba saldrá «Al usar …».',
+        'En el buscador de abajo escribe <b>URL</b> y elige <b>Obtener contenido de URL</b>. Toca «URL» y pega la <b>dirección</b> (botón de abajo).',
+        'Toca la flecha de la acción: Método <b>POST</b>, Cuerpo de la solicitud <b>JSON</b>. <b>Añadir nuevo campo › Texto</b> cuatro veces. A la izquierda (Clave) y a la derecha (valor): <b>a</b> = pago · <b>k</b> = el <b>código</b> · <b>importe</b> = Entrada de atajo › Tipo <i>Transacción</i> › <i>Importe</i> · <b>comercio</b> = igual, <i>Comercio</i>.',
+        'Sal con la flecha para guardar (no pulses el triángulo de abajo). Toca <b>Probar conexión</b> y luego haz un pago pequeño con el móvil o el reloj.'
       ].map((x, i) => '<div class="row"><span class="nm">' + (i + 1) + '</span><span style="flex:1;min-width:0;display:block;font-weight:600;font-size:15px;line-height:1.4">' + x + '</span></div>').join('') + '</div>' +
       '<div class="codex">' + ic('enlace', 20, 5) + '<span>Dirección del script</span><button class="mini" data-a="tCopiar" data-v="' + esc(dir) + '">Copiar</button></div>' +
       '<div class="codex">' + ic('candado', 20, 4) + '<span>' + (cod ? 'Código de esta tarjeta' : 'Código: todavía no creado') + '</span>' + (cod ? '<button class="mini" data-a="tCopiar" data-v="' + esc(cod) + '">Copiar</button>' : '<button class="mini" data-a="tCodigo">Crear</button>') + '</div>' +
@@ -4603,11 +4617,15 @@ wd('porConfirmar', 'Pagos por confirmar', 'Cuentas compartidas', 'S', cRO, 'Pago
   const l = pagosPend(); if (!l.length) return { vacio: true, h: lab('Por confirmar') + '<p class="mu2">Nada esperando</p>' };
   return { vacio: false, h: lab('Por confirmar') + big(l.length, l.length === 1 ? 'pago' : 'pagos') + '<small class="mu2">' + euros(l.reduce((a, x) => a + (Number(x.importe) || 0), 0)) + ' en total</small>' };
 });
+/* 1.4.1: foto de cada participante; si no está unido a una persona, se busca por el nombre y, si no, su inicial */
+const personaPart = x => x.persona ? dato('personas', x.persona) : personas().find(p => (p.nombre || '').trim().toLowerCase() === String(x.nombre || '').trim().toLowerCase()) || null;
+const colPart = x => { const p = personaPart(x); return p ? (p.color || colorDe(p.id)) : COL[4]; };
+const avPart = (x, s) => { const p = personaPart(x); return p ? av(p, s) : '<span class="av ini" style="--c:' + COL[4] + ';width:' + s + 'px;height:' + s + 'px;font-size:' + Math.round(s * .45) + 'px">' + esc(String(x.nombre || '?').trim().charAt(0).toUpperCase()) + '</span>'; };
 wd('quienPaga', 'Quién ha pagado más', 'Cuentas compartidas', 'S', cLV, 'Lo que ha pagado cada uno en la cuenta (la última que uses)', () => {
   const c = ultimaCuenta() || cuentasAbiertas()[0]; if (!c) return { vacio: true, h: lab('Quién ha pagado') + '<p class="mu2">Sin cuentas</p>' };
   const ms = lista('movs').filter(m => m.cuenta === c.id && m.tipo !== 'transferencia'), ps = (c.participantes || []);
   const tot = ps.map(q => [q, ms.filter(m => m.pagadoPor === q.id).reduce((a, m) => a + (Number(m.importe) || 0), 0)]), mx = Math.max(1, ...tot.map(x => x[1]));
-  return { vacio: !ms.length, h: lab(esc(c.nombre)) + '<div class="quien2">' + tot.map(x => '<div>' + (x[0].persona ? av(dato('personas', x[0].persona), 24) : dot(COL[4], 12)) + '<b>' + euros(x[1]).replace(',00', '') + '</b><span class="wb"><i style="width:' + Math.round(x[1] / mx * 100) + '%;background:' + (x[0].persona ? colorDe(x[0].persona) : COL[4]) + '"></i></span></div>').join('') + '</div>' };
+  return { vacio: !ms.length, h: lab(esc(c.nombre)) + '<div class="quien2">' + tot.map(x => '<div>' + avPart(x[0], 26) + '<b>' + euros(x[1]).replace(',00', '') + '</b><span class="wb"><i style="width:' + Math.round(x[1] / mx * 100) + '%;background:' + colPart(x[0]) + '"></i></span></div>').join('') + '</div>' };
 });
 W.porConfirmar.ir = 'irPagos'; W.gastoRapido.ir = 'wGastos'; W.quienPaga.ir = 'wGastos';
 ACC.irPagos = () => Nav.ir('pagos', {});
@@ -5204,5 +5222,167 @@ setInterval(() => { if (S.cfg && !document.hidden) { try { ponerAlDiaTurnos(); }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && S.cfg) setTimeout(() => { try { ponerAlDiaTurnos(); limpiarActividad(); } catch (e) { anotar('al día', e); } }, 4000); });
 setTimeout(() => { if (S.cfg) { try { ponerAlDiaTurnos(); limpiarActividad(); } catch (e) { anotar('al día', e); } } }, 6000);
 Object.assign(window.RONDA, { ACC: ACC, W: W, P: P, dato: dato, cambiar: cambiar, lista: lista });
+
+/* ---- 19_arreglos141.js ---- */
+/* ===================== 1.4.1 · arreglos tras probar la 1.4.0 en el iPhone =====================
+   - Selector de emoji propio (el iPhone no deja abrir su teclado de emojis desde una web).
+   - Los nombres que empezaban por un emoji lo pasan a su casilla.
+   - Fecha límite en las tareas.
+   - Importar medidas del acuario desde un CSV de otra app. */
+
+/* ---------- Selector de emoji ---------- */
+const EMOJIS = [
+  ['Casa', '🏠 🏡 🛋️ 🛏️ 🚿 🛁 🧺 🧹 🧽 🧼 🪣 🧴 🪴 🔑 🚪 🪟 💡 🔌 🔋 🧯 🛠️ 🔧 🪛 🧰 📦 🗑️ ♻️ 🧸 🖼️ 🕯️ 🛒 🏷️'],
+  ['Comida', '🍎 🍊 🍋 🍌 🍉 🍇 🍓 🍒 🥑 🥦 🥕 🌽 🥔 🧅 🧄 🍅 🥬 🥚 🧀 🥛 🍞 🥖 🥐 🍝 🍕 🍔 🌮 🥗 🍲 🍜 🍣 🍗 🥩 🐟 🍤 🍰 🍪 🍫 ☕ 🍵 🍷 🍺 🧃 💧'],
+  ['Dinero', '💶 💳 💰 🪙 🧾 🏦 📈 📉 💸 🏧 🛍️ 🎁 🧮 📊 💼 🤝'],
+  ['Viajes', '🚗 🚙 🚕 🏍️ 🚲 🛴 🚌 🚆 ✈️ 🚢 ⛽ 🅿️ 🗺️ 🧳 🏖️ ⛰️ 🏕️ 🏙️ 🎡 🎢 🏰 🗼 🎒 🛂'],
+  ['Naturaleza', '🌱 🌿 🍀 🌵 🌴 🌳 🌲 🌸 🌼 🌻 🌹 🌷 🍁 🍂 🍄 🌊 ☀️ 🌤️ ⛅ 🌧️ ⛈️ ❄️ 🌈 🌙 ⭐ 🔥'],
+  ['Animales', '🐠 🐟 🐡 🦐 🦀 🐌 🐢 🐶 🐱 🐰 🐹 🐦 🦜 🐝 🦋 🐞 🐴 🐮 🐷 🐑 🦊 🐻 🐼 🐸'],
+  ['Cosas', '📄 📁 🗂️ 📋 📝 ✏️ 📌 📎 📅 🗓️ ⏰ ⌛ 📱 💻 🖥️ 📺 🎧 📷 🔍 💊 🩺 🩹 🧪 🌡️ 🪪 🛡️ 📚 🎓 🏋️ ⚽ 🎾 🎮 🎨 🎸 🎬 🎉'],
+  ['Caras', '😀 😊 😍 🥰 😘 😎 🤓 🥳 😴 🤒 😅 😂 🤔 😬 😢 😡 👍 👌 🙌 👏 💪 🙏 👀 💙 💚 💛 🧡 ❤️ 💜 🖤 🤍'],
+  ['Símbolos', '✅ ☑️ ❌ ⚠️ ❗ ❓ 💯 🔴 🟠 🟡 🟢 🔵 🟣 ⚫ ⚪ 🟥 🟧 🟨 🟩 🟦 🟪 ⭕ 🔺 🔷 ♾️ 🔁 🔔 🏁 🚩 ✨']
+].map(c => [c[0], c[1].split(' ')]);
+let emPick = null;
+function abrirEmojis(inp) {
+  cerrarEmojis(true);
+  let cat = 0;
+  const d = document.createElement('div');
+  d.className = 'empick';
+  const pinta = () => {
+    d.innerHTML = '<div class="fon"></div><div class="hj"><div class="tir"></div><div class="cab"><b>Elige un emoji</b>' + (inp.value ? '<button class="mini" data-em="quitar">Quitar</button>' : '') + '<button class="mini" data-em="cerrar">Cerrar</button></div>' +
+      '<div class="cats">' + EMOJIS.map((c, i) => '<button class="' + (i === cat ? 'on' : '') + '" data-cat="' + i + '">' + c[0] + '</button>').join('') + '</div>' +
+      '<div class="grid">' + EMOJIS[cat][1].map(e => '<button data-e="' + e + '">' + e + '</button>').join('') + '</div>' +
+      '<div class="otro"><input placeholder="Otro: escríbelo con el teclado de emojis" aria-label="Otro emoji" autocomplete="off" enterkeyhint="done"></div></div>';
+  };
+  pinta();
+  const poner = e => { inp.value = e; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); cerrarEmojis(); };
+  d.addEventListener('click', ev => {
+    const b = ev.target.closest('button');
+    if (ev.target.classList.contains('fon')) return cerrarEmojis();
+    if (!b) return;
+    if (b.dataset.e) return poner(b.dataset.e);
+    if (b.dataset.cat) { cat = +b.dataset.cat; const g = $('.grid', d); g.innerHTML = EMOJIS[cat][1].map(e => '<button data-e="' + e + '">' + e + '</button>').join(''); g.scrollTop = 0; $$('.cats button', d).forEach((x, i) => x.classList.toggle('on', i === cat)); return; }
+    if (b.dataset.em === 'quitar') return poner('');
+    if (b.dataset.em === 'cerrar') return cerrarEmojis();
+  });
+  d.addEventListener('input', ev => { if (!ev.target.closest('.otro')) return; ev.stopPropagation(); const e = primerEmoji(ev.target.value); if (e) poner(e); }, true);
+  document.body.appendChild(d);
+  emPick = d;
+  requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add('ver')));
+}
+function cerrarEmojis(ya) {
+  const d = emPick; if (!d) return; emPick = null;
+  if (ya) return d.remove();
+  d.classList.remove('ver'); setTimeout(() => d.remove(), 280);
+}
+/* La casilla ya no abre el teclado normal: abre el selector */
+document.addEventListener('click', ev => {
+  const l = ev.target.closest && ev.target.closest('.emb'); if (!l) return;
+  ev.preventDefault(); ev.stopPropagation();
+  const i = $('input', l); if (i) { i.blur(); abrirEmojis(i); }
+}, true);
+/* El input se queda sin teclado (solo guarda el valor) */
+new MutationObserver(() => { $$('.emb input:not([readonly])').forEach(i => { i.readOnly = true; i.tabIndex = -1; }); }).observe(document.documentElement, { childList: true, subtree: true });
+
+/* ---------- Los nombres que empiezan por emoji lo pasan a su casilla (una vez, sin apuntarlo en Actividad) ---------- */
+const COLS_EMOJI = [['cuentas', 'nombre'], ['fijos', 'nombre'], ['listas', 'nombre'], ['plantas', 'nombre'], ['acuario', 'nombre'], ['medicacion', 'nombre'], ['coches', 'nombre'], ['documentos', 'nombre'], ['tarjetas', 'nombre'], ['turnos', 'nombre'], ['listasr', 'nombre'], ['notas', 'titulo']];
+function separarEmoji(t) {
+  t = String(t || ''); const s = t.trimStart(); const e = primerEmoji(s.slice(0, 16));
+  if (!e || s.indexOf(e) !== 0) return null;
+  let resto = s.slice(e.length).replace(/^[\s️‍]+/, '');
+  return resto ? { e: e, resto: resto } : null;
+}
+function moverEmojis() {
+  if (!S.cfg) return;
+  COLS_EMOJI.forEach(c => {
+    lista(c[0]).forEach(x => {
+      if (x.emoji) return;
+      const r = separarEmoji(x[c[1]]); if (!r) return;
+      const f = { emoji: r.e }; f[c[1]] = r.resto;
+      _cambiarBase(c[0], x.id, f);
+    });
+  });
+}
+setTimeout(() => { try { moverEmojis(); } catch (e) { anotar('emojis', e); } }, 7000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.cfg) setTimeout(() => { try { moverEmojis(); } catch (e) { anotar('emojis', e); } }, 5000); });
+
+/* ---------- Fecha límite ---------- */
+function textoLimite(iso, plano) {
+  const d = deISO(iso); if (!d) return '';
+  const n = Math.round((d - hoy0()) / 864e5);
+  const t = n < 0 ? 'Límite pasado · ' + fechaCortaTxt(iso) : n === 0 ? 'Límite hoy' : n === 1 ? 'Límite mañana' : n < 7 ? 'Límite en ' + n + ' días' : 'Límite · ' + fechaCortaTxt(iso);
+  if (plano) return t;
+  return '<span class="lim' + (n < 0 ? ' pasada' : n <= 2 ? ' pronto' : '') + '">' + ic('reloj', 13) + esc(t) + '</span>';
+}
+
+/* ---------- Importar medidas del acuario (CSV de otra app: parámetro, valor, fecha) ---------- */
+const AC_ALIAS = { amoniaco: 'amoniaco', amonio: 'amoniaco', ammonia: 'amoniaco', nh3: 'amoniaco', nh4: 'amoniaco', fosfato: 'fosfato', fosfatos: 'fosfato', phosphate: 'fosfato', po4: 'fosfato', gh: 'gh', kh: 'kh', hierro: 'hierro', iron: 'hierro', fe: 'hierro', nitrato: 'nitrato', nitratos: 'nitrato', nitrate: 'nitrato', no3: 'nitrato', nitrito: 'nitrito', nitritos: 'nitrito', nitrite: 'nitrito', no2: 'nitrito', ph: 'ph', temperatura: 'temp', temperature: 'temp', temp: 'temp' };
+const sinTildes = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+function leerCSV(txt) {
+  const filas = [];
+  String(txt || '').replace(/^﻿/, '').split(/\r?\n/).forEach(l => {
+    if (!l.trim()) return;
+    const c = []; let cur = '', q = false;
+    for (let i = 0; i < l.length; i++) { const ch = l[i]; if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; } else if ((ch === ',' || ch === ';') && !q) { c.push(cur); cur = ''; } else cur += ch; }
+    c.push(cur); filas.push(c.map(x => x.trim()));
+  });
+  return filas;
+}
+/* Devuelve { dias: {iso: {k: valor}}, n, params: {k: nombre}, nuevos: [{k,n}], malas } */
+function analizarMedidas(txt) {
+  const f = leerCSV(txt); if (!f.length) return null;
+  const cab = f[0].map(sinTildes);
+  let iP = cab.findIndex(x => /param|nombre|name/.test(x)), iV = cab.findIndex(x => /valor|value/.test(x)), iF = cab.findIndex(x => /fecha|date|created|cuando/.test(x));
+  let desde = 1; if (iP < 0 || iV < 0 || iF < 0) { iP = 0; iV = 1; iF = 2; desde = /^[a-z]/i.test(f[0][1] || '') ? 1 : 0; }
+  const params = acParams(true), porNombre = {};
+  params.forEach(p => { porNombre[sinTildes(p.n)] = p.k; porNombre[sinTildes(p.k)] = p.k; });
+  const dias = {}, usados = {}, nuevos = [], ult = {}; let n = 0, malas = 0;
+  f.slice(desde).forEach(r => {
+    const nom = r[iP] || '', v = Number(String(r[iV] || '').replace(',', '.')), m = String(r[iF] || '').match(/(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+    if (!nom || !isFinite(v) || String(r[iV] || '').trim() === '' || !m) { malas++; return; }
+    const s = sinTildes(nom);
+    let k = porNombre[s] || AC_ALIAS[s];
+    if (!k) { let x = nuevos.find(y => sinTildes(y.n) === s); if (!x) { x = { k: 'x' + uid().slice(-6), n: cap(nom.trim()), u: '' }; nuevos.push(x); } porNombre[s] = x.k; k = x.k; }
+    const iso = m[1] + '-' + m[2] + '-' + m[3], t = (m[4] || '00') + (m[5] || '00');
+    dias[iso] = dias[iso] || {};
+    if (!ult[iso + k] || t >= ult[iso + k]) { dias[iso][k] = v; ult[iso + k] = t; }
+    usados[k] = (params.find(p => p.k === k) || nuevos.find(p => p.k === k) || {}).n || nom; n++;
+  });
+  return { dias: dias, n: n, params: usados, nuevos: nuevos, malas: malas };
+}
+/* Solo rellena lo que está vacío: lo apuntado a mano en Ronda no se toca */
+function importarMedidas(a) {
+  if (a.nuevos.length) cambiar('ajustes', 'acuario', { params: acParams(true).map(x => Object.assign({}, x)).concat(a.nuevos.map(x => ({ k: x.k, n: x.n, u: x.u, on: true }))) });
+  let puestos = 0, dejados = 0;
+  Object.keys(a.dias).sort().forEach(iso => {
+    const ya = medidaDe(iso) || {}, f = {};
+    Object.keys(a.dias[iso]).forEach(k => { if (valorDe(ya, k) === null) { f['v_' + k] = a.dias[iso][k]; puestos++; } else dejados++; });
+    if (Object.keys(f).length) { f.fecha = iso; if (!ya.fecha) f.creado = Date.now(); _cambiarBase('medidas', idMedida(iso), f); }
+  });
+  return { puestos: puestos, dejados: dejados };
+}
+ACC.acImportar = () => {
+  const i = document.createElement('input'); i.type = 'file'; i.accept = '.csv,text/csv,text/plain';
+  i.addEventListener('change', () => {
+    const f = i.files && i.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      const a = analizarMedidas(r.result);
+      if (!a || !a.n) return toast('No he encontrado medidas en ese archivo.');
+      const ds = Object.keys(a.dias).sort();
+      const h = abrirHoja('<h3>Importar medidas</h3><div class="impres"><b>' + a.n + ' medidas</b> en <b>' + ds.length + ' días</b>, del ' + esc(fechaCortaTxt(ds[0])) + ' al ' + esc(fechaCortaTxt(ds[ds.length - 1])) + '.<br>' + esc(Object.values(a.params).join(', ')) + '.' +
+        (a.nuevos.length ? '<br>Parámetros nuevos que se añaden: <b>' + esc(a.nuevos.map(x => x.n).join(', ')) + '</b>.' : '') + (a.malas ? '<br>' + a.malas + (a.malas === 1 ? ' fila no se entiende y se salta.' : ' filas no se entienden y se saltan.') : '') +
+        '</div><p class="cap" style="text-align:left;margin-top:10px">Cada valor va a su día. Si un día ya tiene ese parámetro apuntado en Ronda, se deja el de Ronda.</p><button class="btn pri" data-a="acImpOk" style="margin-top:12px">Importar</button>');
+      ACC.acImpOk = () => { const res = importarMedidas(a); cerrarHoja(); Nav.refrescar(true); toast(res.puestos + ' medidas importadas' + (res.dejados ? ' · ' + res.dejados + ' ya estaban' : '')); };
+      void h;
+    };
+    r.readAsText(f);
+  });
+  i.click();
+};
+const _acParamsHtml = P.acParams.html;
+P.acParams.html = p => _acParamsHtml(p) + '<button class="row card" data-a="acImportar" style="margin-top:12px">' + sq('subir', 5) + '<div class="f"><b>Importar medidas de otra app</b><small>Un archivo CSV con parámetro, valor y fecha</small></div>' + chev + '</button>';
+
+Object.assign(window.RONDA, { analizarMedidas: analizarMedidas, importarMedidas: importarMedidas, moverEmojis: moverEmojis, textoLimite: textoLimite });
 
 })();

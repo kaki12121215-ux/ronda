@@ -1,4 +1,4 @@
-/* RONDA · estilos · 1.4.0 */
+/* RONDA · estilos · 1.4.2 */
 @font-face{font-family:Nunito;font-weight:400;font-display:block;src:url('fonts/nunito-regular.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:600;font-display:block;src:url('fonts/nunito-semibold.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:700;font-display:block;src:url('fonts/nunito-bold.woff') format('woff')}
@@ -711,7 +711,7 @@ html[data-tema="oscuro"] .tg{color:#9DC0F0}html[data-tema="oscuro"] .tgp{color:#
 .qb{width:100%;height:46px;border-radius:14px;border:0;background:color-mix(in srgb,var(--a,#EE8AA8) 70%,#fff);color:#2B3A42;font:800 16px Nunito;display:flex;align-items:center;justify-content:center;gap:6px;margin:2px 0 4px}
 .acp{display:inline-flex;align-items:center;gap:4px;font:700 13px Nunito;background:color-mix(in srgb,#fff 70%,transparent);color:var(--ink);padding:5px 10px;border-radius:10px;border:0;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html[data-tema="oscuro"] .acp{background:rgba(255,255,255,.1)}
-.quien2{display:flex;flex-direction:column;gap:8px;margin:4px 0 6px}.quien2>div{display:flex;align-items:center;gap:8px}.quien2 b{min-width:46px;font-size:14px}
+.quien2{display:flex;flex-direction:column;gap:8px;margin:4px 0 6px}.quien2>div{display:flex;align-items:center;gap:8px}.quien2>div>b{min-width:46px;font-size:14px}
 .wb{flex:1;height:8px;border-radius:4px;background:color-mix(in srgb,var(--ink) 8%,transparent);overflow:hidden;display:block}.wb i{display:block;height:100%;border-radius:4px}
 /* Menú de la semana (tabla compacta) */
 .tq{margin:2px -6px 4px}
@@ -808,3 +808,47 @@ html[data-tema="oscuro"] .rsn>div{background:rgba(255,255,255,.08)}
 .ucr{display:flex;align-items:center;gap:10px;padding:7px 0}
 .ucr .f{flex:1;min-width:0}
 .ucr .f b{display:block;line-height:1.3;font-weight:700}
+
+/* ---------- 1.4.1 ---------- */
+.toast{color:var(--bg)}
+.toast span{color:var(--bg);text-align:left;font-weight:800;opacity:1}
+.av.ini{display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:800;line-height:1}
+.halves>div{background:var(--sf)}
+html[data-tema="oscuro"] .halves>div{background:var(--bg)}
+.w .rw{border-top:0}
+input[type=date],input[type=time]{text-align:left}
+input::-webkit-date-and-time-value{text-align:left}
+/* Selector de emoji propio: el iPhone no deja abrir su teclado de emojis desde una web */
+.emb input{pointer-events:none}
+.empick{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:auto}
+.empick .fon{position:absolute;inset:0;background:rgba(27,38,44,.32);opacity:0;transition:opacity .22s}
+.empick.ver .fon{opacity:1}
+.empick .hj{position:relative;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 14px calc(var(--sb) + 14px);max-height:72vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+.empick.ver .hj{transform:none}
+.empick .tir{width:40px;height:5px;border-radius:3px;background:var(--ln);margin:0 auto 10px}
+.empick .cab{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.empick .cab b{flex:1;font-size:18px;font-weight:800}
+.empick .cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.empick .cats::-webkit-scrollbar{display:none}
+.empick .cats button{flex:none;border:0;border-radius:999px;padding:7px 12px;background:var(--sf);font:700 14px Nunito,system-ui;color:var(--mu)}
+.empick .cats button.on{background:var(--ink);color:var(--bg)}
+.empick .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;overflow-y:auto;padding:4px 0}
+.empick .grid button{border:0;background:none;font-size:27px;line-height:1;aspect-ratio:1;border-radius:12px;padding:0}
+.empick .grid button:active{background:var(--sf)}
+.empick .otro{display:flex;gap:8px;align-items:center;margin-top:10px}
+.empick .otro input{flex:1;min-width:0;border:0;border-radius:14px;background:var(--sf);padding:12px 14px;font:700 17px Nunito,system-ui;color:var(--ink);outline:0}
+/* Fecha límite */
+.lim{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:800;color:var(--mu);white-space:nowrap}
+.lim.pronto{color:#C98A00}
+.lim.pasada{color:#C8402B}
+/* Importar medidas */
+.impres{background:var(--sf);border-radius:18px;padding:14px 16px;margin-top:12px;font-weight:600;line-height:1.45}
+.impres b{font-weight:800}
+/* 1.4.2: las secciones ancladas en la barra de abajo no llevan flecha (no hay adónde volver) */
+.pg.raiz .top .bk{visibility:hidden;pointer-events:none}
+/* 1.4.2: después de la animación de carga, la app entra con un fundido suave (ni de golpe ni lento) */
+#arranque{transition:opacity .6s cubic-bezier(.33,0,.2,1)}
+.aparece{opacity:0}
+.aparece .pg.raiz .pgc{transform:translateY(10px)}
+.aparece.ya{opacity:1;transition:opacity .6s cubic-bezier(.2,.7,.2,1)}
+.aparece.ya .pg.raiz .pgc{transform:none;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
