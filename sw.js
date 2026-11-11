@@ -1,6 +1,6 @@
 /* RONDA · service worker: abre sin conexión y recibe versiones nuevas.
    Nunca toca las llamadas a Google (script.google.com / googleusercontent.com). */
-const VERSION = 'ronda-0.2.0';
+const VERSION = 'ronda-0.3.0';
 const ARCHIVOS = ['./', 'index.html', 'app.css', 'app.js', 'manifest.webmanifest',
   'fonts/nunito-regular.woff', 'fonts/nunito-semibold.woff', 'fonts/nunito-bold.woff', 'fonts/nunito-extrabold.woff',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/favicon-32.png'];
