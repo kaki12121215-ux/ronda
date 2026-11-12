@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.7.2 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.7.3 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.7.2';
+const VERSION = '1.7.3';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -710,9 +710,9 @@ const T0 = 3.0, TM = 0.95;
 
 /* Coloca «r_nda» y calcula dónde va el anillo que hace de «o». */
 function medirLogo(cont, topPx, fs) {
-  const cv = document.createElement('canvas').getContext('2d');
-  cv.font = '800 ' + fs + 'px Nunito';
-  const mo = cv.measureText('o');
+  /* 1.7.3: medidas de la «o» de Nunito ExtraBold fijas (por cada px de letra). Antes se medían con canvas y en el iPhone,
+     si la letra aún no estaba lista para canvas, salían mal y el anillo quedaba alto. */
+  const mo = { width: 0.589 * fs, actualBoundingBoxLeft: -0.03 * fs, actualBoundingBoxRight: 0.56 * fs, actualBoundingBoxAscent: 0.51 * fs, actualBoundingBoxDescent: 0.02 * fs };
   const oW = mo.actualBoundingBoxLeft + mo.actualBoundingBoxRight, oH = mo.actualBoundingBoxAscent + mo.actualBoundingBoxDescent;
   const sb = (mo.width - oW) / 2, D = oH * 1.15, padL = sb + 0.06 * fs, padR = sb + 0.01 * fs;
   cont.innerHTML = '<div class="logo" style="top:' + topPx + 'px;font-size:' + fs + 'px"><span class="logo-palabra" style="position:relative;display:inline-block"><span class="l">r</span><span class="ph" style="display:inline-block;height:1px;width:' + (padL + D + padR) + 'px"></span><i class="bl" style="display:inline-block;width:0;height:0"></i><span class="l">n</span><span class="l">d</span><span class="l">a</span></span></div><svg class="anillo"></svg>';
@@ -787,6 +787,8 @@ function animarArranque(modo) {
     if (modo !== 'b') {
       const rapido = now => {
         const t = (now - t0) / 1000 * 1.333;
+        /* Al abrir desde el icono, el iPhone puede tardar un momento en dar el alto real de la pantalla: se recoloca al principio */
+        if (now - t0 < 450) { try { const h0 = H; W = innerWidth; H = innerHeight; if (H !== h0) montar(); } catch (e) { } }
         dibujarAnilloRapido(svg, t, T);
         letras.forEach((l, i) => { const p = oC(cl((t - i * 0.05) / 0.4)); l.style.opacity = p; l.style.transform = 'translateY(' + (10 * (1 - p)) + 'px)'; });
         if (t < 1.0) requestAnimationFrame(rapido); else { dibujarAnilloRapido(svg, 2, T); letras.forEach(l => { l.style.opacity = 1; l.style.transform = ''; }); ok(); }
