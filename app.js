@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.6.1 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.7.0 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.6.1';
+const VERSION = '1.7.0';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -3821,8 +3821,8 @@ wd('regar', 'Toca regar', 'Plantas', 'S', cVE, 'Las de hoy', () => {
   return { vacio: !l.length, h: lab('Toca regar') + '<button class="wbody" data-a="wPlantas">' + big(t.length, t.length === 1 ? 'planta' : 'plantas') + t.slice(0, 2).map(x => '<div class="cu">' + ic('gota', 20, 5) + '<div><b>' + esc(x.nombre) + '</b><small>' + cuando(x.proximo).toLowerCase() + '</small></div></div>').join('') + (t.length ? '' : '<small class="mu2">Todas regadas</small>') + '</button>' };
 });
 wd('plantas', 'Mis plantas', 'Plantas', 'L', cVE, 'Cuánta agua les queda', () => {
-  /* 1.6.1: por orden de riego (la que antes toca, primero) */
-  const l = lista('plantas').sort((a, b) => (a.proximo || '9').localeCompare(b.proximo || '9') || String(a.nombre).localeCompare(String(b.nombre), 'es')).slice(0, 5);
+  /* 1.7.0: de menos agua a más */
+  const l = ordenAgua(lista('plantas')).slice(0, 5);
   const largos = l.some(x => String(x.nombre).length > 18);
   const nivel = x => { const n = diasHasta(x.proximo); return n === null ? 1 : Math.max(0.06, Math.min(1, n / Math.max(1, x.cada || 1))); };
   return { vacio: !l.length, h: lab('Plantas', wlink(lista('plantas').length + '', 'wPlantas')) + '<div class="pl' + (largos ? ' tres' : '') + '">' + l.map(x => '<button data-a="rutVer" data-col="plantas" data-id="' + x.id + '">' + (x.emoji ? '<span class="pem">' + esc(x.emoji) + '</span>' : ic('modulo-plantas', 26, 3)) + '<b class="pn2">' + esc(x.nombre) + '</b><div class="wl2"><i style="height:' + Math.round(100 * nivel(x)) + '%' + (tocaHoy('plantas', x) ? ';background:#E0563C' : '') + '"></i></div></button>').join('') + '</div><small class="mu2">El agua baja hasta el día de riego</small>' };
@@ -5591,7 +5591,7 @@ try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () =
    Los archivos van a la carpeta de Drive de Ronda con el mismo sistema que las fotos (el script no cambia; máximo 20 MB por archivo).
    «Exportar» descarga un zip hecho en el propio móvil: feedback.txt y una carpeta por nota con sus archivos. */
 
-const FB_MAX = 20 * 1024 * 1024;
+const FB_MAX = 100 * 1024 * 1024; /* 1.7.0: con subida directa a Drive; con el script antiguo, 20 MB */
 MODS.feedback = ['Feedback', 'comentario', 0, () => { const n = lista('feedback').filter(x => x.estado !== 'h').length; return n ? n + (n === 1 ? ' pendiente' : ' pendientes') : 'Ideas para mejorar'; }];
 SECC.feedback = [0, 'comentario'];
 COLBARRA.feedback = 0;
@@ -5647,7 +5647,7 @@ function fbHojaHtml() {
     '<p class="lab2">Sección</p><div class="fbsecs">' + fbSecciones().map(x => '<button class="' + (s === x[0] ? 'on' : '') + '" data-a="fbSecElegir" data-v="' + x[0] + '"><i style="background:' + x[2] + '"></i>' + esc(x[1]) + '</button>').join('') + '</div>' +
     '<p class="lab2">Capturas y vídeos</p><div class="fbadj">' + FB.adj.map((a, i) => '<span class="fbw">' + fbMini(a, 72, 112) + (FB.subiendo ? '' : '<button class="fbq" data-a="fbQuitar" data-i="' + i + '" aria-label="Quitar">' + ic('cerrar', 12) + '</button>') + '</span>').join('') +
     (FB.subiendo ? '' : '<label class="fbadd">' + ic('camara', 24, 0) + '<small>Foto o vídeo</small><input type="file" id="fbArch" accept="image/*,video/*" multiple hidden></label>') + '</div>' +
-    '<p class="cap fbnota">Vídeos de hasta 20 MB (unos 30 segundos de grabación de pantalla). Se guardan en vuestro Drive, en la carpeta «Ronda · archivos».</p>' +
+    '<p class="cap fbnota">Vídeos de hasta 100 MB (un par de minutos de grabación de pantalla). Se guardan en vuestro Drive, en la carpeta «Ronda · archivos».</p>' +
     (FB.subiendo ? '<div class="fbprog"><div class="bar2"><i style="width:' + Math.round(100 * (FB.prog || 0)) + '%;background:' + COL[0] + '"></i></div><small>' + esc(FB.subiendo) + '</small></div>' : btn('Guardar nota', 'fbGuardar')) + '</div>';
 }
 function fbHoja() {
@@ -5694,7 +5694,7 @@ async function fbAnadir(input) {
     if (!FB) return;
     try {
       if (/^video\//.test(file.type)) {
-        if (file.size > FB_MAX) { toast('Ese vídeo pesa ' + fbMB(file.size) + ' y el máximo es 20 MB. Grábalo más corto.'); continue; }
+        if (file.size > FB_MAX) { toast('Ese vídeo pesa ' + fbMB(file.size) + ' y el máximo es 100 MB. Grábalo más corto.'); continue; }
         const inf = await fbVideoInfo(file);
         FB.adj.push({ blob: file, tipo: 'vid', mini: inf.mini, dur: inf.dur, bytes: file.size, nombre: file.name || 'video.mov', nuevo: true });
       } else if (/^image\//.test(file.type)) {
@@ -5718,7 +5718,7 @@ ACC.fbGuardar = async () => {
       const a = nuevos[i];
       FB.subiendo = 'Subiendo ' + (nuevos.length > 1 ? (i + 1) + ' de ' + nuevos.length : (a.tipo === 'vid' ? 'el vídeo' : 'la captura')) + '…'; FB.prog = i / nuevos.length; fbPintar();
       const ext = a.tipo === 'vid' ? ((a.nombre.match(/\.[a-z0-9]{2,4}$/i) || ['.mov'])[0].toLowerCase()) : '.jpg';
-      const r = await subirArchivo(a.blob, 'feedback-' + FB.id + '-' + (i + 1) + ext, { progreso: q => { FB.prog = (i + q) / nuevos.length; const b = hojaAbierta && $('.fbprog i', hojaAbierta.h); if (b) b.style.width = Math.round(100 * FB.prog) + '%'; } });
+      const r = await subirRapido(a.blob, 'feedback-' + FB.id + '-' + (i + 1) + ext, { progreso: q => { FB.prog = (i + q) / nuevos.length; const b = hojaAbierta && $('.fbprog i', hojaAbierta.h); if (b) b.style.width = Math.round(100 * FB.prog) + '%'; } });
       a.fid = r.fid; delete a.blob; delete a.nuevo; a.nombre = a.tipo === 'vid' ? 'video' + ext : 'captura.jpg';
     }
   } catch (e) { FB.subiendo = ''; fbPintar(); toast('No he podido subir un archivo: ' + e.message); return; }
@@ -5859,7 +5859,7 @@ function faltaRiego(x) {
   return n === 1 ? 'Mañana' : n + ' días';
 }
 function panelAgua() {
-  const l = lista('plantas').sort((a, b) => (a.proximo || '9').localeCompare(b.proximo || '9') || String(a.nombre).localeCompare(String(b.nombre), 'es'));
+  const l = ordenAgua(lista('plantas'));
   if (!l.length) return '';
   const hoy = l.filter(x => tocaHoy('plantas', x)).length;
   return '<div class="card agp"><div class="agt"><b>Cuánta agua les queda</b><small>' + (hoy ? hoy + (hoy === 1 ? ' toca regar hoy' : ' toca regar hoy') : 'Todas regadas') + '</small></div>' +
@@ -5885,13 +5885,14 @@ function barraAgua(s) {
 }
 document.addEventListener('scroll', ev => { const s = ev.target; if (s && s.classList && s.classList.contains('ags')) barraAgua(s); }, true);
 new MutationObserver(() => { $$('.ags').forEach(s => { if (!s._ag) { s._ag = 1; requestAnimationFrame(() => barraAgua(s)); } }); }).observe(document.documentElement, { childList: true, subtree: true });
-Object.assign(window.RONDA || (window.RONDA = {}), { panelAgua: panelAgua, faltaRiego: faltaRiego });
+Object.assign(window.RONDA || (window.RONDA = {}), { panelAgua: panelAgua, faltaRiego: faltaRiego, nivelAgua: nivelAgua });
 
 /* ---- 24_masrapido161.js ---- */
 /* ===================== 1.6.1 · Más rápido =====================
    Mantener pulsado «Más» en la barra de abajo, desde cualquier pantalla: sale una cuadrícula con todas las secciones.
    Se puede soltar encima de una para ir directo, o soltar fuera y tocar después. Un toque normal sigue abriendo Más. */
 let MR = null;
+let mrSoltarFuera = () => { };
 function mrSecciones() {
   /* Solo las de la pestaña Más: las que ya están en la barra de abajo no salen */
   const enBarra = raices().map(x => x[0]);
@@ -5941,7 +5942,7 @@ function mrMarcar(x, y) {
     clearTimeout(t);
     if (!hecho) return;
     ev.preventDefault();
-    const b = MR && MR.sobre; if (b) mrIr(b.dataset.k);
+    const b = MR && MR.sobre; if (b) mrIr(b.dataset.k); else mrSoltarFuera();
     setTimeout(() => { hecho = false; }, 60);
   }, { passive: false });
   document.addEventListener('contextmenu', ev => { if (masDe(ev)) ev.preventDefault(); });
@@ -5954,5 +5955,53 @@ function mrMarcar(x, y) {
 })();
 
 Object.assign(window.RONDA || (window.RONDA = {}), { mrAbrir: mrAbrir, mrCerrar: mrCerrar, mrIr: mrIr });
+
+/* ---- 25_arreglos170.js ---- */
+/* ===================== 1.7.0 · Arreglos del feedback ===================== */
+
+/* ---------- Subida directa a Drive (feedback): rápida y sin juntar trozos ----------
+   El script (1.7.0) pide a Google un enlace de subida de un solo uso para este archivo y el móvil lo sube ahí.
+   Si el script es antiguo o la subida directa falla, se usa la de siempre (hasta 20 MB). */
+function subirDirecto(blob, url, progreso) {
+  return new Promise((ok, mal) => {
+    const x = new XMLHttpRequest();
+    x.open('PUT', url);
+    x.setRequestHeader('Content-Type', blob.type || 'application/octet-stream');
+    x.timeout = 15 * 60 * 1000;
+    if (progreso) x.upload.onprogress = e => { if (e.lengthComputable) progreso(e.loaded / e.total); };
+    x.onload = () => {
+      if (x.status !== 200 && x.status !== 201) return mal(Object.assign(new Error('Google ha contestado ' + x.status), { code: 'directa' }));
+      let id = ''; try { id = JSON.parse(x.responseText).id; } catch (e) { }
+      id ? ok(id) : mal(Object.assign(new Error('Google no ha devuelto el archivo'), { code: 'directa' }));
+    };
+    x.onerror = () => mal(Object.assign(new Error('Sin conexión con Google'), { code: 'directa' }));
+    x.ontimeout = () => mal(Object.assign(new Error('La subida ha tardado demasiado'), { code: 'directa' }));
+    x.send(blob);
+  });
+}
+async function subirRapido(blob, nombre, opts) {
+  opts = opts || {};
+  let ses = null;
+  try { ses = await api('archivo-sesion', { nombre: nombre, tipo: blob.type || 'application/octet-stream', bytes: blob.size, origen: location.origin }, { ms: 30000 }); }
+  catch (e) { if (e.code === 'token' || e.code === 'sinred') throw e; ses = null; }
+  if (ses && ses.url) {
+    try { const fid = await subirDirecto(blob, ses.url, opts.progreso); if (opts.progreso) opts.progreso(1); return { fid: fid, bytes: blob.size, directa: true }; }
+    catch (e) { if (blob.size > 20 * 1024 * 1024) throw e; }
+  }
+  if (blob.size > 20 * 1024 * 1024) throw Object.assign(new Error('Para archivos de más de 20 MB hay que actualizar el script de Google a la 1.7.0.'), { code: 'archivo' });
+  return subirArchivo(blob, nombre, opts);
+}
+
+/* ---------- Mantener pulsado «Más»: sin el menú del iPhone y, al soltar sin elegir, se cierra ---------- */
+mrSoltarFuera = () => mrCerrar();
+
+/* ---------- Plantas: de menos agua a más (panel de Plantas y tarjeta de Inicio) ---------- */
+function ordenAgua(l) { return l.slice().sort((a, b) => nivelAgua(a) - nivelAgua(b) || (a.proximo || '9').localeCompare(b.proximo || '9') || String(a.nombre).localeCompare(String(b.nombre), 'es')); }
+
+/* ---------- Iconos de Menú: solo líneas, como los demás ---------- */
+ICONOS['modulo-menu-semanal'] = ['<circle cx="12.5" cy="12.5" r="5.8"/><path d="M2.5 3.5v4.5a1.6 1.6 0 0 0 1.6 1.6V20.5"/><path d="M5.7 3.5v4.5a1.6 1.6 0 0 1-1.6 1.6"/><path d="M21.5 20.5V3.5c-1.7 1.4-2.3 3.8-2.3 6.6"/>', [[12.5, 12.5, 'c']]];
+ICONOS['menu-comida'] = ['<circle cx="15" cy="12.5" r="7.5"/><path d="M2.5 4v5.5a1.8 1.8 0 0 0 1.8 1.8V20.5"/><path d="M6 4v5.5a1.8 1.8 0 0 1-1.7 1.8"/>', [[15, 12.5, 'c']]];
+
+Object.assign(window.RONDA || (window.RONDA = {}), { subirRapido: subirRapido, ordenAgua: ordenAgua, bajarArchivo: bajarArchivo });
 
 })();

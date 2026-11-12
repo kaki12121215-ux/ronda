@@ -1,4 +1,4 @@
-/* RONDA · estilos · 1.6.1 */
+/* RONDA · estilos · 1.7.0 */
 @font-face{font-family:Nunito;font-weight:400;font-display:block;src:url('fonts/nunito-regular.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:600;font-display:block;src:url('fonts/nunito-semibold.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:700;font-display:block;src:url('fonts/nunito-bold.woff') format('woff')}
@@ -1050,3 +1050,12 @@ html[data-tema="oscuro"] .grid .mod{box-shadow:none}
 .hd.hdi .hdic svg circle, .pg .minit svg circle, .pgc:has(> .hd.hdi) > .top svg circle{stroke:var(--hc,var(--bg));stroke-width:1.6}
 /* Botones de la nota de feedback: en una línea */
 .bts2 .btn{font-size:16px;white-space:nowrap;padding-left:8px;padding-right:8px}
+
+/* ===================== 1.7.0 ===================== */
+/* Mantener pulsado «Más»: sin el menú del iPhone (copiar, vista previa…) */
+#nav a,#mrapido{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#nav a{touch-action:manipulation}
+/* Avisos en el centro de la pantalla: ya no tapan los botones de arriba */
+.toast{top:50%!important;bottom:auto!important;left:24px;right:24px;transform:translateY(-50%) scale(.94)!important;opacity:0;box-shadow:0 18px 50px rgba(27,38,44,.28);justify-content:center;text-align:center;transition:opacity .2s ease,transform .22s cubic-bezier(.2,.9,.25,1.1)}
+.toast.ver{transform:translateY(-50%)!important;opacity:1}
+.toast:has(button){justify-content:space-between;text-align:left}
