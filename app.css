@@ -1,4 +1,4 @@
-/* RONDA · estilos · 1.7.0 */
+/* RONDA · estilos · 1.7.1 */
 @font-face{font-family:Nunito;font-weight:400;font-display:block;src:url('fonts/nunito-regular.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:600;font-display:block;src:url('fonts/nunito-semibold.woff') format('woff')}
 @font-face{font-family:Nunito;font-weight:700;font-display:block;src:url('fonts/nunito-bold.woff') format('woff')}
@@ -1059,3 +1059,9 @@ html[data-tema="oscuro"] .grid .mod{box-shadow:none}
 .toast{top:50%!important;bottom:auto!important;left:24px;right:24px;transform:translateY(-50%) scale(.94)!important;opacity:0;box-shadow:0 18px 50px rgba(27,38,44,.28);justify-content:center;text-align:center;transition:opacity .2s ease,transform .22s cubic-bezier(.2,.9,.25,1.1)}
 .toast.ver{transform:translateY(-50%)!important;opacity:1}
 .toast:has(button){justify-content:space-between;text-align:left}
+
+/* ===================== 1.7.1 · Solo para mí ===================== */
+.solo{display:inline-flex;vertical-align:-1px;margin-left:5px;color:var(--mu);opacity:.9}
+.solo .ic,.solo svg{width:13px;height:13px}
+.solo svg circle{display:none}
+h1 .solo .ic,h1 .solo svg,h3 .solo svg{width:18px;height:18px}

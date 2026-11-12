@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.7.0 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.7.1 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.7.0';
+const VERSION = '1.7.1';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -207,7 +207,10 @@ function leerPaquete(txt) {
 function dato(col, id) { const r = S.recs[col] && S.recs[col][id]; return r && !r.f._b ? Object.assign({ id: id }, r.f) : null; }
 function lista(col) {
   const m = S.recs[col] || {};
-  return Object.keys(m).filter(id => !m[id].f._b).map(id => Object.assign({ id: id, _rev: m[id].rev, _por: m[id].por }, m[id].f));
+  const l = Object.keys(m).filter(id => !m[id].f._b).map(id => Object.assign({ id: id, _rev: m[id].rev, _por: m[id].por }, m[id].f));
+  /* 1.7.1: las tareas «Solo para mí» de otro no salen en ningún sitio */
+  if (col === 'tareas') { const yo = S.cfg && S.cfg.persona; return l.filter(x => !x.solo || x.solo === yo); }
+  return l;
 }
 function personas() { return lista('personas').sort((a, b) => (a.alta || 0) - (b.alta || 0)); }
 function yo() { return S.cfg ? dato('personas', S.cfg.persona) : null; }
@@ -1939,7 +1942,7 @@ P.tareas = {
       const atras = !x.hecho && x.fecha && x.fecha < hoyISO();
       return '<div class="row card it' + (x.hecho ? ' dn' : '') + (nuevo ? ' nuevo' : '') + '" data-a="verTarea" data-lp="menuTarea" data-id="' + x.id + '">' +
         '<button class="ck' + (x.hecho ? ' on' : '') + (atras ? ' pas' : '') + '" data-a="hacerTarea" data-id="' + x.id + '" style="' + (x.hecho ? 'background:' + colorDe(x.hechoPor) + ';border-color:transparent' : 'border-color:' + c) + '" aria-label="Hecha">' + tick(16) + '</button>' +
-        '<div class="f"><b>' + esc(x.titulo) + '</b><small' + (atras ? ' style="color:#C8402B"' : '') + '>' + (x.hecho ? 'Hecha por ' + esc(nombreDe(x.hechoPor)) : cuando(x.fecha, x.hora)) + (x.turno ? ' · Turno' : '') + (x.repite && x.repite.cada ? ' · ' + textoRepe(x.repite).toLowerCase() : '') + (x.cal ? ' · en el calendario' : '') + '</small>' + (!x.hecho && x.limite ? textoLimite(x.limite) : '') + '</div>' +
+        '<div class="f"><b>' + esc(x.titulo) + candado(x) + '</b><small' + (atras ? ' style="color:#C8402B"' : '') + '>' + (x.hecho ? 'Hecha por ' + esc(nombreDe(x.hechoPor)) : cuando(x.fecha, x.hora)) + (x.turno ? ' · Turno' : '') + (x.repite && x.repite.cada ? ' · ' + textoRepe(x.repite).toLowerCase() : '') + (x.cal ? ' · en el calendario' : '') + '</small>' + (!x.hecho && x.limite ? textoLimite(x.limite) : '') + '</div>' +
         avQuien(x.para, 28) + '</div>';
     };
     h += '<div class="list">' + l.slice(0, 300).map(fila).join('') + '</div>';
@@ -1953,7 +1956,7 @@ ACC.nuevaTarea = el => Nav.ir('tarea', { para: (el && el.dataset.para) || S.cfg.
 ACC.verTarea = el => Nav.ir('tareaVer', { id: el.dataset.id });
 ACC.menuTarea = el => {
   const x = dato('tareas', el.dataset.id); if (!x) return;
-  abrirHoja('<h3>' + esc(x.titulo) + '</h3><div class="list"><button class="row card" data-a="editarTarea" data-id="' + x.id + '">' + ic('editar', 24) + '<b>Cambiar</b></button><button class="row card" data-a="borrarTarea" data-id="' + x.id + '">' + ic('borrar', 24, 0) + '<b>Borrar</b></button></div>');
+  abrirHoja('<h3>' + esc(x.titulo) + candado(x) + '</h3><div class="list"><button class="row card" data-a="editarTarea" data-id="' + x.id + '">' + ic('editar', 24) + '<b>Cambiar</b></button><button class="row card" data-a="borrarTarea" data-id="' + x.id + '">' + ic('borrar', 24, 0) + '<b>Borrar</b></button></div>');
 };
 ACC.editarTarea = el => { cerrarHoja(); const x = dato('tareas', el.dataset.id); Nav.ir('tarea', Object.assign({ id: x.id }, x, { repite: x.repite || {} })); };
 ACC.hacerTarea = (el, ev) => {
@@ -2006,11 +2009,11 @@ P.tarea = {
     p.repite = p.repite || {};
     return tope(p.id ? 'Cambiar tarea' : 'Nueva tarea') +
       fldTxt('tTit', 'Qué hay que hacer', pv(p, 'tTit', p.titulo), 'Por ejemplo, cambiar la bombilla', 'maxlength="120"') +
-      '<p class="lab2">Para quién</p>' + chipsPersonas(p.para, 'tPara', true) +
+      filaSolo(!!p.solo) + (p.solo ? '' : '<p class="lab2">Para quién</p>' + chipsPersonas(p.para, 'tPara', true)) +
       '<div style="display:flex;gap:10px"><label class="fld" style="flex:1.4"><small>Cuándo</small><input type="date" id="tFec" value="' + esc(pv(p, 'tFec', p.fecha || '')) + '"></label><label class="fld" style="flex:1"><small>Hora</small><input type="time" id="tHor" value="' + esc(pv(p, 'tHor', p.hora || '')) + '"></label></div>' +
       '<label class="fld"><small>Fecha límite (opcional)</small><input type="date" id="tLim" value="' + esc(pv(p, 'tLim', p.limite || '')) + '"></label>' +
       '<div class="list" style="margin-top:6px"><button class="row card" data-a="tRepe">' + sq('repetir', 4) + '<div class="f"><b>Repetir</b><small>' + esc(textoRepe(p.repite)) + '</small></div>' + chev + '</button>' +
-      filaCal(!!p.cal, 'tCal') + (p.cal ? filaAviso(p.aviso, 'tAviso') : '') + '</div>' +
+      (p.solo ? '' : filaCal(!!p.cal, 'tCal') + (p.cal ? filaAviso(p.aviso, 'tAviso') : '')) + '</div>' +
       fldArea('tNot', 'Notas', pv(p, 'tNot', p.notas), 'Opcional') +
       (p.id ? '<button class="btn sec peligro" data-a="borrarTarea" data-id="' + esc(p.id) + '" style="margin-top:12px">Borrar tarea</button>' : '');
   },
@@ -2029,6 +2032,9 @@ ACC.guardarTarea = () => {
   if (p.repite && p.repite.cada && !fecha) return toast('Para repetirla, ponle la primera fecha.');
   const id = p.id || 't' + uid();
   const campos = { titulo: titulo, para: p.para || S.cfg.persona, fecha: fecha, hora: hora, repite: p.repite && p.repite.cada ? p.repite : null, cal: !!p.cal, aviso: p.cal ? (p.aviso === undefined ? '0' : p.aviso) : '', notas: val('tNot'), limite: val('tLim') };
+  /* 1.7.1: «Solo para mí»: siempre tuya, sin calendario compartido; el otro no la ve */
+  campos.solo = p.solo ? S.cfg.persona : '';
+  if (p.solo) Object.assign(campos, { para: S.cfg.persona, cal: false, aviso: '' });
   if (!p.id) Object.assign(campos, { hecho: false, creadoPor: S.cfg.persona, orden: Date.now() });
   cambiar('tareas', id, campos);
   const antes = p.id ? dato('tareas', id) : null;
@@ -2068,7 +2074,7 @@ P.tareaVer = {
     if (x.veces) kv.push(['Hecha', x.veces + (x.veces === 1 ? ' vez' : ' veces') + ' · la última ' + esc(nombreDe(x.ultimaPor))]);
     kv.push(['Añadida por', nombreDe(x.creadoPor)]);
     return tope('Tarea', '<button class="rt" data-a="editarTarea" data-id="' + x.id + '" style="border:0;background:none">' + ic('editar', 24) + '</button>') +
-      '<h1 style="font-size:28px;margin:6px 0 14px">' + esc(x.titulo) + '</h1><div class="card" style="padding:4px 16px">' + kv.map(k => '<div class="kv"><small>' + k[0] + '</small><b>' + esc(k[1]) + '</b></div>').join('') + '</div>' +
+      '<h1 style="font-size:28px;margin:6px 0 14px">' + esc(x.titulo) + candado(x) + '</h1><div class="card" style="padding:4px 16px">' + kv.map(k => '<div class="kv"><small>' + k[0] + '</small><b>' + esc(k[1]) + '</b></div>').join('') + '</div>' +
       (x.notas ? '<h3>Notas</h3><div class="card" style="padding:14px 16px;font-weight:600;white-space:pre-wrap">' + esc(x.notas) + '</div>' : '');
   },
   fijo: p => { const x = dato('tareas', p.id) || {}; return '<div class="btns"><button class="btn pri" data-a="hacerTareaVer" data-id="' + esc(p.id) + '">' + (x.hecho ? 'Marcar como pendiente' : 'Marcar como hecha') + '</button><button class="btn sec" data-a="borrarTarea" data-id="' + esc(p.id) + '">Borrar tarea</button></div>'; }
@@ -2135,7 +2141,7 @@ function filaEv(e) {
   const quien = String(e.quien || '').split(',').filter(x => dato('personas', x)).map(nombreDe).join(', ');
   return '<button class="row card" data-a="verEvento" data-id="' + esc(e.id) + '"><span class="sq sm" style="background:' + colorEv(e) + '22">' + ic(ip ? ip[0] : 'calendario', 26, ip ? ip[2] : 5) + '</span><div class="f"><b>' + esc(e.titulo) + '</b><small>' + horaEv(e) + (quien ? ' · ' + esc(quien) : '') + (e.lugar ? ' · ' + esc(e.lugar) : '') + '</small></div></button>';
 }
-const filaTareaAg = t => '<button class="row card" data-a="verTarea" data-id="' + t.id + '">' + sq('modulo-tareas', 1) + '<div class="f"><b>' + esc(t.titulo) + '</b><small>Tarea' + (t.hora ? ' · ' + t.hora : '') + ' · ' + esc(nombreDe(t.para)) + '</small></div></button>';
+const filaTareaAg = t => '<button class="row card" data-a="verTarea" data-id="' + t.id + '">' + sq('modulo-tareas', 1) + '<div class="f"><b>' + esc(t.titulo) + candado(t) + '</b><small>Tarea' + (t.hora ? ' · ' + t.hora : '') + ' · ' + esc(nombreDe(t.para)) + '</small></div></button>';
 
 P.agenda = {
   raiz: true, clase: 'con-barra',
@@ -3587,7 +3593,7 @@ const wd = (k, t, sec, sz, col, desc, f) => { W[k] = { t: t, sec: sec, sz: sz, c
 wd('hoy', 'Hoy', 'Agenda', 'L', cAZ, 'El día en línea de tiempo: eventos y tus tareas', () => {
   const h = hoyISO(), evs = eventosDia(h), ts = lista('tareas').filter(t => !t.hecho && t.fecha && t.fecha <= h && mias(t)).sort((a, b) => (a.hora || '99').localeCompare(b.hora || '99'));
   const it = evs.map(e => [e.todoDia ? 'Todo el día' : hora(new Date(e.inicio)), '<span class="pb" style="background:' + colorEv(e) + '"></span><button class="tt2" data-a="verEvento" data-id="' + esc(e.id) + '">' + esc(e.titulo) + '</button>', e.todoDia ? '0' : hora(new Date(e.inicio))])
-    .concat(ts.map(t => [t.fecha < h ? 'Atrasada' : (t.hora || 'Hoy'), wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + '</button>', t.fecha < h ? '00' : (t.hora || '99')]))
+    .concat(ts.map(t => [t.fecha < h ? 'Atrasada' : (t.hora || 'Hoy'), wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button>', t.fecha < h ? '00' : (t.hora || '99')]))
     .sort((a, b) => a[2].localeCompare(b[2])).slice(0, 6);
   const d = new Date();
   return { vacio: !it.length, h: lab('Hoy', wlink('Agenda', 'wAgenda')) + '<div class="hoyw"><div class="dia3"><b>' + d.getDate() + '</b><span>' + DIAS[d.getDay()] + '</span></div><div class="tl">' + (it.length ? it.map(x => '<div class="ti"><small>' + x[0] + '</small><div class="tb">' + x[1] + '</div></div>').join('') : '<p class="mu2">Nada para hoy</p>') + '</div></div>' };
@@ -3641,7 +3647,7 @@ wd('tareas', 'Mis tareas', 'Tareas', 'L', cLI, 'Cuántas llevas hechas hoy y las
   const l = lista('tareas').filter(mias), pend = l.filter(t => !t.hecho).sort((a, b) => ((a.fecha || '9999') + (a.hora || '99')).localeCompare((b.fecha || '9999') + (b.hora || '99')));
   const hoyT = l.filter(t => t.fecha === hoyISO() || (t.hecho && t.hechoEn && isoDia(new Date(t.hechoEn)) === hoyISO())), hechas = hoyT.filter(t => t.hecho).length;
   return { vacio: !pend.length && !hoyT.length, h: lab('Mis tareas', wlink(pend.length ? 'Ver las ' + pend.length : 'Tareas', 'wTareas')) + '<div class="prg"><b>' + hechas + '</b><span>de ' + hoyT.length + ' hechas hoy</span></div><div class="bar2"><i style="width:' + (hoyT.length ? Math.round(100 * hechas / hoyT.length) : 0) + '%;background:' + cLI + '"></i></div>' +
-    (pend.length ? pend.slice(0, 3).map(t => '<div class="rw">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + '</button><small>' + (t.para === 'todos' ? 'Todos' : t.fecha ? cuando(t.fecha).replace('Atrasada · ', '') : '') + '</small></div>').join('') : '<p class="mu2">Nada pendiente</p>') };
+    (pend.length ? pend.slice(0, 3).map(t => '<div class="rw">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button><small>' + (t.para === 'todos' ? 'Todos' : t.fecha ? cuando(t.fecha).replace('Atrasada · ', '') : '') + '</small></div>').join('') : '<p class="mu2">Nada pendiente</p>') };
 });
 wd('paraHoy', 'Para hoy', 'Tareas', 'S', cLI, 'Cuántas y de quién', () => {
   const l = lista('tareas').filter(t => !t.hecho && t.fecha && t.fecha <= hoyISO());
@@ -3650,7 +3656,7 @@ wd('paraHoy', 'Para hoy', 'Tareas', 'S', cLI, 'Cuántas y de quién', () => {
 });
 wd('atras', 'Atrasadas', 'Tareas', 'S', cCO, 'Solo lo que se ha pasado', () => {
   const l = lista('tareas').filter(t => !t.hecho && t.fecha && t.fecha < hoyISO()).sort((a, b) => a.fecha.localeCompare(b.fecha));
-  return { vacio: !l.length, h: lab('Atrasadas') + '<div class="alert">' + ic('aviso', 22, 0) + '<b>' + l.length + '</b></div>' + l.slice(0, 2).map(t => '<div class="rw">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + '</button></div>').join('') };
+  return { vacio: !l.length, h: lab('Atrasadas') + '<div class="alert">' + ic('aviso', 22, 0) + '<b>' + l.length + '</b></div>' + l.slice(0, 2).map(t => '<div class="rw">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button></div>').join('') };
 });
 wd('quien', 'Quién tiene qué', 'Tareas', 'S', cVE, 'Tareas pendientes de cada persona', () => {
   const l = lista('tareas').filter(t => !t.hecho), mx = Math.max(1, ...personas().map(p => l.filter(t => t.para === p.id).length));
@@ -5410,7 +5416,7 @@ wd('tareasLista', 'Mis tareas en lista', 'Tareas', 'S', cLI, 'Tus tareas con su 
   return {
     vacio: !l.length,
     h: lab('Mis tareas', '<span class="tlc">' + l.length + '</span>') +
-      (l.length ? '<div class="tlw"><div class="tls">' + l.map(t => '<div class="tlr it">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tlt" data-a="verTarea" data-id="' + t.id + '"><b>' + esc(t.titulo) + '</b>' + extraTarea(t) + '</button></div>').join('') + '</div><span class="tlbar"><i></i></span></div>'
+      (l.length ? '<div class="tlw"><div class="tls">' + l.map(t => '<div class="tlr it">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tlt" data-a="verTarea" data-id="' + t.id + '"><b>' + esc(t.titulo) + candado(t) + '</b>' + extraTarea(t) + '</button></div>').join('') + '</div><span class="tlbar"><i></i></span></div>'
         : '<p class="mu2">Nada pendiente</p>')
   };
 });
@@ -6003,5 +6009,15 @@ ICONOS['modulo-menu-semanal'] = ['<circle cx="12.5" cy="12.5" r="5.8"/><path d="
 ICONOS['menu-comida'] = ['<circle cx="15" cy="12.5" r="7.5"/><path d="M2.5 4v5.5a1.8 1.8 0 0 0 1.8 1.8V20.5"/><path d="M6 4v5.5a1.8 1.8 0 0 1-1.7 1.8"/>', [[15, 12.5, 'c']]];
 
 Object.assign(window.RONDA || (window.RONDA = {}), { subirRapido: subirRapido, ordenAgua: ordenAgua, bajarArchivo: bajarArchivo });
+
+/* ---- 26_solo171.js ---- */
+/* ===================== 1.7.1 · Tareas «Solo para mí» =====================
+   No son secretas: es para que cada uno pueda apuntar cosas suyas sin llenar las tareas del otro.
+   La tarea lleva solo = persona; en la app de los demás no aparece en ningún sitio (listas, tarjetas, contadores, búsqueda).
+   El script no cambia: se guarda en la hoja como las demás. */
+function candado(x) { return x && x.solo ? '<span class="solo" title="Solo la ves tú" aria-label="Solo la ves tú">' + ic('candado', 13) + '</span>' : ''; }
+function filaSolo(on) { return '<div class="row card">' + sq('candado', 4) + '<div class="f"><b>Solo para mí</b><small>' + (on ? 'Solo la ves tú. No va al calendario compartido.' : 'La ven todos') + '</small></div>' + swi(on, 'tSolo') + '</div>'; }
+ACC.tSolo = () => { const e = Nav.actual(); guardarCampos(e); const p = e.params; p.solo = !p.solo; if (p.solo) { p.para = S.cfg.persona; p.cal = false; } Nav.refrescar(true); };
+Object.assign(window.RONDA || (window.RONDA = {}), { candado: candado });
 
 })();
