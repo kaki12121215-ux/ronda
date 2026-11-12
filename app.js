@@ -1,4 +1,4 @@
-/* RONDA · app · versión 1.7.1 · se genera con src/build.js a partir de src/app */
+/* RONDA · app · versión 1.7.2 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -26,7 +26,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.7.1';
+const VERSION = '1.7.2';
 const MIN_SCRIPT = '1.4.0';
 const COL = ['#F0674B', '#F2B824', '#A6C93A', '#2E8B57', '#2BB5B0', '#3C78C8', '#9B86E0', '#EE8AA8'];
 const NOMCOL = ['Coral', 'Limón', 'Lima', 'Verde', 'Turquesa', 'Azul', 'Lavanda', 'Rosa'];
@@ -735,6 +735,20 @@ function dibujarAnillo(svg, t, T, START) {
   }
   svg.innerHTML = '<g transform="translate(' + cx.toFixed(2) + ' ' + cy.toFixed(2) + ') scale(' + k.toFixed(4) + ')">' + o + '</g>';
 }
+/* 1.7.2 · Arranque rápido: la palabra ya en su sitio; las bolas saltan una a una dentro de la «o» mientras el anillo gira un cuarto de vuelta.
+   t va en «segundos de animación»: se dibuja a 1,333× para que dure 0,75 s. */
+function dibujarAnilloRapido(svg, t, T) {
+  const k = T.S / 100, rot = -90 * (1 - oC(cl(t / 0.95)));
+  let o = '';
+  for (let i = 0; i < 8; i++) {
+    const t0 = 0.05 + i * 0.065, p = cl((t - t0) / 0.38), e = oB(p), R = 37.5 * e, a = (i * 45 + rot) * Math.PI / 180;
+    const s = cl(p * 2.4) * (0.6 + 0.4 * Math.min(1.25, e));
+    const q = cl((t - t0 - 0.2) / 0.45);
+    if (q > 0 && q < 1) o += '<circle cx="' + (37.5 * Math.sin(a)).toFixed(2) + '" cy="' + (-37.5 * Math.cos(a)).toFixed(2) + '" r="' + (10.4 + 12 * oC(q)).toFixed(2) + '" fill="' + COL[i] + '" opacity="' + (0.3 * (1 - q)).toFixed(3) + '"/>';
+    if (p > 0) o += '<circle cx="' + (R * Math.sin(a)).toFixed(2) + '" cy="' + (-R * Math.cos(a)).toFixed(2) + '" r="' + (10.4 * Math.max(s, 0)).toFixed(3) + '" fill="' + COL[i] + '"/>';
+  }
+  svg.innerHTML = '<g transform="translate(' + T.cx.toFixed(2) + ' ' + T.cy.toFixed(2) + ') scale(' + k.toFixed(4) + ')">' + o + '</g>';
+}
 /* Logo quieto (bienvenida, Acerca de). */
 function logoQuieto(cont, topPx, fs) {
   const T = medirLogo(cont, topPx, fs);
@@ -769,6 +783,17 @@ function animarArranque(modo) {
     const FIN = T0 + 0.3 + 3 * 0.1 + 0.55 + 0.25;
     if (REDUCIR) { dibujarAnillo(svg, 10, T, T); letras.forEach(l => { l.style.opacity = 1; }); await espera(500); return ok(); }
     const t0 = performance.now();
+    /* 1.7.2: al abrir con espacio ya creado, la animación corta (0,75 s); la bienvenida de la primera vez queda igual */
+    if (modo !== 'b') {
+      const rapido = now => {
+        const t = (now - t0) / 1000 * 1.333;
+        dibujarAnilloRapido(svg, t, T);
+        letras.forEach((l, i) => { const p = oC(cl((t - i * 0.05) / 0.4)); l.style.opacity = p; l.style.transform = 'translateY(' + (10 * (1 - p)) + 'px)'; });
+        if (t < 1.0) requestAnimationFrame(rapido); else { dibujarAnilloRapido(svg, 2, T); letras.forEach(l => { l.style.opacity = 1; l.style.transform = ''; }); ok(); }
+      };
+      requestAnimationFrame(rapido);
+      return;
+    }
     const paso = now => {
       const t = (now - t0) / 1000 * K;
       /* Justo antes de que el anillo viaje a la «o», se vuelve a medir con la letra ya cargada: así va directo a su sitio. */
@@ -6019,5 +6044,6 @@ function candado(x) { return x && x.solo ? '<span class="solo" title="Solo la ve
 function filaSolo(on) { return '<div class="row card">' + sq('candado', 4) + '<div class="f"><b>Solo para mí</b><small>' + (on ? 'Solo la ves tú. No va al calendario compartido.' : 'La ven todos') + '</small></div>' + swi(on, 'tSolo') + '</div>'; }
 ACC.tSolo = () => { const e = Nav.actual(); guardarCampos(e); const p = e.params; p.solo = !p.solo; if (p.solo) { p.para = S.cfg.persona; p.cal = false; } Nav.refrescar(true); };
 Object.assign(window.RONDA || (window.RONDA = {}), { candado: candado });
+Object.assign(window.RONDA || (window.RONDA = {}), { animarArranque: animarArranque });
 
 })();
