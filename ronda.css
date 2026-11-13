@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.11 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.12 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2291,3 +2291,8 @@ html.rn-prof #app, html.rn-prof-nav #nav { transform: none !important; }
 .rn-velo.rn-velo-prof { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(43,58,66,.28); transition: opacity .18s ease-out; }
 .rn-velo.rn-velo-prof.rn-ver { transition: opacity .22s ease-out; }
 [data-tema="oscuro"] .rn-velo.rn-velo-prof { background: rgba(0,0,0,.5); }
+/* 1.0.12 · Con el menú abierto, la franja de la hora sigue con su degradado: el velo empieza debajo de la hora
+   y el menú ya no usa desenfoque de fondo (en el iPhone hacía que la franja de arriba se pintara lisa). */
+.rn-pop-velo { top: env(safe-area-inset-top, 0px); }
+.rn-pop { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(255,255,255,.97); }
+[data-tema="oscuro"] .rn-pop { background: rgba(35,44,49,.98); }
