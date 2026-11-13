@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.8 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.9 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2235,3 +2235,30 @@ html.rn-mas[data-tema="oscuro"] .rn-b5c { background: #232C31; box-shadow: 0 -10
 [data-tema="oscuro"] .rn-mas-listo { background: #EEF2F4; color: #1B2328; }
 .rn-mas-aviso { margin: -4px 0 10px; font-size: 14px; opacity: .65; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .rn-ord-ed .rn-sc { animation: none; } }
+
+/* ===================== 1.0.9 · Menú desde el botón ===================== */
+.rn-pop-velo { position: fixed; inset: 0; z-index: 90; background: rgba(43,58,66,.10); opacity: 0; transition: opacity .2s ease; -webkit-tap-highlight-color: transparent; }
+[data-tema="oscuro"] .rn-pop-velo { background: rgba(0,0,0,.35); }
+.rn-pop-velo.rn-pop-ver { opacity: 1; }
+.rn-pop { position: fixed; z-index: 91; width: 244px; padding: 6px 0; border-radius: 20px;
+  background: rgba(255,255,255,.82); -webkit-backdrop-filter: blur(24px) saturate(1.6); backdrop-filter: blur(24px) saturate(1.6);
+  box-shadow: 0 12px 36px rgba(43,58,66,.18), 0 1px 0 rgba(255,255,255,.7) inset; border: 1px solid rgba(255,255,255,.6);
+  opacity: 0; transform: translateY(var(--dy, -8px)) scale(.96); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+[data-tema="oscuro"] .rn-pop { background: rgba(35,44,49,.86); border-color: rgba(255,255,255,.08); box-shadow: 0 12px 36px rgba(0,0,0,.45); }
+.rn-pop.rn-pop-ver { opacity: 1; transform: none; transition: opacity .28s var(--e-muelle, cubic-bezier(.2,.9,.3,1.2)), transform .28s var(--e-muelle, cubic-bezier(.2,.9,.3,1.2)); }
+.rn-pop.rn-pop-sale { opacity: 0; transform: scale(.97); transition: opacity .16s ease-in, transform .16s ease-in; }
+.rn-pop-op { display: flex; align-items: center; gap: 12px; width: 100%; height: 46px; padding: 0 16px; border: 0; background: none; color: var(--txt); font: 600 15px/1.2 var(--f-texto); text-align: left; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.rn-pop-op span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rn-pop-op svg { flex: none; opacity: .8; }
+.rn-pop-op.rn-pop-toca, .rn-pop-op:active { background: rgba(127,127,127,.16); }
+.rn-pop-pel { color: #E0613F; }
+[data-tema="oscuro"] .rn-pop-pel { color: #FF8F72; }
+[data-tema="oscuro"] .rn-pop-op:not(.rn-pop-pel) { color: #fff; }
+.rn-pop-raya { display: block; height: 1px; margin: 5px 16px; background: rgba(127,127,127,.25); }
+@media (prefers-reduced-motion: reduce) {
+  .rn-pop, .rn-pop.rn-pop-ver, .rn-pop.rn-pop-sale { transform: none !important; transition: opacity .15s linear !important; }
+}
+.rn-pap-vaciar { margin-top: 16px; }
+.rn-pop { width: auto; min-width: 244px; max-width: min(300px, calc(100vw - 20px)); }
+.rn-hj .rn-btnp.rn-peligro, .rn-hj .rn-btnp.rn-peligro b, .rn-btnp.rn-peligro { color: #FFFFFF !important; background: #E0613F; }
+[data-tema="oscuro"] .rn-btnp.rn-peligro { background: #E86E50; }

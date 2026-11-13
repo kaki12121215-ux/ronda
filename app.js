@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.8 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.9 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.8';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.9';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9394,7 +9394,7 @@ ACC.rnOrdModo = el => { try { localStorage.setItem('ronda-' + el.dataset.c + '-o
 const RN_PAP = { tareas: ['Tareas', 'titulo'], compra: ['Compra', 'nombre'], notas: ['Notas', 'titulo'] };
 function rnBorrados(col) {
   const R = S.recs[col] || {}, lim = Date.now() - 30 * 86400000;
-  return Object.keys(R).filter(id => R[id].f && R[id].f._b).map(id => ({ id, f: R[id].f, cuando: (R[id].t && R[id].t._b) || 0 }))
+  return Object.keys(R).filter(id => R[id].f && R[id].f._b === 1 || (R[id].f && R[id].f._b === true)).map(id => ({ id, f: R[id].f, cuando: (R[id].t && R[id].t._b) || 0 }))
     .filter(x => !x.cuando || x.cuando > lim).sort((a, b) => b.cuando - a.cuando);
 }
 function rnBtnPapelera(col) {
@@ -9416,6 +9416,110 @@ ACC.rnRecuperar = el => {
   cambiar(col, id, { _b: 0 });
   toast('«' + (r.f[(RN_PAP[col] || [])[1]] || 'Elemento') + '» recuperado', null, null, 'hecho');
   Nav.refrescar(true);
+};
+
+/* ---- 58_rn_109.js ---- */
+/* ===================== 1.0.9 · MENÚ DESDE EL BOTÓN =====================
+   Un solo componente para todos los menús cortos de opciones (hasta 6, solo tocar y elegir): nace del botón o de la fila
+   que lo abre, como los menús del iPhone. Los formularios, las hojas con campos o interruptores y las confirmaciones
+   siguen saliendo desde abajo. Lo que borra va al final, tras una raya, en coral. */
+let RN_POP = null, RN_PUNTERO = { x: 0, y: 0 };
+document.addEventListener('pointerdown', ev => { RN_PUNTERO = { x: ev.clientX, y: ev.clientY }; }, true);
+/* ops: [icono, texto, acción, atributos extra, peligro] */
+function rnPop(ancla, ops) {
+  rnPopCerrar(true);
+  const r = ancla && ancla.getBoundingClientRect ? ancla.getBoundingClientRect() : { left: RN_PUNTERO.x, right: RN_PUNTERO.x, top: RN_PUNTERO.y, bottom: RN_PUNTERO.y, width: 0, height: 0 };
+  /* Si el ancla es una fila ancha (mantener pulsado), el menú nace donde está el dedo */
+  const fila = r.width > innerWidth * 0.6, x0 = fila ? RN_PUNTERO.x : null;
+  const norm = ops.filter(o => !o[4]), pel = ops.filter(o => o[4]);
+  const btn = o => '<button class="rn-pop-op' + (o[4] ? ' rn-pop-pel' : '') + '" data-a="' + o[2] + '"' + (o[3] || '') + '>' + rnIc(o[0], 20, 1.9) + '<span>' + o[1] + '</span></button>';
+  const velo = document.createElement('div'); velo.className = 'rn-pop-velo';
+  const m = document.createElement('div'); m.className = 'rn-pop'; m.setAttribute('role', 'menu');
+  m.innerHTML = norm.map(btn).join('') + (pel.length && norm.length ? '<i class="rn-pop-raya"></i>' : '') + pel.map(btn).join('');
+  document.body.append(velo, m);
+  const W = m.offsetWidth, H = m.offsetHeight, M = 10, G = 8;
+  /* Horizontal: alineado con el borde del botón que queda más cerca del centro de la pantalla */
+  let izq, origX;
+  if (x0 != null) { izq = x0 - (x0 > innerWidth / 2 ? W : 0); origX = x0 > innerWidth / 2 ? 'right' : 'left'; }
+  else if (r.left + r.width / 2 > innerWidth / 2) { izq = r.right - W; origX = 'right'; } else { izq = r.left; origX = 'left'; }
+  izq = Math.max(M, Math.min(innerWidth - W - M, izq));
+  /* Vertical: debajo; si no cabe, encima; nunca fuera */
+  const bajo = fila ? RN_PUNTERO.y + G : r.bottom + G, alto = fila ? RN_PUNTERO.y - G - H : r.top - G - H;
+  let arriba = false, top = bajo;
+  if (bajo + H > innerHeight - M - 90 && alto > M) { top = alto; arriba = true; }
+  top = Math.max(M, Math.min(innerHeight - H - M, top));
+  m.style.left = izq + 'px'; m.style.top = top + 'px';
+  m.style.transformOrigin = origX + ' ' + (arriba ? 'bottom' : 'top');
+  m.style.setProperty('--dy', (arriba ? 8 : -8) + 'px');
+  RN_POP = { m, velo };
+  requestAnimationFrame(() => { velo.classList.add('rn-pop-ver'); m.classList.add('rn-pop-ver'); });
+  velo.addEventListener('pointerdown', ev => { ev.preventDefault(); rnPopCerrar(); });
+  velo.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); });
+  /* Al tocar una opción: se marca un instante, se cierra y se hace (la acción la lanza el manejador de siempre) */
+  m.addEventListener('click', ev => { const b = ev.target.closest('.rn-pop-op'); if (!b) return; b.classList.add('rn-pop-toca'); setTimeout(() => rnPopCerrar(), 60); });
+  m.addEventListener('contextmenu', ev => ev.preventDefault());
+  return m;
+}
+function rnPopCerrar(ya) {
+  const p = RN_POP; if (!p) return; RN_POP = null;
+  if (ya || REDUCIR) { p.m.remove(); p.velo.remove(); return; }
+  p.m.classList.add('rn-pop-sale'); p.velo.classList.remove('rn-pop-ver');
+  setTimeout(() => { p.m.remove(); p.velo.remove(); }, 200);
+}
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && RN_POP) rnPopCerrar(); });
+/* Si se cambia de pantalla con el menú abierto, se va */
+const _navRaiz109 = Nav.raiz, _navIr109 = Nav.ir;
+Nav.raiz = function () { rnPopCerrar(true); return _navRaiz109.apply(this, arguments); };
+Nav.ir = function () { rnPopCerrar(true); return _navIr109.apply(this, arguments); };
+const rnIdA = id => ' data-id="' + esc(id) + '"';
+
+/* 1 · Producto de la compra */
+ACC.menuProducto = el => { const x = dato('compra', el.dataset.id); if (!x) return;
+  rnPop(el, [['editar', 'Cambiar', 'editarProducto', rnIdA(x.id)], ['borrar', 'Borrar', 'borrarProducto', rnIdA(x.id), 1]]); };
+/* 2 · Tarea */
+ACC.rnMenuTarea = el => { const x = dato('tareas', el.dataset.id); if (!x) return;
+  rnPop(el, [['editar', 'Cambiar', 'rnEditarTarea', rnIdA(x.id)], ['hecho', x.hecho ? 'Marcar como pendiente' : 'Marcar como hecha', 'rnHacerMenu', rnIdA(x.id)], ['borrar', 'Borrar la tarea', 'rnBorrarTarea', rnIdA(x.id), 1]]); };
+/* 3 · Lista de la compra. «Ordenar por secciones» ya no es un interruptor: se toca y cambia */
+function rnOpcionesLista(lid, el) {
+  const l = datoLista(lid); if (!l) return;
+  const hechos = lista('compra').filter(x => listaDe(x) === l.id && x.hecho).length;
+  const ops = [['editar', 'Cambiar nombre y emoji', 'editarLista', rnIdA(l.id)], ['compartir', 'Compartir', 'rnCompartirLista', rnIdA(l.id)],
+    ['filtrar', l.secciones ? 'Quitar secciones' : 'Ordenar por secciones', 'rnListaSecTog', rnIdA(l.id)],
+    ['archivar', 'Vaciar lo ya comprado' + (hechos ? ' (' + hechos + ')' : ''), 'rnVaciarLista', rnIdA(l.id)]];
+  if (listasCompra().length > 1) ops.push(['borrar', 'Borrar la lista', 'borrarLista', rnIdA(l.id), 1]);
+  rnPop(el, ops);
+}
+ACC.rnMenuLista = el => rnOpcionesLista(el.dataset.id, el);
+ACC.rnOpcLista = el => rnOpcionesLista(el.dataset.id, el);
+ACC.rnListaSecTog = el => { const l = datoLista(el.dataset.id); if (!l) return; const on = !l.secciones;
+  cambiar('listas', l.id, Object.assign({}, l.id === LSUPER && !S.recs.listas ? { nombre: l.nombre } : {}, { secciones: on }));
+  Nav.refrescar(true); toast(on ? 'Ordenada por secciones' : 'Sin secciones', null, null, 'hecho'); };
+/* 4 · Cuenta de gastos */
+ACC.menuCuenta = el => { const id = el.dataset.id, c = dato('cuentas', id); if (!c) return;
+  rnPop(el, [['editar', 'Cambiar nombre y personas', 'editarCuenta', rnIdA(id)], ['grafico-circular', 'Estadísticas', 'estadCuenta', rnIdA(id)],
+    ['etiqueta', 'Categorías', 'ir', ' data-id="categorias"'], ['archivar', 'Archivar', 'archivarCuenta', rnIdA(id)], ['borrar', 'Borrar cuenta', 'borrarCuenta', rnIdA(id), 1]]); };
+/* 5 · Nota (desde la lista y desde la nota abierta). «Color…» abre su hoja de colores como antes */
+ACC.notaMenu = el => {
+  const p = Nav.actual().params;
+  if (!rnEnNota() && el && el.dataset && el.dataset.id) { const n0 = dato('notas', el.dataset.id); if (!n0) return; p.id = el.dataset.id; p.color = colorNota(n0); }
+  const n = dato('notas', p.id) || {};
+  rnPop(el && el.getBoundingClientRect ? el : null, [['etiqueta', n.fijada ? 'Quitar de fijadas' : 'Fijar', 'notaFijar'], ['color', 'Color…', 'notaColores'],
+    ['compartir', 'Compartir', 'notaCompartir'], ['borrar', 'Borrar nota', 'notaBorrar', '', 1]]);
+};
+/* 6 · Documento */
+ACC.docMenu = el => { const d = dato('documentos', el.dataset.id); if (!d) return; rnPop(el, [['borrar', 'Borrar documento', 'docBorrar', rnIdA(d.id), 1]]); };
+/* 7 · Lista de «Listas» */
+ACC.listaRMenu = el => rnPop(el && el.getBoundingClientRect ? el : null, [['editar', 'Cambiar nombre y emoji', 'lrRenombrar'], ['borrar', 'Borrar lista', 'lrBorrarLista', '', 1]]);
+
+/* Papelera: vaciar del todo (pregunta antes) */
+const _papHtml109 = P.papelera.html;
+P.papelera.html = p => { const o = _papHtml109(p), col = p.col || 'tareas';
+  return o + (rnBorrados(col).length ? '<button class="rn-btnp rn-peligro rn-pap-vaciar" data-a="rnVaciarPapelera" data-col="' + col + '">' + rnIc('borrar', 20, 2) + 'Vaciar papelera</button>' : ''); };
+ACC.rnVaciarPapelera = async el => {
+  const col = el.dataset.col, l = rnBorrados(col); if (!l.length) return;
+  if (!await preguntar('¿Borrar definitivamente?', l.length + (l.length === 1 ? ' cosa' : ' cosas') + '. No se podrá recuperar.', 'Borrar', true)) return;
+  l.forEach(x => cambiar(col, x.id, { _b: 2 }));
+  Nav.refrescar(true); toast('Papelera vacía', null, null, 'hecho');
 };
 
 /* ---- 59_rn_fin.js ---- */
