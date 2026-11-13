@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.4 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.5 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.4';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.5';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -6637,6 +6637,7 @@ function rnNotaTarea(x, f) {
   const p = [];
   /* 0.3.0: de quién es va a la derecha (su foto, o «Todos») */
   if (x.cat) p.push(esc(x.cat));
+  if (x.subs && x.subs.length) p.push(x.subs.filter(y => y.h).length + '/' + x.subs.length + ' subtareas');
   if (x.repite && x.repite.cada) p.push(textoRepe(x.repite));
   if (x.limite) p.push('Límite: ' + rnDiaTexto(x.limite, true));
   return p.join(' · ');
@@ -9192,6 +9193,32 @@ function rnPintarRP() {
 ACC.rnRPmas = el => { RN_RP.n = Math.max(1, Math.min(99, RN_RP.n + Number(el.dataset.v))); rnPintarRP(); };
 ACC.rnRPu = el => { RN_RP.u = el.dataset.v; rnPintarRP(); };
 ACC.rnRPok = () => { RN_T.repite = { cada: 'p', n: RN_RP.n, u: RN_RP.u }; if (!RN_T.fecha) RN_T.fecha = hoyISO(); rnPintarTarea(); };
+
+/* ---- 58_rn_104.js ---- */
+/* ===================== 1.0.4b · SUBTAREAS =====================
+   En la ficha de una tarea, «Subtareas»: añadir, marcar, borrar. Se guardan en la tarea (campo «subs»: [{ id, t, h }]),
+   así se sincronizan con el resto de la tarea y el script no cambia. En la lista sale «2/5 subtareas». */
+const _tareaVer104 = P.tareaVer.html;
+P.tareaVer.html = p => {
+  const o = _tareaVer104(p), x = dato('tareas', p.id);
+  if (!x) return o;
+  const subs = x.subs || [], hechas = subs.filter(y => y.h).length;
+  return o + '<div class="rn-subs">' + rnGrupo('Subtareas', subs.length ? hechas + ' de ' + subs.length : '') +
+    rnCd(subs.map(y => '<div class="rn-rw rn-it rn-sub' + (y.h ? ' rn-dn' : '') + '">' + rnCk(y.h, false, 'rnSubHecha', x.id + '|' + y.id) +
+      '<span class="rn-t">' + esc(y.t) + '</span><button class="rn-subx" data-a="rnSubBorrar" data-id="' + x.id + '|' + y.id + '" aria-label="Borrar subtarea">' + rnIc('cerrar', 16, 2) + '</button></div>').join('') +
+      '<div class="rn-rw rn-subn"><input id="rnSubN" placeholder="Añadir subtarea" maxlength="120" autocomplete="off" enterkeyhint="done" data-id="' + x.id + '"><button class="rn-subadd" data-a="rnSubAdd" data-id="' + x.id + '" aria-label="Añadir">' + rnIc('anadir', 18, 2.2) + '</button></div>', 'rn-subc') + '</div>';
+};
+const rnSubs = id => ((dato('tareas', id) || {}).subs || []).map(y => Object.assign({}, y));
+ACC.rnSubAdd = el => {
+  const i = $('#rnSubN'), t = cap(String(i && i.value || '').trim()), id = el.dataset.id;
+  if (!t) { if (i) i.focus(); return; }
+  const subs = rnSubs(id); subs.push({ id: uid(), t: t, h: false });
+  cambiar('tareas', id, { subs: subs }); Nav.refrescar(true);
+  setTimeout(() => { const n = $('#rnSubN'); if (n) n.focus(); }, 60);
+};
+ACC.rnSubHecha = el => { const [id, s] = el.dataset.id.split('|'), subs = rnSubs(id), y = subs.find(z => z.id === s); if (!y) return; y.h = !y.h; cambiar('tareas', id, { subs: subs }); Nav.refrescar(true); };
+ACC.rnSubBorrar = el => { const [id, s] = el.dataset.id.split('|'); cambiar('tareas', id, { subs: rnSubs(id).filter(z => z.id !== s) }); Nav.refrescar(true); };
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target && ev.target.id === 'rnSubN') { ev.preventDefault(); ACC.rnSubAdd(ev.target); } }, true);
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
