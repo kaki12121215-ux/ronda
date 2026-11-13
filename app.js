@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.13 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.14 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.13';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.14';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -8540,7 +8540,7 @@ function rnPildora(n) {
    Con «Reducir movimiento», todo son fundidos. */
 
 /* ---------- 1. «Más» ---------- */
-let RN_MAS_ABIERTA = false, RN_MAS_ELIGE = false;
+let RN_MAS_ABIERTA = false, RN_MAS_ELIGE = false, RN_MAS_PRE = false;
 Nav.barra = function () {
   let n = $('#nav');
   if (!n) { n = document.createElement('nav'); n.id = 'nav'; n.setAttribute('aria-label', 'Secciones'); document.body.appendChild(n); }
@@ -8548,12 +8548,15 @@ Nav.barra = function () {
   const fuera = !raiz || P[raiz.id].sinBarra || (top && (P[top.id].sinBarra || (!top.raiz && !P[top.id].rn)));
   if (fuera) { n.className = 'rn-barra rn-b5 rn-oculta'; try { rnColorFondo(); } catch (x) { } return; }
   const b = rnBarra(), tabs = [['inicio', 'inicio', 'Inicio'], [b[0], RN_SEC[b[0]][1], rnNomTab(b[0])], null, [b[1], RN_SEC[b[1]][1], rnNomTab(b[1])], ['mas', 'menu', 'Más']];
-  const activa = RN_MAS_ABIERTA || !tabs.some(x => x && x[0] === raiz.id) ? 'mas' : raiz.id;
-  const k = rnColorDe(raiz.id, raiz.params), gris = RN_MAS_ABIERTA || activa === 'inicio' || !k || k === 'neutro';
+  const activa = RN_MAS_ABIERTA || RN_MAS_PRE || !tabs.some(x => x && x[0] === raiz.id) ? 'mas' : raiz.id;
+  const k = rnColorDe(raiz.id, raiz.params), gris = RN_MAS_ABIERTA || RN_MAS_PRE || activa === 'inicio' || !k || k === 'neutro';
   n.className = 'rn-barra rn-b5';
-  n.innerHTML = '<div class="rn-b5c"><i class="rn-pil' + (gris ? ' rn-pil-gris' : ' rn-k-' + k) + '"></i>' + tabs.map(x => x === null
+  const html = '<div class="rn-b5c"><i class="rn-pil' + (gris ? ' rn-pil-gris' : ' rn-k-' + k) + '"></i>' + tabs.map(x => x === null
     ? '<button class="rn-plus5' + (Dilo.el || RN_DILO.vuelo ? ' rn-plus-ido' : '') + '" data-a="rnPlus" aria-label="Añadir. Mantén pulsado para Dilo">' + rnIc('anadir', 24, 2.2) + '</button>'
     : '<button class="rn-tab' + (x[0] === activa ? ' rn-on' + (gris ? ' rn-gris' : '') : '') + '" data-a="rnTab" data-id="' + x[0] + '" aria-label="' + x[2] + '"' + (x[0] === activa ? ' aria-current="page"' : '') + '><i>' + rnIc(x[1], 22, x[0] === activa ? 2.1 : 1.8) + '</i><span>' + x[2] + '</span></button>').join('') + '</div>';
+  /* 1.0.14: si la barra ya es esta, no se vuelve a pintar (así la burbuja sigue su camino sin saltos) */
+  if (n.dataset.h === html) { try { rnColorFondo(); } catch (x) { } return; }
+  n.innerHTML = html; n.dataset.h = html;
   rnPildora(n);
   try { rnColorFondo(); } catch (x) { }
 };
@@ -9538,16 +9541,18 @@ ACC.rnVaciarPapelera = async el => {
   Nav.refrescar(true); toast('Papelera vacía', null, null, 'hecho');
 };
 
-/* 1.0.13 · «Más» reacciona como las demás pestañas: la burbuja se mueve en el mismo toque y la hoja se prepara
-   justo después (antes se montaba la hoja entera primero y la burbuja esperaba). */
-const _rnTab113 = ACC.rnTab;
+/* 1.0.14 · «Más» reacciona como las demás pestañas. Antes, la barra se volvía a pintar cuando la hoja ya estaba
+   montada: la burbuja no salía hasta entonces y luego aparecía de golpe. Ahora: primero la barra con «Más» marcado
+   (la burbuja empieza a deslizarse en ese mismo toque) y, dos fotogramas después, la hoja. La barra no se repinta
+   otra vez porque ya es la misma. */
+const _rnTab114 = ACC.rnTab;
 ACC.rnTab = el => {
   if (el && el.dataset && el.dataset.id === 'mas' && !RN_MAS_ABIERTA && !(RN_MR && RN_MR.anular)) {
-    const n = $('#nav'); if (n) { $$('.rn-tab', n).forEach(t => t.classList.toggle('rn-on', t === el)); rnPildora(n); }
-    requestAnimationFrame(() => setTimeout(() => _rnTab113(el), 0));
+    RN_MAS_PRE = true; Nav.barra();
+    requestAnimationFrame(() => requestAnimationFrame(() => { try { _rnTab114(el); } finally { RN_MAS_PRE = false; } }));
     return;
   }
-  return _rnTab113(el);
+  return _rnTab114(el);
 };
 
 /* ---- 59_rn_fin.js ---- */
