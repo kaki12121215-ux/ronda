@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.2 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.3 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.2';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.3';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9161,6 +9161,36 @@ function rnFiltroCats() {
   return '<div class="rn-flw rn-flcat"><div class="rn-fl rn-gl">' + [['', 'Todas las categorías']].concat(cs.map(c => [c, c])).map(c => '<button class="' + (RN_CATF === c[0] ? 'rn-on' : '') + '" data-a="rnCatFiltro" data-v="' + esc(c[0]) + '">' + esc(c[1]) + '</button>').join('') + '</div></div>';
 }
 ACC.rnCatFiltro = el => { RN_CATF = el.dataset.v; Nav.refrescar(true); };
+
+/* ---- 58_rn_103.js ---- */
+/* ===================== 1.0.3 · REPETIR PERSONALIZADO =====================
+   Al final de «Repetir», «Personalizar…»: cada N días, semanas, meses o años, con − y +.
+   Usa la repetición de siempre { cada: 'p', n, u } (u: d, s, m, a), que ya entienden la lista y el script. */
+let RN_RP = { n: 1, u: 'd' };
+const _rnTRepe103 = ACC.rnTRepe;
+ACC.rnTRepe = ev => {
+  _rnTRepe103(ev);
+  const r = RN_T.repite || {}, ops = $('.rn-hjc .rn-ops', hojaAbierta.h);
+  if (!ops) return;
+  ops.insertAdjacentHTML('beforeend', '<button class="rn-op" data-a="rnTRepeP"><span>Personalizar…</span>' + (r.cada === 'p' ? '<span class="rn-lv">' + esc(textoRepe(r)) + '</span>' : '') + '</button>');
+};
+ACC.rnTRepeP = () => {
+  const r = RN_T.repite || {};
+  RN_RP = r.cada === 'p' ? { n: r.n || 1, u: r.u || 'd' } : r.cada === 'ndias' ? { n: r.n || 2, u: 'd' } : { n: 1, u: 'd' };
+  rnPintarRP();
+};
+function rnPintarRP() {
+  const hc = $('.rn-hjc', hojaAbierta.h), U = [['d', 'Días'], ['s', 'Semanas'], ['m', 'Meses'], ['a', 'Años']];
+  hc.innerHTML = rnCabHoja('Personalizar', '<button class="rn-x" data-a="rnTRepe" aria-label="Volver">' + rnIc('atras', 22, 2) + '</button>') +
+    '<div class="rn-rp"><button class="rn-rpb" data-a="rnRPmas" data-v="-1" aria-label="Menos"' + (RN_RP.n <= 1 ? ' disabled' : '') + '>−</button>' +
+    '<b class="rn-rpn" aria-live="polite">' + RN_RP.n + '</b><button class="rn-rpb" data-a="rnRPmas" data-v="1" aria-label="Más"' + (RN_RP.n >= 99 ? ' disabled' : '') + '>+</button></div>' +
+    '<div class="rn-qcs rn-rpu">' + U.map(u => '<button class="rn-qc' + (RN_RP.u === u[0] ? ' rn-on' : '') + '" data-a="rnRPu" data-v="' + u[0] + '">' + u[1] + '</button>').join('') + '</div>' +
+    '<p class="rn-txt rn-rpt">' + esc(textoRepe({ cada: 'p', n: RN_RP.n, u: RN_RP.u })) + '</p>' +
+    '<button class="rn-btnp" data-a="rnRPok">Usar</button>';
+}
+ACC.rnRPmas = el => { RN_RP.n = Math.max(1, Math.min(99, RN_RP.n + Number(el.dataset.v))); rnPintarRP(); };
+ACC.rnRPu = el => { RN_RP.u = el.dataset.v; rnPintarRP(); };
+ACC.rnRPok = () => { RN_T.repite = { cada: 'p', n: RN_RP.n, u: RN_RP.u }; if (!RN_T.fecha) RN_T.fecha = hoyISO(); rnPintarTarea(); };
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
