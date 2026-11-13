@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.10 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.11 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.10';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.11';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -8578,7 +8578,7 @@ function rnSecciones() {
   /* La ola: cada sección sale desde la esquina de «Más», las más cercanas primero */
   const m = $('#nav .rn-tab[data-id="mas"]'), o = m ? m.getBoundingClientRect() : { left: innerWidth - 60, top: innerHeight - 60, width: 0, height: 0 };
   const ox = o.left + o.width / 2, oy = o.top + o.height / 2;
-  $$('.rn-sc', h).forEach(c => { const q = c.getBoundingClientRect(), dx = ox - (q.left + q.width / 2), dy = oy - (q.top + q.height / 2), d = Math.hypot(dx, dy) || 1; c.style.setProperty('--d', Math.round(80 + d / 1.5) + 'ms'); c.style.setProperty('--ux', (dx / d * 14).toFixed(1) + 'px'); c.style.setProperty('--uy', (dy / d * 14).toFixed(1) + 'px'); });
+  $$('.rn-sc', h).forEach(c => { const q = c.getBoundingClientRect(), dx = ox - (q.left + q.width / 2), dy = oy - (q.top + q.height / 2), d = Math.hypot(dx, dy) || 1; c.style.setProperty('--d', Math.round(20 + d / 3.5) + 'ms'); c.style.setProperty('--ux', (dx / d * 14).toFixed(1) + 'px'); c.style.setProperty('--uy', (dy / d * 14).toFixed(1) + 'px'); });
   return h;
 }
 const _secElegir57 = ACC.rnSecElegir;
@@ -9427,7 +9427,8 @@ let RN_POP = null, RN_PUNTERO = { x: 0, y: 0 };
 document.addEventListener('pointerdown', ev => { RN_PUNTERO = { x: ev.clientX, y: ev.clientY }; }, true);
 /* ops: [icono, texto, acción, atributos extra, peligro] */
 function rnPop(ancla, ops) {
-  rnPopCerrar(true);
+  if (RN_POP) { rnPopCerrar(); return; }          /* tocar otra vez el botón con el menú abierto lo cierra */
+  if (Date.now() - RN_POP_CERRADO < 350) return;
   /* 1.0.10: si el botón o la fila ya no está en la pantalla (se ha vuelto a pintar), el menú sale donde está el dedo */
   const vivo = ancla && ancla.getBoundingClientRect && ancla.isConnected !== false && ancla.getBoundingClientRect().height > 0;
   const r = vivo ? ancla.getBoundingClientRect() : { left: RN_PUNTERO.x, right: RN_PUNTERO.x, top: RN_PUNTERO.y, bottom: RN_PUNTERO.y, width: innerWidth, height: 0 };
@@ -9455,20 +9456,32 @@ function rnPop(ancla, ops) {
   m.style.setProperty('--dy', (arriba ? 8 : -8) + 'px');
   RN_POP = { m, velo };
   /* 1.0.10: animación con keyframes (en el iPhone las transiciones a veces no arrancaban y salía de golpe) */
-  m.getBoundingClientRect(); velo.classList.add('rn-pop-ver'); m.classList.add('rn-pop-ver');
-  velo.addEventListener('pointerdown', ev => { ev.preventDefault(); rnPopCerrar(); });
+  /* 1.0.11: la animación la lleva JavaScript (Web Animations), que en Safari arranca siempre */
+  const dy = arriba ? 8 : -8, muelle = 'cubic-bezier(.2,.9,.3,1.15)';
+  if (REDUCIR) { m.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, fill: 'both' }); }
+  else m.animate([{ opacity: 0, transform: 'translateY(' + dy + 'px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 280, easing: muelle, fill: 'both' });
+  velo.animate([{ opacity: 0 }, { opacity: 1 }], { duration: REDUCIR ? 150 : 200, fill: 'both' });
+  m.style.opacity = '1'; velo.style.opacity = '1';
+  velo.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); rnPopCerrar(); });
   velo.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); });
   /* Al tocar una opción: se marca un instante, se cierra y se hace (la acción la lanza el manejador de siempre) */
   m.addEventListener('click', ev => { const b = ev.target.closest('.rn-pop-op'); if (!b) return; b.classList.add('rn-pop-toca'); setTimeout(() => rnPopCerrar(), 60); });
   m.addEventListener('contextmenu', ev => ev.preventDefault());
   return m;
 }
+let RN_POP_CERRADO = 0;
 function rnPopCerrar(ya) {
-  const p = RN_POP; if (!p) return; RN_POP = null;
-  if (ya || REDUCIR) { p.m.remove(); p.velo.remove(); return; }
-  p.m.classList.remove('rn-pop-ver'); p.m.classList.add('rn-pop-sale'); p.velo.classList.add('rn-pop-sale'); p.m.style.pointerEvents = 'none'; p.velo.style.pointerEvents = 'none';
-  setTimeout(() => { p.m.remove(); p.velo.remove(); }, 200);
+  const p = RN_POP; if (!p) return; RN_POP = null; RN_POP_CERRADO = Date.now();
+  if (ya) { p.m.remove(); p.velo.remove(); return; }
+  /* El velo sigue tapando hasta que el menú se ha ido: el toque que lo cierra no llega al botón de debajo */
+  p.m.style.pointerEvents = 'none';
+  const d = REDUCIR ? 150 : 160;
+  p.m.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: REDUCIR ? 'none' : 'scale(.97)' }], { duration: d, easing: 'ease-in', fill: 'both' });
+  p.velo.animate([{ opacity: 1 }, { opacity: 0 }], { duration: d, easing: 'ease-in', fill: 'both' });
+  setTimeout(() => { p.m.remove(); p.velo.remove(); }, d + 40);
 }
+/* Un toque justo después de cerrar (el mismo dedo) no vuelve a abrir el menú */
+document.addEventListener('click', ev => { if (Date.now() - RN_POP_CERRADO < 350 && !ev.target.closest('.rn-pop')) { ev.stopPropagation(); ev.preventDefault(); } }, true);
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && RN_POP) rnPopCerrar(); });
 /* Si se cambia de pantalla con el menú abierto, se va */
 const _navRaiz109 = Nav.raiz, _navIr109 = Nav.ir;
