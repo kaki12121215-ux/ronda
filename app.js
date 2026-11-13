@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.18 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.14 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.18';  /* = 1.0.8 (sin los menús nuevos ni lo posterior) + Vaciar papelera */
+const VERSION = '1.0.14';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -7130,7 +7130,7 @@ P.lista = {
     const l = lista('compra').filter(x => listaDe(x) === L.id), falta = l.filter(x => !x.hecho), hechos = l.filter(x => x.hecho);
     const fila = x => { const quien = rnPersona(x.creadoPor); return '<div class="rn-rw rn-it' + (x.hecho ? ' rn-dn' : '') + '" data-lp="menuProducto" data-id="' + x.id + '"><button class="rn-ck' + (x.hecho ? ' rn-on' : '') + '" data-a="marcar" data-id="' + x.id + '" aria-label="Comprado">' + rnTick + '</button><button class="rn-rwt" data-a="marcar" data-id="' + x.id + '"><span class="rn-t">' + esc(x.nombre) + '</span>' + ((x.cantidad || (x.para && !x.hecho)) ? '<span class="rn-n">' + [x.cantidad ? esc(textoCantidad(x.cantidad)) : '', x.para && !x.hecho ? esc(textoPara(x.para)) : ''].filter(Boolean).join(' · ') + '</span>' : '') + '</button>' + (quien && quien.id !== S.cfg.persona && !x.hecho ? rnAv(quien, 26) : '') + '</div>'; };
     const orden = (a, b) => (a.orden || 0) - (b.orden || 0);
-    let h = rnTitulo((L.emoji ? esc(L.emoji) + ' ' : '') + esc(L.nombre), { peq: 1, atras: 'Compra', der: rnBtnPapelera('compra') + rnRb('compartir', 'rnCompartirLista', 'Compartir', ' data-id="' + esc(L.id) + '"') + rnRb('menu', 'rnOpcLista', 'Opciones', ' data-id="' + esc(L.id) + '"'), sub: l.length ? falta.length + ' por comprar y ' + hechos.length + ' en el carro' : 'Lista vacía' }) +
+    let h = rnTitulo((L.emoji ? esc(L.emoji) + ' ' : '') + esc(L.nombre), { peq: 1, atras: 'Compra', der: rnRb('compartir', 'rnCompartirLista', 'Compartir', ' data-id="' + esc(L.id) + '"') + rnRb('menu', 'rnOpcLista', 'Opciones', ' data-id="' + esc(L.id) + '"'), sub: l.length ? falta.length + ' por comprar y ' + hechos.length + ' en el carro' : 'Lista vacía' }) +
       '<form class="rn-cd rn-gl rn-qbar" onsubmit="return false"><input id="nuevo" class="rn-qai" placeholder="Añadir a ' + esc(L.nombre) + '" autocomplete="off" enterkeyhint="done" maxlength="60" aria-label="Añadir producto"><button type="button" class="rn-qmic" data-a="rnDilo" aria-label="Dictar">' + rnIc('microfono', 21, 2) + '</button><button type="submit" class="rn-qab" data-a="anadirCompra" aria-label="Añadir">' + rnIc('anadir', 22, 2.2) + '</button></form>';
     if (!l.length) return h + '<div class="rn-vac">' + rnIlu('sin-compras') + '<h2>Sin compras</h2><p class="rn-txt">Escribe arriba lo que falta.</p></div>';
     if (L.secciones) SECCIONES.forEach(s => { const xs = falta.filter(x => (x.seccion || 'otros') === s[0]).sort(orden); if (xs.length) h += rnCd(rnGrupo(s[1], String(xs.length)) + xs.map(fila).join(''), 'rn-gr'); });
@@ -7168,7 +7168,7 @@ P.listasr = {
   raiz: true, rn: true,
   html: () => {
     const l = lista('listasr').sort((a, b) => (a.creado || 0) - (b.creado || 0));
-    let h = rnTitulo('Listas', { der: rnBtnPapelera('listasr'), sub: 'Listas que se repiten: se usan, se vacían y vuelven' });
+    let h = rnTitulo('Listas', { sub: 'Listas que se repiten: se usan, se vacían y vuelven' });
     if (!l.length) return h + '<div class="rn-vac">' + rnIlu('il-listas') + '<h2>Sin listas</h2><p class="rn-txt">La maleta, la limpieza del sábado, lo de antes de salir…</p></div>';
     return h + '<div style="height:8px"></div>' + l.map(x => {
       const it = itemsDe(x.id), n = it.filter(i => i.h).length, tot = it.length;
@@ -7226,7 +7226,7 @@ P.agenda = {
     p.mes = p.mes || isoDia(new Date(hoy.getFullYear(), hoy.getMonth(), 1)); p.dia = p.dia || hoyISO(); p.vista = p.vista || 'mes';
     const m = deISO(p.mes); cargarMes(m);
     const flechasMes = '<span class="rn-mesf"><button class="rn-mesb" data-a="agMes" data-v="-1" aria-label="Mes anterior">' + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>' + '</button><button class="rn-mesb" data-a="agMes" data-v="1" aria-label="Mes siguiente">' + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>' + '</button></span>';
-    const cab = rnTitulo(cap(MESES[m.getMonth()]) + flechasMes, { der: rnBtnPapelera('agenda') + rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: String(m.getFullYear()) }) + rnFiltros([['mes', 'Mes'], ['semana', 'Semana'], ['lista', 'Lista']], p.vista, 'pSet', 'vista');
+    const cab = rnTitulo(cap(MESES[m.getMonth()]) + flechasMes, { der: rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: String(m.getFullYear()) }) + rnFiltros([['mes', 'Mes'], ['semana', 'Semana'], ['lista', 'Lista']], p.vista, 'pSet', 'vista');
     if (p.vista !== 'mes') { rnModoViejo(true); try { return cab + rnSinCabecera(P_VIEJO.agenda.html(p, e), true); } catch (x) { return cab; } }
     rnModoViejo(false);
     const ini = new Date(m.getFullYear(), m.getMonth(), 1), n = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(), h0 = hoyISO();
@@ -7266,7 +7266,7 @@ P.gastos = {
   raiz: true, rn: true,
   html: (p, e) => {
     p.t = p.t || 'cuentas';
-    const cab = rnTitulo('Gastos', { der: rnBtnPapelera('gastos') + rnRb('grafico-de-barras', 'rnEstad', 'Estadísticas') }) + rnFiltros([['cuentas', 'Cuentas'], ['fijos', 'Gastos fijos'], ['resumen', 'Resumen']], p.t, 'pSet', 't');
+    const cab = rnTitulo('Gastos', { der: rnRb('grafico-de-barras', 'rnEstad', 'Estadísticas') }) + rnFiltros([['cuentas', 'Cuentas'], ['fijos', 'Gastos fijos'], ['resumen', 'Resumen']], p.t, 'pSet', 't');
     if (p.t === 'fijos') { rnModoViejo(true); const q = Object.assign({}, p, { modo: 'fijos' }); return cab + rnSinCabecera(P_VIEJO.gastos.html(q, e), true); }
     if (p.t === 'resumen') { rnModoViejo(true); return cab + rnSinCabecera(P.resumenFijos.html(p, e), true); }
     rnModoViejo(false);
@@ -7375,7 +7375,7 @@ P.documentos = {
   html: () => {
     const ds = lista('documentos'), cs = CARPETAS.map(c => [c, ds.filter(d => d.carpeta === c[0]).length]);
     const conDocs = cs.filter(x => x[1]);
-    let h = rnTitulo('Documentos', { der: rnBtnPapelera('documentos') + rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: ds.length + (ds.length === 1 ? ' archivo' : ' archivos') + (conDocs.length ? ' en ' + conDocs.length + (conDocs.length === 1 ? ' carpeta' : ' carpetas') : '') });
+    let h = rnTitulo('Documentos', { der: rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: ds.length + (ds.length === 1 ? ' archivo' : ' archivos') + (conDocs.length ? ' en ' + conDocs.length + (conDocs.length === 1 ? ' carpeta' : ' carpetas') : '') });
     h += '<button class="rn-cd rn-gl rn-lock" data-a="' + (docsActivos() ? (DOC.clave ? 'cerrarDocs' : 'rnDocsAbrir') : 'ir" data-id="docClave') + '">' + rnChip('candado', 34) + '<span class="rn-fat"><span class="rn-t rn-b">Cifrados en el móvil</span><span class="rn-n">' + (!docsActivos() ? 'Toca para activarlos con vuestro código de 4 cifras' : DOC.clave ? 'Abiertos · se cierran solos a los 5 minutos' : 'Se abren con vuestro código de 4 cifras') + '</span></span></button>';
     if (!docsActivos()) return h + '<div class="rn-vac">' + rnIlu('sin-documentos') + '<h2>Documentos a salvo</h2><p class="rn-txt">DNI, seguros, garantías… cifrados antes de salir del móvil.</p><button class="rn-btnp rn-btnc" data-a="ir" data-id="docClave">Activar los documentos</button></div>';
     const vis = (conDocs.length ? conDocs : cs).slice(0, conDocs.length > 4 ? conDocs.length : 4);
@@ -8540,7 +8540,7 @@ function rnPildora(n) {
    Con «Reducir movimiento», todo son fundidos. */
 
 /* ---------- 1. «Más» ---------- */
-let RN_MAS_ABIERTA = false, RN_MAS_ELIGE = false;
+let RN_MAS_ABIERTA = false, RN_MAS_ELIGE = false, RN_MAS_PRE = false;
 Nav.barra = function () {
   let n = $('#nav');
   if (!n) { n = document.createElement('nav'); n.id = 'nav'; n.setAttribute('aria-label', 'Secciones'); document.body.appendChild(n); }
@@ -8548,12 +8548,15 @@ Nav.barra = function () {
   const fuera = !raiz || P[raiz.id].sinBarra || (top && (P[top.id].sinBarra || (!top.raiz && !P[top.id].rn)));
   if (fuera) { n.className = 'rn-barra rn-b5 rn-oculta'; try { rnColorFondo(); } catch (x) { } return; }
   const b = rnBarra(), tabs = [['inicio', 'inicio', 'Inicio'], [b[0], RN_SEC[b[0]][1], rnNomTab(b[0])], null, [b[1], RN_SEC[b[1]][1], rnNomTab(b[1])], ['mas', 'menu', 'Más']];
-  const activa = RN_MAS_ABIERTA || !tabs.some(x => x && x[0] === raiz.id) ? 'mas' : raiz.id;
-  const k = rnColorDe(raiz.id, raiz.params), gris = RN_MAS_ABIERTA || activa === 'inicio' || !k || k === 'neutro';
+  const activa = RN_MAS_ABIERTA || RN_MAS_PRE || !tabs.some(x => x && x[0] === raiz.id) ? 'mas' : raiz.id;
+  const k = rnColorDe(raiz.id, raiz.params), gris = RN_MAS_ABIERTA || RN_MAS_PRE || activa === 'inicio' || !k || k === 'neutro';
   n.className = 'rn-barra rn-b5';
-  n.innerHTML = '<div class="rn-b5c"><i class="rn-pil' + (gris ? ' rn-pil-gris' : ' rn-k-' + k) + '"></i>' + tabs.map(x => x === null
+  const html = '<div class="rn-b5c"><i class="rn-pil' + (gris ? ' rn-pil-gris' : ' rn-k-' + k) + '"></i>' + tabs.map(x => x === null
     ? '<button class="rn-plus5' + (Dilo.el || RN_DILO.vuelo ? ' rn-plus-ido' : '') + '" data-a="rnPlus" aria-label="Añadir. Mantén pulsado para Dilo">' + rnIc('anadir', 24, 2.2) + '</button>'
     : '<button class="rn-tab' + (x[0] === activa ? ' rn-on' + (gris ? ' rn-gris' : '') : '') + '" data-a="rnTab" data-id="' + x[0] + '" aria-label="' + x[2] + '"' + (x[0] === activa ? ' aria-current="page"' : '') + '><i>' + rnIc(x[1], 22, x[0] === activa ? 2.1 : 1.8) + '</i><span>' + x[2] + '</span></button>').join('') + '</div>';
+  /* 1.0.14: si la barra ya es esta, no se vuelve a pintar (así la burbuja sigue su camino sin saltos) */
+  if (n.dataset.h === html) { try { rnColorFondo(); } catch (x) { } return; }
+  n.innerHTML = html; n.dataset.h = html;
   rnPildora(n);
   try { rnColorFondo(); } catch (x) { }
 };
@@ -8571,10 +8574,14 @@ function rnSecciones() {
     } });
   RN_MAS_ABIERTA = true;
   /* 0.3.3: el hueco de la barra, en píxeles (en el iPhone, con porcentajes, la hoja no crecía: aparecía de golpe) */
-  /* 1.0.17: «Más» se abre como «Añadir» (sube desde abajo): sin desenfoque ni encoger la pantalla de detrás, sin recorte y sin ola.
-     Era lo que la hacía lenta en el iPhone. */
-  r.classList.add('rn-mas');
+  h.style.setProperty('--ct', Math.max(0, h.offsetHeight - 82) + 'px'); h.getBoundingClientRect();
+  if (hojaAbierta) hojaAbierta.velo.classList.add('rn-velo-prof');
+  r.classList.add('rn-mas', 'rn-prof');
   Nav.barra();
+  /* La ola: cada sección sale desde la esquina de «Más», las más cercanas primero */
+  const m = $('#nav .rn-tab[data-id="mas"]'), o = m ? m.getBoundingClientRect() : { left: innerWidth - 60, top: innerHeight - 60, width: 0, height: 0 };
+  const ox = o.left + o.width / 2, oy = o.top + o.height / 2;
+  $$('.rn-sc', h).forEach(c => { const q = c.getBoundingClientRect(), dx = ox - (q.left + q.width / 2), dy = oy - (q.top + q.height / 2), d = Math.hypot(dx, dy) || 1; c.style.setProperty('--d', Math.round(20 + d / 3.5) + 'ms'); c.style.setProperty('--ux', (dx / d * 14).toFixed(1) + 'px'); c.style.setProperty('--uy', (dy / d * 14).toFixed(1) + 'px'); });
   return h;
 }
 const _secElegir57 = ACC.rnSecElegir;
@@ -8582,15 +8589,7 @@ ACC.rnSecElegir = el => { RN_MAS_ELIGE = true; setTimeout(() => { RN_MAS_ELIGE =
 ACC.rnTab = el => {
   if (RN_MR && RN_MR.anular) return;
   const k = el.dataset.id;
-  /* 1.0.18: con «Secciones» abierta, tocar otra pestaña va directa a ella: la burbuja ya no vuelve primero a la pestaña
-     de antes ni se espera 160 ms */
-  if (RN_MAS_ABIERTA) {
-    if (k === 'mas') return cerrarHoja();
-    const misma = Nav.pila.length === 1 && Nav.pila[0] && Nav.pila[0].id === k;
-    RN_MAS_ELIGE = true; cerrarHoja(); RN_MAS_ELIGE = false;
-    rnAbrir(k); if (misma) Nav.barra();
-    return;
-  }
+  if (RN_MAS_ABIERTA) { cerrarHoja(); if (k !== 'mas') setTimeout(() => rnAbrir(k), 160); return; }
   rnAbrir(k);
 };
 
@@ -9395,49 +9394,165 @@ ACC.rnOrdModo = el => { try { localStorage.setItem('ronda-' + el.dataset.c + '-o
 /* ===================== 1.0.7 · PAPELERA =====================
    Lo borrado no desaparece: queda marcado como borrado en la hoja. Un botón pequeño de papelera en Tareas, Compra y Notas
    (solo si hay algo borrado en los últimos 30 días) abre la lista para recuperarlo. */
-/* 1.0.16: la papelera sale siempre (aunque esté vacía) y en todas las secciones donde se borra algo; cada sección mira
-   sus colecciones (Compra: productos y listas; Gastos: gastos, cuentas y fijos…). */
-const RN_PAP = { tareas: ['Tareas', ['tareas']], compra: ['Compra', ['compra', 'listas']], notas: ['Notas', ['notas']],
-  gastos: ['Gastos', ['movs', 'cuentas', 'fijos']], documentos: ['Documentos', ['documentos']], listasr: ['Listas', ['listasr', 'listasri']], agenda: ['Agenda', ['eventos']] };
-const rnTitBorrado = f => f.titulo || f.nombre || f.concepto || f.texto || 'Sin título';
-function rnBorrados(sec) {
-  const cols = (RN_PAP[sec] || [sec, [sec]])[1], lim = Date.now() - 30 * 86400000, o = [];
-  cols.forEach(col => { const R = S.recs[col] || {};
-    Object.keys(R).forEach(id => { const r = R[id]; if (!r || !r.f || !(r.f._b === 1 || r.f._b === true)) return;
-      const cuando = (r.t && r.t._b) || 0; if (cuando && cuando < lim) return; o.push({ col, id, f: r.f, cuando }); }); });
-  return o.sort((a, b) => b.cuando - a.cuando);
+const RN_PAP = { tareas: ['Tareas', 'titulo'], compra: ['Compra', 'nombre'], notas: ['Notas', 'titulo'] };
+function rnBorrados(col) {
+  const R = S.recs[col] || {}, lim = Date.now() - 30 * 86400000;
+  return Object.keys(R).filter(id => R[id].f && R[id].f._b === 1 || (R[id].f && R[id].f._b === true)).map(id => ({ id, f: R[id].f, cuando: (R[id].t && R[id].t._b) || 0 }))
+    .filter(x => !x.cuando || x.cuando > lim).sort((a, b) => b.cuando - a.cuando);
 }
-function rnBtnPapelera(sec) {
-  return '<button class="rn-rb rn-gl rn-pap" data-a="rnPapelera" data-col="' + sec + '" aria-label="Papelera">' + rnIc('borrar', 18, 2) + '</button>';
+function rnBtnPapelera(col) {
+  return rnBorrados(col).length ? '<button class="rn-rb rn-gl rn-pap" data-a="rnPapelera" data-col="' + col + '" aria-label="Papelera">' + rnIc('borrar', 18, 2) + '</button>' : '';
 }
 ACC.rnPapelera = el => Nav.ir('papelera', { col: el.dataset.col });
 P.papelera = {
   html: p => {
-    const sec = p.col || 'tareas', c = RN_PAP[sec] || [sec], l = rnBorrados(sec);
+    const col = p.col || 'tareas', c = RN_PAP[col] || ['', 'titulo'], l = rnBorrados(col);
     let o = rnTitulo('Papelera', { peq: 1, atras: c[0], sub: 'Lo borrado en los últimos 30 días' });
     if (!l.length) return o + rnCd('<p class="rn-txt" style="padding:6px 0 12px">No hay nada borrado.</p>');
-    return o + rnCd(l.map(x => '<div class="rn-rw"><span class="rn-fat"><span class="rn-t">' + esc(rnTitBorrado(x.f)) + '</span>' +
-      '<span class="rn-n">' + (x.cuando ? 'Borrado ' + rnDiaTexto(isoDia(new Date(x.cuando)), true) : 'Borrado') + '</span></span>' +
-      '<button class="rn-recup" data-a="rnRecuperar" data-col="' + x.col + '" data-id="' + x.id + '">Recuperar</button></div>').join(''));
+    return o + rnCd(l.map(x => '<div class="rn-rw"><span class="rn-fat"><span class="rn-t">' + esc(x.f[c[1]] || x.f.texto || 'Sin título') + '</span>' +
+      (x.cuando ? '<span class="rn-n">Borrado ' + rnDiaTexto(isoDia(new Date(x.cuando)), true) + '</span>' : '') + '</span>' +
+      '<button class="rn-recup" data-a="rnRecuperar" data-col="' + col + '" data-id="' + x.id + '">Recuperar</button></div>').join(''));
   }
 };
 ACC.rnRecuperar = el => {
   const col = el.dataset.col, id = el.dataset.id, r = (S.recs[col] || {})[id]; if (!r) return;
   cambiar(col, id, { _b: 0 });
-  toast('«' + rnTitBorrado(r.f) + '» recuperado', null, null, 'hecho');
+  toast('«' + (r.f[(RN_PAP[col] || [])[1]] || 'Elemento') + '» recuperado', null, null, 'hecho');
   Nav.refrescar(true);
 };
 
-/* 1.0.15 · Vaciar papelera: borra para siempre todo lo que hay (pregunta antes). Lo borrado así queda marcado con
-   _b = 2 y ya no sale en la papelera. */
-const _papHtml115 = P.papelera.html;
-P.papelera.html = p => { const o = _papHtml115(p), col = p.col || 'tareas';
-  return o + (rnBorrados(col).length ? '<button class="rn-btnp rn-pap-vaciar" data-a="rnVaciarPapelera" data-col="' + col + '">' + rnIc('borrar', 20, 2) + 'Vaciar papelera</button>' : ''); };
+/* ---- 58_rn_109.js ---- */
+/* ===================== 1.0.9 · MENÚ DESDE EL BOTÓN =====================
+   Un solo componente para todos los menús cortos de opciones (hasta 6, solo tocar y elegir): nace del botón o de la fila
+   que lo abre, como los menús del iPhone. Los formularios, las hojas con campos o interruptores y las confirmaciones
+   siguen saliendo desde abajo. Lo que borra va al final, tras una raya, en coral. */
+let RN_POP = null, RN_PUNTERO = { x: 0, y: 0 };
+document.addEventListener('pointerdown', ev => { RN_PUNTERO = { x: ev.clientX, y: ev.clientY }; }, true);
+/* ops: [icono, texto, acción, atributos extra, peligro] */
+function rnPop(ancla, ops) {
+  if (RN_POP) { rnPopCerrar(); return; }          /* tocar otra vez el botón con el menú abierto lo cierra */
+  if (Date.now() - RN_POP_CERRADO < 350) return;
+  /* 1.0.10: si el botón o la fila ya no está en la pantalla (se ha vuelto a pintar), el menú sale donde está el dedo */
+  const vivo = ancla && ancla.getBoundingClientRect && ancla.isConnected !== false && ancla.getBoundingClientRect().height > 0;
+  const r = vivo ? ancla.getBoundingClientRect() : { left: RN_PUNTERO.x, right: RN_PUNTERO.x, top: RN_PUNTERO.y, bottom: RN_PUNTERO.y, width: innerWidth, height: 0 };
+  /* Si el ancla es una fila ancha (mantener pulsado), el menú nace donde está el dedo */
+  const fila = r.width > innerWidth * 0.6, x0 = fila ? RN_PUNTERO.x : null;
+  const norm = ops.filter(o => !o[4]), pel = ops.filter(o => o[4]);
+  const btn = o => '<button class="rn-pop-op' + (o[4] ? ' rn-pop-pel' : '') + '" data-a="' + o[2] + '"' + (o[3] || '') + '>' + rnIc(o[0], 20, 1.9) + '<span>' + o[1] + '</span></button>';
+  const velo = document.createElement('div'); velo.className = 'rn-pop-velo';
+  const m = document.createElement('div'); m.className = 'rn-pop'; m.setAttribute('role', 'menu');
+  m.innerHTML = norm.map(btn).join('') + (pel.length && norm.length ? '<i class="rn-pop-raya"></i>' : '') + pel.map(btn).join('');
+  document.body.append(velo, m);
+  const W = m.offsetWidth, H = m.offsetHeight, M = 10, G = 8;
+  /* Horizontal: alineado con el borde del botón que queda más cerca del centro de la pantalla */
+  let izq, origX;
+  if (x0 != null) { izq = x0 - (x0 > innerWidth / 2 ? W : 0); origX = x0 > innerWidth / 2 ? 'right' : 'left'; }
+  else if (r.left + r.width / 2 > innerWidth / 2) { izq = r.right - W; origX = 'right'; } else { izq = r.left; origX = 'left'; }
+  izq = Math.max(M, Math.min(innerWidth - W - M, izq));
+  /* Vertical: debajo; si no cabe, encima; nunca fuera */
+  const bajo = fila ? RN_PUNTERO.y + G : r.bottom + G, alto = fila ? RN_PUNTERO.y - G - H : r.top - G - H;
+  let arriba = false, top = bajo;
+  if (bajo + H > innerHeight - M - 90 && alto > M) { top = alto; arriba = true; }
+  top = Math.max(M, Math.min(innerHeight - H - M, top));
+  m.style.left = izq + 'px'; m.style.top = top + 'px';
+  m.style.transformOrigin = origX + ' ' + (arriba ? 'bottom' : 'top');
+  m.style.setProperty('--dy', (arriba ? 8 : -8) + 'px');
+  RN_POP = { m, velo };
+  /* 1.0.10: animación con keyframes (en el iPhone las transiciones a veces no arrancaban y salía de golpe) */
+  /* 1.0.11: la animación la lleva JavaScript (Web Animations), que en Safari arranca siempre */
+  const dy = arriba ? 8 : -8, muelle = 'cubic-bezier(.2,.9,.3,1.15)';
+  if (REDUCIR) { m.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, fill: 'both' }); }
+  else m.animate([{ opacity: 0, transform: 'translateY(' + dy + 'px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 280, easing: muelle, fill: 'both' });
+  velo.animate([{ opacity: 0 }, { opacity: 1 }], { duration: REDUCIR ? 150 : 200, fill: 'both' });
+  m.style.opacity = '1'; velo.style.opacity = '1';
+  velo.addEventListener('pointerdown', ev => { ev.preventDefault(); ev.stopPropagation(); rnPopCerrar(); });
+  velo.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); });
+  /* Al tocar una opción: se marca un instante, se cierra y se hace (la acción la lanza el manejador de siempre) */
+  m.addEventListener('click', ev => { const b = ev.target.closest('.rn-pop-op'); if (!b) return; b.classList.add('rn-pop-toca'); setTimeout(() => rnPopCerrar(), 60); });
+  m.addEventListener('contextmenu', ev => ev.preventDefault());
+  return m;
+}
+let RN_POP_CERRADO = 0;
+function rnPopCerrar(ya) {
+  const p = RN_POP; if (!p) return; RN_POP = null; RN_POP_CERRADO = Date.now();
+  if (ya) { p.m.remove(); p.velo.remove(); return; }
+  /* El velo sigue tapando hasta que el menú se ha ido: el toque que lo cierra no llega al botón de debajo */
+  p.m.style.pointerEvents = 'none';
+  const d = REDUCIR ? 150 : 160;
+  p.m.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: REDUCIR ? 'none' : 'scale(.97)' }], { duration: d, easing: 'ease-in', fill: 'both' });
+  p.velo.animate([{ opacity: 1 }, { opacity: 0 }], { duration: d, easing: 'ease-in', fill: 'both' });
+  setTimeout(() => { p.m.remove(); p.velo.remove(); }, d + 40);
+}
+/* Un toque justo después de cerrar (el mismo dedo) no vuelve a abrir el menú */
+document.addEventListener('click', ev => { if (Date.now() - RN_POP_CERRADO < 350 && !ev.target.closest('.rn-pop')) { ev.stopPropagation(); ev.preventDefault(); } }, true);
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && RN_POP) rnPopCerrar(); });
+/* Si se cambia de pantalla con el menú abierto, se va */
+const _navRaiz109 = Nav.raiz, _navIr109 = Nav.ir;
+Nav.raiz = function () { rnPopCerrar(true); return _navRaiz109.apply(this, arguments); };
+Nav.ir = function () { rnPopCerrar(true); return _navIr109.apply(this, arguments); };
+const rnIdA = id => ' data-id="' + esc(id) + '"';
+
+/* 1 · Producto de la compra */
+ACC.menuProducto = el => { const x = dato('compra', el.dataset.id); if (!x) return;
+  rnPop(el, [['editar', 'Cambiar', 'editarProducto', rnIdA(x.id)], ['borrar', 'Borrar', 'borrarProducto', rnIdA(x.id), 1]]); };
+/* 2 · Tarea */
+ACC.rnMenuTarea = el => { const x = dato('tareas', el.dataset.id); if (!x) return;
+  rnPop(el, [['editar', 'Cambiar', 'rnEditarTarea', rnIdA(x.id)], ['hecho', x.hecho ? 'Marcar como pendiente' : 'Marcar como hecha', 'rnHacerMenu', rnIdA(x.id)], ['borrar', 'Borrar la tarea', 'rnBorrarTarea', rnIdA(x.id), 1]]); };
+/* 3 · Lista de la compra. «Ordenar por secciones» ya no es un interruptor: se toca y cambia */
+function rnOpcionesLista(lid, el) {
+  const l = datoLista(lid); if (!l) return;
+  const hechos = lista('compra').filter(x => listaDe(x) === l.id && x.hecho).length;
+  const ops = [['editar', 'Cambiar nombre y emoji', 'editarLista', rnIdA(l.id)], ['compartir', 'Compartir', 'rnCompartirLista', rnIdA(l.id)],
+    ['filtrar', l.secciones ? 'Quitar secciones' : 'Ordenar por secciones', 'rnListaSecTog', rnIdA(l.id)],
+    ['archivar', 'Vaciar lo ya comprado' + (hechos ? ' (' + hechos + ')' : ''), 'rnVaciarLista', rnIdA(l.id)]];
+  if (listasCompra().length > 1) ops.push(['borrar', 'Borrar la lista', 'borrarLista', rnIdA(l.id), 1]);
+  rnPop(el, ops);
+}
+ACC.rnMenuLista = el => rnOpcionesLista(el.dataset.id, el);
+ACC.rnOpcLista = el => rnOpcionesLista(el.dataset.id, el);
+ACC.rnListaSecTog = el => { const l = datoLista(el.dataset.id); if (!l) return; const on = !l.secciones;
+  cambiar('listas', l.id, Object.assign({}, l.id === LSUPER && !S.recs.listas ? { nombre: l.nombre } : {}, { secciones: on }));
+  Nav.refrescar(true); toast(on ? 'Ordenada por secciones' : 'Sin secciones', null, null, 'hecho'); };
+/* 4 · Cuenta de gastos */
+ACC.menuCuenta = el => { const id = el.dataset.id, c = dato('cuentas', id); if (!c) return;
+  rnPop(el, [['editar', 'Cambiar nombre y personas', 'editarCuenta', rnIdA(id)], ['grafico-circular', 'Estadísticas', 'estadCuenta', rnIdA(id)],
+    ['etiqueta', 'Categorías', 'ir', ' data-id="categorias"'], ['archivar', 'Archivar', 'archivarCuenta', rnIdA(id)], ['borrar', 'Borrar cuenta', 'borrarCuenta', rnIdA(id), 1]]); };
+/* 5 · Nota (desde la lista y desde la nota abierta). «Color…» abre su hoja de colores como antes */
+ACC.notaMenu = el => {
+  const p = Nav.actual().params;
+  if (!rnEnNota() && el && el.dataset && el.dataset.id) { const n0 = dato('notas', el.dataset.id); if (!n0) return; p.id = el.dataset.id; p.color = colorNota(n0); }
+  const n = dato('notas', p.id) || {};
+  rnPop(el && el.getBoundingClientRect ? el : null, [['etiqueta', n.fijada ? 'Quitar de fijadas' : 'Fijar', 'notaFijar'], ['color', 'Color…', 'notaColores'],
+    ['compartir', 'Compartir', 'notaCompartir'], ['borrar', 'Borrar nota', 'notaBorrar', '', 1]]);
+};
+/* 6 · Documento */
+ACC.docMenu = el => { const d = dato('documentos', el.dataset.id); if (!d) return; rnPop(el, [['borrar', 'Borrar documento', 'docBorrar', rnIdA(d.id), 1]]); };
+/* 7 · Lista de «Listas» */
+ACC.listaRMenu = el => rnPop(el && el.getBoundingClientRect ? el : null, [['editar', 'Cambiar nombre y emoji', 'lrRenombrar'], ['borrar', 'Borrar lista', 'lrBorrarLista', '', 1]]);
+
+/* Papelera: vaciar del todo (pregunta antes) */
+const _papHtml109 = P.papelera.html;
+P.papelera.html = p => { const o = _papHtml109(p), col = p.col || 'tareas';
+  return o + (rnBorrados(col).length ? '<button class="rn-btnp rn-peligro rn-pap-vaciar" data-a="rnVaciarPapelera" data-col="' + col + '">' + rnIc('borrar', 20, 2) + 'Vaciar papelera</button>' : ''); };
 ACC.rnVaciarPapelera = async el => {
-  const sec = el.dataset.col, l = rnBorrados(sec); if (!l.length) return;
+  const col = el.dataset.col, l = rnBorrados(col); if (!l.length) return;
   if (!await preguntar('¿Borrar definitivamente?', l.length + (l.length === 1 ? ' cosa' : ' cosas') + '. No se podrá recuperar.', 'Borrar', true)) return;
-  l.forEach(x => cambiar(x.col, x.id, { _b: 2 }));
+  l.forEach(x => cambiar(col, x.id, { _b: 2 }));
   Nav.refrescar(true); toast('Papelera vacía', null, null, 'hecho');
+};
+
+/* 1.0.14 · «Más» reacciona como las demás pestañas. Antes, la barra se volvía a pintar cuando la hoja ya estaba
+   montada: la burbuja no salía hasta entonces y luego aparecía de golpe. Ahora: primero la barra con «Más» marcado
+   (la burbuja empieza a deslizarse en ese mismo toque) y, dos fotogramas después, la hoja. La barra no se repinta
+   otra vez porque ya es la misma. */
+const _rnTab114 = ACC.rnTab;
+ACC.rnTab = el => {
+  if (el && el.dataset && el.dataset.id === 'mas' && !RN_MAS_ABIERTA && !(RN_MR && RN_MR.anular)) {
+    RN_MAS_PRE = true; Nav.barra();
+    requestAnimationFrame(() => requestAnimationFrame(() => { try { _rnTab114(el); } finally { RN_MAS_PRE = false; } }));
+    return;
+  }
+  return _rnTab114(el);
 };
 
 /* ---- 59_rn_fin.js ---- */

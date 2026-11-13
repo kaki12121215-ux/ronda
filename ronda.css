@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.18 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.14 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2236,16 +2236,72 @@ html.rn-mas[data-tema="oscuro"] .rn-b5c { background: #232C31; box-shadow: 0 -10
 .rn-mas-aviso { margin: -4px 0 10px; font-size: 14px; opacity: .65; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .rn-ord-ed .rn-sc { animation: none; } }
 
-/* 1.0.15 · Vaciar papelera */
-.rn-pap-vaciar { margin-top: 16px; background: #E0613F; color: #FFFFFF; }
-[data-tema="oscuro"] .rn-pap-vaciar { background: #E86E50; color: #FFFFFF; }
+/* ===================== 1.0.9 · Menú desde el botón ===================== */
+.rn-pop-velo { position: fixed; inset: 0; z-index: 90; background: rgba(43,58,66,.10); opacity: 0; transition: opacity .2s ease; -webkit-tap-highlight-color: transparent; }
+[data-tema="oscuro"] .rn-pop-velo { background: rgba(0,0,0,.35); }
+.rn-pop-velo.rn-pop-ver { opacity: 1; }
+.rn-pop { position: fixed; z-index: 91; width: 244px; padding: 6px 0; border-radius: 20px;
+  background: rgba(255,255,255,.82); -webkit-backdrop-filter: blur(24px) saturate(1.6); backdrop-filter: blur(24px) saturate(1.6);
+  box-shadow: 0 12px 36px rgba(43,58,66,.18), 0 1px 0 rgba(255,255,255,.7) inset; border: 1px solid rgba(255,255,255,.6);
+  opacity: 0; transform: translateY(var(--dy, -8px)) scale(.96); -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+[data-tema="oscuro"] .rn-pop { background: rgba(35,44,49,.86); border-color: rgba(255,255,255,.08); box-shadow: 0 12px 36px rgba(0,0,0,.45); }
+.rn-pop.rn-pop-ver { opacity: 1; transform: none; transition: opacity .28s var(--e-muelle, cubic-bezier(.2,.9,.3,1.2)), transform .28s var(--e-muelle, cubic-bezier(.2,.9,.3,1.2)); }
+.rn-pop.rn-pop-sale { opacity: 0; transform: scale(.97); transition: opacity .16s ease-in, transform .16s ease-in; }
+.rn-pop-op { display: flex; align-items: center; gap: 12px; width: 100%; height: 46px; padding: 0 16px; border: 0; background: none; color: var(--txt); font: 600 15px/1.2 var(--f-texto); text-align: left; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.rn-pop-op span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rn-pop-op svg { flex: none; opacity: .8; }
+.rn-pop-op.rn-pop-toca, .rn-pop-op:active { background: rgba(127,127,127,.16); }
+.rn-pop-pel { color: #E0613F; }
+[data-tema="oscuro"] .rn-pop-pel { color: #FF8F72; }
+[data-tema="oscuro"] .rn-pop-op:not(.rn-pop-pel) { color: #fff; }
+.rn-pop-raya { display: block; height: 1px; margin: 5px 16px; background: rgba(127,127,127,.25); }
+@media (prefers-reduced-motion: reduce) {
+  .rn-pop, .rn-pop.rn-pop-ver, .rn-pop.rn-pop-sale { transform: none !important; transition: opacity .15s linear !important; }
+}
+.rn-pap-vaciar { margin-top: 16px; }
+.rn-pop { width: auto; min-width: 244px; max-width: min(300px, calc(100vw - 20px)); }
+.rn-hj .rn-btnp.rn-peligro, .rn-hj .rn-btnp.rn-peligro b, .rn-btnp.rn-peligro { color: #FFFFFF !important; background: #E0613F; }
+[data-tema="oscuro"] .rn-btnp.rn-peligro { background: #E86E50; }
 
-/* 1.0.17 · «Más» se abre como «Añadir»: sube desde abajo, sin recorte, sin desenfoque detrás y sin ola */
-.rn-hj.rn-gl.rn-hj-mas, .rn-hj.rn-gl.rn-hj-mas.rn-ver { -webkit-clip-path: none; clip-path: none; will-change: auto; }
-.rn-hj.rn-gl.rn-hj-mas { transform: translateY(105%); transition: transform .26s var(--e-salir); }
-.rn-hj.rn-gl.rn-hj-mas.rn-ver { transform: none; transition: transform .42s var(--e-muelle); }
-.rn-hj-mas .rn-sc, .rn-hj-mas.rn-ver .rn-sc { opacity: 1; animation: none; }
-.rn-hj-mas :is(.rn-hjcab, .rn-tirador), .rn-hj-mas.rn-ver :is(.rn-hjcab, .rn-tirador) { opacity: 1; transition: none; }
+/* 1.0.10 · Menú: ancho fijo (no cambia al colocarlo) y animación con keyframes, suave en el iPhone */
+.rn-pop { width: 260px !important; min-width: 0; max-width: calc(100vw - 20px); transition: none !important; will-change: transform, opacity;
+  -webkit-backdrop-filter: blur(16px) saturate(1.5); backdrop-filter: blur(16px) saturate(1.5); background: rgba(255,255,255,.9); }
+[data-tema="oscuro"] .rn-pop { background: rgba(35,44,49,.92); }
+.rn-pop.rn-pop-ver { animation: rn-pop-entra .28s cubic-bezier(.2,.9,.3,1.15) both; }
+.rn-pop.rn-pop-sale { animation: rn-pop-sale .16s ease-in both; }
+@keyframes rn-pop-entra { from { opacity: 0; transform: translateY(var(--dy, -8px)) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes rn-pop-sale { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(.97); } }
+.rn-pop-velo { transition: none; }
+.rn-pop-velo.rn-pop-ver { animation: rn-velo-entra .2s ease both; }
+.rn-pop-velo.rn-pop-sale { animation: rn-velo-sale .16s ease-in both; }
+@keyframes rn-velo-entra { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rn-velo-sale { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .rn-pop.rn-pop-ver, .rn-pop-velo.rn-pop-ver { animation: rn-velo-entra .15s linear both; }
+  .rn-pop.rn-pop-sale, .rn-pop-velo.rn-pop-sale { animation: rn-velo-sale .15s linear both; }
+}
 
-/* 1.0.18 · «Más» ya no se encoge poco a poco al tocarlo (parecía que tardaba en reaccionar) */
-.rn-b5 .rn-tab.rn-espera { transform: none; transition: none; }
+/* 1.0.11 · Las animaciones del menú van por JavaScript */
+.rn-pop, .rn-pop.rn-pop-ver, .rn-pop.rn-pop-sale, .rn-pop-velo, .rn-pop-velo.rn-pop-ver, .rn-pop-velo.rn-pop-sale { animation: none !important; transition: none !important; }
+.rn-pop { opacity: 0; transform: none; }
+.rn-pop-velo { opacity: 0; }
+/* 1.0.11 · «Más» abre al instante: sin encoger toda la pantalla ni desenfocarla (era lo que más le costaba al iPhone,
+   sobre todo la primera vez). Un velo de color hace el mismo papel. */
+html.rn-prof #app, html.rn-prof-nav #nav { transform: none !important; }
+.rn-velo.rn-velo-prof { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(43,58,66,.28); transition: opacity .18s ease-out; }
+.rn-velo.rn-velo-prof.rn-ver { transition: opacity .22s ease-out; }
+[data-tema="oscuro"] .rn-velo.rn-velo-prof { background: rgba(0,0,0,.5); }
+/* 1.0.12 · Con el menú abierto, la franja de la hora sigue con su degradado: el velo empieza debajo de la hora
+   y el menú ya no usa desenfoque de fondo (en el iPhone hacía que la franja de arriba se pintara lisa). */
+.rn-pop { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(255,255,255,.97); }
+[data-tema="oscuro"] .rn-pop { background: rgba(35,44,49,.98); }
+
+/* 1.0.14 · La franja de la hora. El iOS nuevo pinta esa franja con el color de fondo (background-color) de lo que
+   esté fijo arriba de la pantalla: el velo gris de menús y hojas la volvía una línea lisa. Los velos ya no tienen
+   color de fondo: el oscurecido va como imagen (degradado de un solo color), que el iPhone no copia en la franja. */
+.rn-velo, .rn-pop-velo { background-color: transparent !important; }
+.rn-velo { background-image: linear-gradient(var(--velo), var(--velo)); }
+.rn-velo.rn-velo-prof { background-image: linear-gradient(rgba(43,58,66,.28), rgba(43,58,66,.28)); }
+[data-tema="oscuro"] .rn-velo.rn-velo-prof { background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)); }
+.rn-pop-velo { background-image: linear-gradient(rgba(43,58,66,.10), rgba(43,58,66,.10)); }
+[data-tema="oscuro"] .rn-pop-velo { background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)); }
