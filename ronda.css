@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.17 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.18 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2246,3 +2246,6 @@ html.rn-mas[data-tema="oscuro"] .rn-b5c { background: #232C31; box-shadow: 0 -10
 .rn-hj.rn-gl.rn-hj-mas.rn-ver { transform: none; transition: transform .42s var(--e-muelle); }
 .rn-hj-mas .rn-sc, .rn-hj-mas.rn-ver .rn-sc { opacity: 1; animation: none; }
 .rn-hj-mas :is(.rn-hjcab, .rn-tirador), .rn-hj-mas.rn-ver :is(.rn-hjcab, .rn-tirador) { opacity: 1; transition: none; }
+
+/* 1.0.18 · «Más» ya no se encoge poco a poco al tocarlo (parecía que tardaba en reaccionar) */
+.rn-b5 .rn-tab.rn-espera { transform: none; transition: none; }
