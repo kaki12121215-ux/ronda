@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.12 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.13 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2296,3 +2296,5 @@ html.rn-prof #app, html.rn-prof-nav #nav { transform: none !important; }
 .rn-pop-velo { top: env(safe-area-inset-top, 0px); }
 .rn-pop { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: rgba(255,255,255,.97); }
 [data-tema="oscuro"] .rn-pop { background: rgba(35,44,49,.98); }
+/* 1.0.13 · Ningún velo oscurece la franja de la hora (se veía como una línea lisa gris arriba) */
+.rn-velo, .rn-pop-velo { top: max(env(safe-area-inset-top, 0px), 0px) !important; }
