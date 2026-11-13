@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.8 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.7 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.8';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.7';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -7424,7 +7424,7 @@ P.feedback = {
 
 /* ===================== «+» de Inicio: hoja «Añadir» (aprobada en JPG) ===================== */
 const RN_ANADIR = [['Tarea', 'modulo-tareas', 'lima', () => rnNuevaTarea({})], ['Producto', 'modulo-compra', 'amarillo', () => ACC.aProducto()], ['Gasto', 'modulo-gastos', 'rosa', () => P.gastos.rnPlus.call(null)], ['Evento', 'modulo-calendario', 'azul', () => ACC.aEvento()], ['Nota', 'modulo-notas', 'lavanda', () => ACC.aNota()], ['Documento', 'modulo-documentos', 'lavanda', () => ACC.docNuevo({ dataset: {} })]];
-P.inicio.rnPlus = () => abrirHoja(rnCabHoja('Añadir') + '<div class="rn-secs rn-secs3">' + rnOrdenAnadir().map(i => [RN_ANADIR[i], i]).map(([x, i]) => '<button class="rn-sc rn-k-' + x[2] + '" data-a="rnAnadirY" data-i="' + i + '" data-id="' + i + '">' + rnChip(x[1], 44) + '<span>' + x[0] + '</span></button>').join('') + '</div>', { clase: 'rn-hj-sec' });
+P.inicio.rnPlus = () => abrirHoja(rnCabHoja('Añadir') + '<div class="rn-secs rn-secs3">' + RN_ANADIR.map((x, i) => '<button class="rn-sc rn-k-' + x[2] + '" data-a="rnAnadirY" data-i="' + i + '">' + rnChip(x[1], 44) + '<span>' + x[0] + '</span></button>').join('') + '</div>', { clase: 'rn-hj-sec' });
 ACC.rnAnadirY = el => { const f = RN_ANADIR[+el.dataset.i][3]; cerrarHoja(); setTimeout(() => { if (Nav.pila[0].id === 'gastos' || RN_ANADIR[+el.dataset.i][0] !== 'Gasto') f(); else { const c = cuentasAbiertas()[0]; if (!c) return Nav.ir('cuentaEditar', {}); const yoP = (c.participantes || []).find(x => x.persona === S.cfg.persona); Nav.ir('mov', { cid: c.id, pagadoPor: yoP ? yoP.id : (c.participantes || [])[0].id }); } }, 320); };
 
 /* ---- 48_rn_021.js ---- */
@@ -7887,7 +7887,7 @@ P.ajustes.html = () => {
     '<h2 class="rn-gt">La app</h2><div class="rn-cd">' +
     fila('sol', 'Apariencia', { claro: 'Claro', oscuro: 'Oscuro', auto: 'Automático' }[tema], 'apariencia') +
     fila('ordenar', 'Barra de abajo', rnBarra().map(k => rnCorto(k)).join(' y '), 'barra') +
-    fila('filtrar', 'Orden de «Más» y «Añadir»', ['mas', 'anadir'].map(c => ({ def: 'Predeterminado', az: 'A-Z', pers: 'Personalizado' })[rnModoOrden(c)]).join(' · '), 'masOrden') +
+    fila('filtrar', 'Orden de «Más»', { def: 'Predeterminado', az: 'De la A a la Z', pers: 'Personalizado' }[rnMasModo()], 'masOrden') +
     fila('paraguas', 'El tiempo', esc(ciudad), 'tiempoAj') +
     fila('nota', 'Resumen del domingo', res, 'resumenAj') +
     fila('sincronizar', 'Sincronización', sync, 'sincronizacion') +
@@ -9282,8 +9282,7 @@ const RN_SW_BORRA = { menuProducto: 'borrarProducto', rnMenuTarea: 'rnBorrarTare
 /* ---- 58_rn_107.js ---- */
 /* ===================== 1.0.7 · ORDEN DE «MÁS» =====================
    Ajustes › Orden de «Más»: Predeterminado, De la A a la Z o Personalizado (arrastrando). Se guarda en este móvil. */
-const rnModoOrden = c => { try { return localStorage.getItem('ronda-' + c + '-orden') || 'def'; } catch (e) { return 'def'; } };
-const rnMasModo = () => rnModoOrden('mas');
+const rnMasModo = () => { try { return localStorage.getItem('ronda-mas-orden') || 'def'; } catch (e) { return 'def'; } };
 function rnOrdenMas() {
   const m = rnMasModo();
   if (m === 'az') return RN_ORDEN_SEC.slice().sort((a, b) => sinAcentos(RN_SEC[a][0]).localeCompare(sinAcentos(RN_SEC[b][0]), 'es'));
@@ -9309,15 +9308,14 @@ ACC.rnMasModo = el => {
 /* Ordenar desde la propia hoja de «Más»: mantener pulsada una sección (0,45 s) la coge; se arrastra y las demás se
    apartan. Al soltar, el orden queda guardado como «Personalizado». «Listo» (o cerrar la hoja) termina. */
 let RN_MAS_ED = false;
-function rnMasOrdenar(h) { return rnOrdenarHoja(h, 'mas'); }
-function rnOrdenarHoja(h, clave) {
+function rnMasOrdenar(h) {
   const cont = h && $('.rn-secs', h); if (!cont) return;
   let t = 0, d = null, ini = null;
-  const guardar = () => { const l = $$('.rn-sc', cont).map(c => c.dataset.id); try { localStorage.setItem('ronda-' + clave + '-pers', JSON.stringify(l)); localStorage.setItem('ronda-' + clave + '-orden', 'pers'); } catch (e) { } };
+  const guardar = () => { const l = $$('.rn-sc', cont).map(c => c.dataset.id); try { localStorage.setItem('ronda-mas-pers', JSON.stringify(l)); localStorage.setItem('ronda-mas-orden', 'pers'); } catch (e) { } };
   const editar = () => {
-    if (RN_MAS_ED) return; RN_MAS_ED = true; h.classList.add('rn-mas-ed', 'rn-ord-ed');
+    if (RN_MAS_ED) return; RN_MAS_ED = true; h.classList.add('rn-mas-ed');
     const cab = $('.rn-hjcab', h); if (cab && !$('.rn-mas-listo', h)) cab.insertAdjacentHTML('beforeend', '<button class="rn-mas-listo" data-a="rnMasListo">Listo</button>');
-    if (!$('.rn-mas-aviso', h)) cont.insertAdjacentHTML('beforebegin', '<p class="rn-mas-aviso">Arrastra para ordenar</p>');
+    if (!$('.rn-mas-aviso', h)) cont.insertAdjacentHTML('beforebegin', '<p class="rn-mas-aviso">Arrastra las secciones para ordenarlas</p>');
   };
   const coger = (c, x, y) => {
     editar(); const r = c.getBoundingClientRect();
@@ -9354,7 +9352,7 @@ function rnOrdenarHoja(h, clave) {
   cont.addEventListener('click', ev => { if (RN_MAS_ED) { ev.stopPropagation(); ev.preventDefault(); } }, true);
   cont.addEventListener('contextmenu', ev => ev.preventDefault());
 }
-ACC.rnMasListo = () => { RN_MAS_ED = false; const h = $('.rn-ord-ed'); if (h) { h.classList.remove('rn-mas-ed', 'rn-ord-ed'); $$('.rn-mas-listo,.rn-mas-aviso', h).forEach(x => x.remove()); } };
+ACC.rnMasListo = () => { RN_MAS_ED = false; const h = $('.rn-hj-mas'); if (h) { h.classList.remove('rn-mas-ed'); $$('.rn-mas-listo,.rn-mas-aviso', h).forEach(x => x.remove()); } };
 const _rnSecciones107 = rnSecciones;
 rnSecciones = function () {
   const abierta = RN_MAS_ABIERTA, h = _rnSecciones107.apply(this, arguments);
@@ -9362,30 +9360,6 @@ rnSecciones = function () {
   if (!abierta && h) rnMasOrdenar(h);
   return h;
 };
-
-/* 1.0.8 · La hoja «Añadir» (el «+»): el mismo orden (Predeterminado, A-Z, Personalizado arrastrando en la propia hoja) */
-function rnOrdenAnadir() {
-  const base = RN_ANADIR.map((x, i) => i), m = rnModoOrden('anadir');
-  if (m === 'az') return base.slice().sort((a, b) => sinAcentos(RN_ANADIR[a][0]).localeCompare(sinAcentos(RN_ANADIR[b][0]), 'es'));
-  if (m === 'pers') {
-    let l = []; try { l = JSON.parse(localStorage.getItem('ronda-anadir-pers') || '[]').map(Number); } catch (e) { }
-    l = l.filter(i => base.indexOf(i) >= 0); return l.concat(base.filter(i => l.indexOf(i) < 0));
-  }
-  return base;
-}
-const _anadir108 = P.inicio.rnPlus;
-P.inicio.rnPlus = function () {
-  const r = _anadir108.apply(this, arguments); RN_MAS_ED = false;
-  const h = hojaAbierta && hojaAbierta.h; if (h && $('[data-a="rnAnadirY"]', h)) rnOrdenarHoja(h, 'anadir');
-  return r;
-};
-/* Ajustes: «Orden de Más y Añadir» con las dos listas de opciones */
-P.masOrden.html = () => {
-  const bloque = (c, tit, nota) => { const m = rnModoOrden(c), op = (v, t, s2) => '<button class="rn-op" data-a="rnOrdModo" data-c="' + c + '" data-v="' + v + '"><span>' + t + (s2 ? '<small class="rn-n" style="display:block">' + s2 + '</small>' : '') + '</span>' + (m === v ? '<span class="rn-fle">' + rnIc('hecho', 20, 2.4) + '</span>' : '') + '</button>';
-    return '<h2 class="rn-gt">' + tit + '</h2>' + rnCd('<div class="rn-ops">' + op('def', 'Predeterminado') + op('az', 'De la A a la Z') + op('pers', 'Personalizado', nota) + '</div>'); };
-  return rnTitulo('Orden', { peq: 1, atras: 'Ajustes' }) + bloque('mas', 'Hoja de «Más»', 'En «Más», mantén pulsada una sección y arrástrala') + bloque('anadir', 'Hoja de «Añadir» (el +)', 'En «Añadir», mantén pulsada una opción y arrástrala');
-};
-ACC.rnOrdModo = el => { try { localStorage.setItem('ronda-' + el.dataset.c + '-orden', el.dataset.v); } catch (e) { } Nav.refrescar(true); };
 
 /* ---- 58_rn_108.js ---- */
 /* ===================== 1.0.7 · PAPELERA =====================
