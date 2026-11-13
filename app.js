@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.9 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.10 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.9';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.10';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9428,7 +9428,9 @@ document.addEventListener('pointerdown', ev => { RN_PUNTERO = { x: ev.clientX, y
 /* ops: [icono, texto, acción, atributos extra, peligro] */
 function rnPop(ancla, ops) {
   rnPopCerrar(true);
-  const r = ancla && ancla.getBoundingClientRect ? ancla.getBoundingClientRect() : { left: RN_PUNTERO.x, right: RN_PUNTERO.x, top: RN_PUNTERO.y, bottom: RN_PUNTERO.y, width: 0, height: 0 };
+  /* 1.0.10: si el botón o la fila ya no está en la pantalla (se ha vuelto a pintar), el menú sale donde está el dedo */
+  const vivo = ancla && ancla.getBoundingClientRect && ancla.isConnected !== false && ancla.getBoundingClientRect().height > 0;
+  const r = vivo ? ancla.getBoundingClientRect() : { left: RN_PUNTERO.x, right: RN_PUNTERO.x, top: RN_PUNTERO.y, bottom: RN_PUNTERO.y, width: innerWidth, height: 0 };
   /* Si el ancla es una fila ancha (mantener pulsado), el menú nace donde está el dedo */
   const fila = r.width > innerWidth * 0.6, x0 = fila ? RN_PUNTERO.x : null;
   const norm = ops.filter(o => !o[4]), pel = ops.filter(o => o[4]);
@@ -9452,7 +9454,8 @@ function rnPop(ancla, ops) {
   m.style.transformOrigin = origX + ' ' + (arriba ? 'bottom' : 'top');
   m.style.setProperty('--dy', (arriba ? 8 : -8) + 'px');
   RN_POP = { m, velo };
-  requestAnimationFrame(() => { velo.classList.add('rn-pop-ver'); m.classList.add('rn-pop-ver'); });
+  /* 1.0.10: animación con keyframes (en el iPhone las transiciones a veces no arrancaban y salía de golpe) */
+  m.getBoundingClientRect(); velo.classList.add('rn-pop-ver'); m.classList.add('rn-pop-ver');
   velo.addEventListener('pointerdown', ev => { ev.preventDefault(); rnPopCerrar(); });
   velo.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); });
   /* Al tocar una opción: se marca un instante, se cierra y se hace (la acción la lanza el manejador de siempre) */
@@ -9463,7 +9466,7 @@ function rnPop(ancla, ops) {
 function rnPopCerrar(ya) {
   const p = RN_POP; if (!p) return; RN_POP = null;
   if (ya || REDUCIR) { p.m.remove(); p.velo.remove(); return; }
-  p.m.classList.add('rn-pop-sale'); p.velo.classList.remove('rn-pop-ver');
+  p.m.classList.remove('rn-pop-ver'); p.m.classList.add('rn-pop-sale'); p.velo.classList.add('rn-pop-sale'); p.m.style.pointerEvents = 'none'; p.velo.style.pointerEvents = 'none';
   setTimeout(() => { p.m.remove(); p.velo.remove(); }, 200);
 }
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && RN_POP) rnPopCerrar(); });
