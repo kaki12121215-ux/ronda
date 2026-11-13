@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.19 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.20 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.19';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.20';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -576,6 +576,9 @@ function banda() {
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-a]');
   if (!el || el.disabled) return;
+  /* 1.0.20: lo que se anula es solo el «clic» de soltar el dedo tras mantener pulsado; un toque en el menú o la hoja
+     que acaba de salir ya no se pierde (antes «Borrar la tarea» a veces cerraba el menú sin borrar) */
+  if (LP.cancelarClick && ev.target.closest('.rn-pop, .rn-hj, .rn-aviso')) LP.cancelarClick = false;
   if (LP.cancelarClick) { LP.cancelarClick = false; ev.preventDefault(); return; }
   const f = ACC[el.dataset.a];
   if (!f) return;
