@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.15 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.16 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.15';  /* = 1.0.8 (sin los menús nuevos ni lo posterior) + Vaciar papelera */
+const VERSION = '1.0.16';  /* = 1.0.8 (sin los menús nuevos ni lo posterior) + Vaciar papelera */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -7130,7 +7130,7 @@ P.lista = {
     const l = lista('compra').filter(x => listaDe(x) === L.id), falta = l.filter(x => !x.hecho), hechos = l.filter(x => x.hecho);
     const fila = x => { const quien = rnPersona(x.creadoPor); return '<div class="rn-rw rn-it' + (x.hecho ? ' rn-dn' : '') + '" data-lp="menuProducto" data-id="' + x.id + '"><button class="rn-ck' + (x.hecho ? ' rn-on' : '') + '" data-a="marcar" data-id="' + x.id + '" aria-label="Comprado">' + rnTick + '</button><button class="rn-rwt" data-a="marcar" data-id="' + x.id + '"><span class="rn-t">' + esc(x.nombre) + '</span>' + ((x.cantidad || (x.para && !x.hecho)) ? '<span class="rn-n">' + [x.cantidad ? esc(textoCantidad(x.cantidad)) : '', x.para && !x.hecho ? esc(textoPara(x.para)) : ''].filter(Boolean).join(' · ') + '</span>' : '') + '</button>' + (quien && quien.id !== S.cfg.persona && !x.hecho ? rnAv(quien, 26) : '') + '</div>'; };
     const orden = (a, b) => (a.orden || 0) - (b.orden || 0);
-    let h = rnTitulo((L.emoji ? esc(L.emoji) + ' ' : '') + esc(L.nombre), { peq: 1, atras: 'Compra', der: rnRb('compartir', 'rnCompartirLista', 'Compartir', ' data-id="' + esc(L.id) + '"') + rnRb('menu', 'rnOpcLista', 'Opciones', ' data-id="' + esc(L.id) + '"'), sub: l.length ? falta.length + ' por comprar y ' + hechos.length + ' en el carro' : 'Lista vacía' }) +
+    let h = rnTitulo((L.emoji ? esc(L.emoji) + ' ' : '') + esc(L.nombre), { peq: 1, atras: 'Compra', der: rnBtnPapelera('compra') + rnRb('compartir', 'rnCompartirLista', 'Compartir', ' data-id="' + esc(L.id) + '"') + rnRb('menu', 'rnOpcLista', 'Opciones', ' data-id="' + esc(L.id) + '"'), sub: l.length ? falta.length + ' por comprar y ' + hechos.length + ' en el carro' : 'Lista vacía' }) +
       '<form class="rn-cd rn-gl rn-qbar" onsubmit="return false"><input id="nuevo" class="rn-qai" placeholder="Añadir a ' + esc(L.nombre) + '" autocomplete="off" enterkeyhint="done" maxlength="60" aria-label="Añadir producto"><button type="button" class="rn-qmic" data-a="rnDilo" aria-label="Dictar">' + rnIc('microfono', 21, 2) + '</button><button type="submit" class="rn-qab" data-a="anadirCompra" aria-label="Añadir">' + rnIc('anadir', 22, 2.2) + '</button></form>';
     if (!l.length) return h + '<div class="rn-vac">' + rnIlu('sin-compras') + '<h2>Sin compras</h2><p class="rn-txt">Escribe arriba lo que falta.</p></div>';
     if (L.secciones) SECCIONES.forEach(s => { const xs = falta.filter(x => (x.seccion || 'otros') === s[0]).sort(orden); if (xs.length) h += rnCd(rnGrupo(s[1], String(xs.length)) + xs.map(fila).join(''), 'rn-gr'); });
@@ -7168,7 +7168,7 @@ P.listasr = {
   raiz: true, rn: true,
   html: () => {
     const l = lista('listasr').sort((a, b) => (a.creado || 0) - (b.creado || 0));
-    let h = rnTitulo('Listas', { sub: 'Listas que se repiten: se usan, se vacían y vuelven' });
+    let h = rnTitulo('Listas', { der: rnBtnPapelera('listasr'), sub: 'Listas que se repiten: se usan, se vacían y vuelven' });
     if (!l.length) return h + '<div class="rn-vac">' + rnIlu('il-listas') + '<h2>Sin listas</h2><p class="rn-txt">La maleta, la limpieza del sábado, lo de antes de salir…</p></div>';
     return h + '<div style="height:8px"></div>' + l.map(x => {
       const it = itemsDe(x.id), n = it.filter(i => i.h).length, tot = it.length;
@@ -7226,7 +7226,7 @@ P.agenda = {
     p.mes = p.mes || isoDia(new Date(hoy.getFullYear(), hoy.getMonth(), 1)); p.dia = p.dia || hoyISO(); p.vista = p.vista || 'mes';
     const m = deISO(p.mes); cargarMes(m);
     const flechasMes = '<span class="rn-mesf"><button class="rn-mesb" data-a="agMes" data-v="-1" aria-label="Mes anterior">' + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>' + '</button><button class="rn-mesb" data-a="agMes" data-v="1" aria-label="Mes siguiente">' + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>' + '</button></span>';
-    const cab = rnTitulo(cap(MESES[m.getMonth()]) + flechasMes, { der: rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: String(m.getFullYear()) }) + rnFiltros([['mes', 'Mes'], ['semana', 'Semana'], ['lista', 'Lista']], p.vista, 'pSet', 'vista');
+    const cab = rnTitulo(cap(MESES[m.getMonth()]) + flechasMes, { der: rnBtnPapelera('agenda') + rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: String(m.getFullYear()) }) + rnFiltros([['mes', 'Mes'], ['semana', 'Semana'], ['lista', 'Lista']], p.vista, 'pSet', 'vista');
     if (p.vista !== 'mes') { rnModoViejo(true); try { return cab + rnSinCabecera(P_VIEJO.agenda.html(p, e), true); } catch (x) { return cab; } }
     rnModoViejo(false);
     const ini = new Date(m.getFullYear(), m.getMonth(), 1), n = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(), h0 = hoyISO();
@@ -7266,7 +7266,7 @@ P.gastos = {
   raiz: true, rn: true,
   html: (p, e) => {
     p.t = p.t || 'cuentas';
-    const cab = rnTitulo('Gastos', { der: rnRb('grafico-de-barras', 'rnEstad', 'Estadísticas') }) + rnFiltros([['cuentas', 'Cuentas'], ['fijos', 'Gastos fijos'], ['resumen', 'Resumen']], p.t, 'pSet', 't');
+    const cab = rnTitulo('Gastos', { der: rnBtnPapelera('gastos') + rnRb('grafico-de-barras', 'rnEstad', 'Estadísticas') }) + rnFiltros([['cuentas', 'Cuentas'], ['fijos', 'Gastos fijos'], ['resumen', 'Resumen']], p.t, 'pSet', 't');
     if (p.t === 'fijos') { rnModoViejo(true); const q = Object.assign({}, p, { modo: 'fijos' }); return cab + rnSinCabecera(P_VIEJO.gastos.html(q, e), true); }
     if (p.t === 'resumen') { rnModoViejo(true); return cab + rnSinCabecera(P.resumenFijos.html(p, e), true); }
     rnModoViejo(false);
@@ -7375,7 +7375,7 @@ P.documentos = {
   html: () => {
     const ds = lista('documentos'), cs = CARPETAS.map(c => [c, ds.filter(d => d.carpeta === c[0]).length]);
     const conDocs = cs.filter(x => x[1]);
-    let h = rnTitulo('Documentos', { der: rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: ds.length + (ds.length === 1 ? ' archivo' : ' archivos') + (conDocs.length ? ' en ' + conDocs.length + (conDocs.length === 1 ? ' carpeta' : ' carpetas') : '') });
+    let h = rnTitulo('Documentos', { der: rnBtnPapelera('documentos') + rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: ds.length + (ds.length === 1 ? ' archivo' : ' archivos') + (conDocs.length ? ' en ' + conDocs.length + (conDocs.length === 1 ? ' carpeta' : ' carpetas') : '') });
     h += '<button class="rn-cd rn-gl rn-lock" data-a="' + (docsActivos() ? (DOC.clave ? 'cerrarDocs' : 'rnDocsAbrir') : 'ir" data-id="docClave') + '">' + rnChip('candado', 34) + '<span class="rn-fat"><span class="rn-t rn-b">Cifrados en el móvil</span><span class="rn-n">' + (!docsActivos() ? 'Toca para activarlos con vuestro código de 4 cifras' : DOC.clave ? 'Abiertos · se cierran solos a los 5 minutos' : 'Se abren con vuestro código de 4 cifras') + '</span></span></button>';
     if (!docsActivos()) return h + '<div class="rn-vac">' + rnIlu('sin-documentos') + '<h2>Documentos a salvo</h2><p class="rn-txt">DNI, seguros, garantías… cifrados antes de salir del móvil.</p><button class="rn-btnp rn-btnc" data-a="ir" data-id="docClave">Activar los documentos</button></div>';
     const vis = (conDocs.length ? conDocs : cs).slice(0, conDocs.length > 4 ? conDocs.length : 4);
@@ -9391,30 +9391,36 @@ ACC.rnOrdModo = el => { try { localStorage.setItem('ronda-' + el.dataset.c + '-o
 /* ===================== 1.0.7 · PAPELERA =====================
    Lo borrado no desaparece: queda marcado como borrado en la hoja. Un botón pequeño de papelera en Tareas, Compra y Notas
    (solo si hay algo borrado en los últimos 30 días) abre la lista para recuperarlo. */
-const RN_PAP = { tareas: ['Tareas', 'titulo'], compra: ['Compra', 'nombre'], notas: ['Notas', 'titulo'] };
-function rnBorrados(col) {
-  const R = S.recs[col] || {}, lim = Date.now() - 30 * 86400000;
-  return Object.keys(R).filter(id => R[id].f && (R[id].f._b === 1 || R[id].f._b === true)).map(id => ({ id, f: R[id].f, cuando: (R[id].t && R[id].t._b) || 0 }))
-    .filter(x => !x.cuando || x.cuando > lim).sort((a, b) => b.cuando - a.cuando);
+/* 1.0.16: la papelera sale siempre (aunque esté vacía) y en todas las secciones donde se borra algo; cada sección mira
+   sus colecciones (Compra: productos y listas; Gastos: gastos, cuentas y fijos…). */
+const RN_PAP = { tareas: ['Tareas', ['tareas']], compra: ['Compra', ['compra', 'listas']], notas: ['Notas', ['notas']],
+  gastos: ['Gastos', ['movs', 'cuentas', 'fijos']], documentos: ['Documentos', ['documentos']], listasr: ['Listas', ['listasr', 'listasri']], agenda: ['Agenda', ['eventos']] };
+const rnTitBorrado = f => f.titulo || f.nombre || f.concepto || f.texto || 'Sin título';
+function rnBorrados(sec) {
+  const cols = (RN_PAP[sec] || [sec, [sec]])[1], lim = Date.now() - 30 * 86400000, o = [];
+  cols.forEach(col => { const R = S.recs[col] || {};
+    Object.keys(R).forEach(id => { const r = R[id]; if (!r || !r.f || !(r.f._b === 1 || r.f._b === true)) return;
+      const cuando = (r.t && r.t._b) || 0; if (cuando && cuando < lim) return; o.push({ col, id, f: r.f, cuando }); }); });
+  return o.sort((a, b) => b.cuando - a.cuando);
 }
-function rnBtnPapelera(col) {
-  return rnBorrados(col).length ? '<button class="rn-rb rn-gl rn-pap" data-a="rnPapelera" data-col="' + col + '" aria-label="Papelera">' + rnIc('borrar', 18, 2) + '</button>' : '';
+function rnBtnPapelera(sec) {
+  return '<button class="rn-rb rn-gl rn-pap" data-a="rnPapelera" data-col="' + sec + '" aria-label="Papelera">' + rnIc('borrar', 18, 2) + '</button>';
 }
 ACC.rnPapelera = el => Nav.ir('papelera', { col: el.dataset.col });
 P.papelera = {
   html: p => {
-    const col = p.col || 'tareas', c = RN_PAP[col] || ['', 'titulo'], l = rnBorrados(col);
+    const sec = p.col || 'tareas', c = RN_PAP[sec] || [sec], l = rnBorrados(sec);
     let o = rnTitulo('Papelera', { peq: 1, atras: c[0], sub: 'Lo borrado en los últimos 30 días' });
     if (!l.length) return o + rnCd('<p class="rn-txt" style="padding:6px 0 12px">No hay nada borrado.</p>');
-    return o + rnCd(l.map(x => '<div class="rn-rw"><span class="rn-fat"><span class="rn-t">' + esc(x.f[c[1]] || x.f.texto || 'Sin título') + '</span>' +
-      (x.cuando ? '<span class="rn-n">Borrado ' + rnDiaTexto(isoDia(new Date(x.cuando)), true) + '</span>' : '') + '</span>' +
-      '<button class="rn-recup" data-a="rnRecuperar" data-col="' + col + '" data-id="' + x.id + '">Recuperar</button></div>').join(''));
+    return o + rnCd(l.map(x => '<div class="rn-rw"><span class="rn-fat"><span class="rn-t">' + esc(rnTitBorrado(x.f)) + '</span>' +
+      '<span class="rn-n">' + (x.cuando ? 'Borrado ' + rnDiaTexto(isoDia(new Date(x.cuando)), true) : 'Borrado') + '</span></span>' +
+      '<button class="rn-recup" data-a="rnRecuperar" data-col="' + x.col + '" data-id="' + x.id + '">Recuperar</button></div>').join(''));
   }
 };
 ACC.rnRecuperar = el => {
   const col = el.dataset.col, id = el.dataset.id, r = (S.recs[col] || {})[id]; if (!r) return;
   cambiar(col, id, { _b: 0 });
-  toast('«' + (r.f[(RN_PAP[col] || [])[1]] || 'Elemento') + '» recuperado', null, null, 'hecho');
+  toast('«' + rnTitBorrado(r.f) + '» recuperado', null, null, 'hecho');
   Nav.refrescar(true);
 };
 
@@ -9424,9 +9430,9 @@ const _papHtml115 = P.papelera.html;
 P.papelera.html = p => { const o = _papHtml115(p), col = p.col || 'tareas';
   return o + (rnBorrados(col).length ? '<button class="rn-btnp rn-pap-vaciar" data-a="rnVaciarPapelera" data-col="' + col + '">' + rnIc('borrar', 20, 2) + 'Vaciar papelera</button>' : ''); };
 ACC.rnVaciarPapelera = async el => {
-  const col = el.dataset.col, l = rnBorrados(col); if (!l.length) return;
+  const sec = el.dataset.col, l = rnBorrados(sec); if (!l.length) return;
   if (!await preguntar('¿Borrar definitivamente?', l.length + (l.length === 1 ? ' cosa' : ' cosas') + '. No se podrá recuperar.', 'Borrar', true)) return;
-  l.forEach(x => cambiar(col, x.id, { _b: 2 }));
+  l.forEach(x => cambiar(x.col, x.id, { _b: 2 }));
   Nav.refrescar(true); toast('Papelera vacía', null, null, 'hecho');
 };
 
