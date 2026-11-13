@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.0 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.1 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.0';  /* el diseño nuevo, sustituye a la 1.8.0 */
+const VERSION = '1.0.1';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -1962,21 +1962,21 @@ P.tareas = {
     let l = tareasOrdenadas();
     const pend = l.filter(x => !x.hecho).length, hechas = l.filter(x => x.hecho).length;
     /* Se filtra por a quién está asignada (no por quién la creó). Las de «Todos» salen en todos los filtros. */
-    if (f === 'mias') l = l.filter(x => !x.hecho && (x.para === yoId || x.para === 'todos'));
+    if (f === 'mias') l = l.filter(x => !x.hecho && esPara(x, yoId));
     else if (f === 'hechas') l = l.filter(x => x.hecho);
-    else if (f !== 'todas') l = l.filter(x => !x.hecho && (x.para === f || x.para === 'todos'));
+    else if (f !== 'todas') l = l.filter(x => !x.hecho && esPara(x, f));
     else l = l.filter(x => !x.hecho);
     let h = '<div data-r="banda">' + banda() + '</div>' + head('Tareas', pend + (pend === 1 ? ' pendiente' : ' pendientes') + ' · ' + hechas + (hechas === 1 ? ' hecha' : ' hechas'));
     h += '<div class="chips" style="margin-bottom:14px;flex-wrap:nowrap;overflow-x:auto">' + [['todas', 'Todas'], ['mias', 'Mías']].concat(otros.map(o => [o.id, 'De ' + o.nombre])).concat([['hechas', 'Hechas']]).map(c => '<button class="chip' + (f === c[0] ? ' on' : '') + '" data-a="pSet" data-k="f" data-v="' + c[0] + '" style="flex:none">' + esc(c[1]) + '</button>').join('') + '</div>';
     if (!l.length) return h + vacio(f === 'hechas' ? 'sin-tareas' : 'todo-hecho', f === 'hechas' ? 'Nada hecho aún' : 'Sin tareas', f === 'hechas' ? 'Cuando marquéis tareas, saldrán aquí.' : 'Cuando añadas una, la verás aquí.');
     const fila = x => {
-      const c = x.para === 'todos' ? 'var(--ink)' : colorDe(x.para);
+      const c = colorPara(x);
       const nuevo = e && e.pintado && !e.vistos[x.id]; if (e) e.vistos[x.id] = 1;
       const atras = !x.hecho && x.fecha && x.fecha < hoyISO();
       return '<div class="row card it' + (x.hecho ? ' dn' : '') + (nuevo ? ' nuevo' : '') + '" data-a="verTarea" data-lp="menuTarea" data-id="' + x.id + '">' +
         '<button class="ck' + (x.hecho ? ' on' : '') + (atras ? ' pas' : '') + '" data-a="hacerTarea" data-id="' + x.id + '" style="' + (x.hecho ? 'background:' + colorDe(x.hechoPor) + ';border-color:transparent' : 'border-color:' + c) + '" aria-label="Hecha">' + tick(16) + '</button>' +
         '<div class="f"><b>' + esc(x.titulo) + candado(x) + '</b>' + (sub => sub ? '<small' + (atras ? ' style="color:#C8402B"' : '') + '>' + sub + '</small>' : '')([x.hecho ? 'Hecha por ' + esc(nombreDe(x.hechoPor)) : atras ? cuando(x.fecha, x.hora) : (x.hora || ''), x.turno ? 'Turno' : '', x.repite && x.repite.cada ? (x.hecho || atras || x.hora || x.turno ? textoRepe(x.repite).toLowerCase() : textoRepe(x.repite)) : '', x.cal ? (x.hecho || atras || x.hora || x.turno || (x.repite && x.repite.cada) ? 'en el calendario' : 'En el calendario') : ''].filter(Boolean).join(' · ')) + (!x.hecho && x.limite ? textoLimite(x.limite) : '') + '</div>' +
-        avQuien(x.para, 28) + '</div>';
+        (paraIds(x).length > 1 ? rnCarasPara(x, 28) : avQuien(x.para, 28)) + '</div>';
     };
     /* 1.8.0: el día va en el título del grupo, así que en la ficha solo sale la hora (y turno, repetición, calendario).
        Por días, cada día en su bandeja (Atrasadas, Hoy, Mañana, el día, Sin fecha). Las hechas, en una sola. */
@@ -2023,7 +2023,7 @@ ACC.hacerTarea = (el, ev) => {
   }
   const h = !x.hecho;
   if (fila) fila.classList.toggle('dn', h);
-  el.classList.toggle('on', h); el.style.background = h ? (yo() || {}).color : ''; el.style.borderColor = h ? 'transparent' : (x.para === 'todos' ? 'var(--ink)' : colorDe(x.para));
+  el.classList.toggle('on', h); el.style.background = h ? (yo() || {}).color : ''; el.style.borderColor = h ? 'transparent' : colorPara(x);
   cambiar('tareas', x.id, { hecho: h, hechoPor: h ? S.cfg.persona : '', hechoEn: Date.now() });
   if (x.cal) marcarCal('tareas', x.id);
   const quedan = lista('tareas').filter(t => !t.hecho && t.fecha === hoyISO()).length;
@@ -2116,7 +2116,7 @@ P.tareaVer = {
   html: p => {
     const x = dato('tareas', p.id);
     if (!x) return tope('Tarea') + '<p class="mu">Esta tarea ya no existe.</p>';
-    const kv = [['Para', nombreDe(x.para)], ['Cuándo', cuando(x.fecha, x.hora)]].concat(x.limite ? [['Fecha límite', textoLimite(x.limite, true)]] : []).concat([ ['Repite', textoRepe(x.repite)], ['Calendario', x.cal ? 'Sí · ' + textoAviso(x.aviso).toLowerCase() : 'No']]);
+    const kv = [['Para', nombresPara(x)], ['Cuándo', cuando(x.fecha, x.hora)]].concat(x.limite ? [['Fecha límite', textoLimite(x.limite, true)]] : []).concat([ ['Repite', textoRepe(x.repite)], ['Calendario', x.cal ? 'Sí · ' + textoAviso(x.aviso).toLowerCase() : 'No']]);
     if (x.veces) kv.push(['Hecha', x.veces + (x.veces === 1 ? ' vez' : ' veces') + ' · la última ' + esc(nombreDe(x.ultimaPor))]);
     kv.push(['Añadida por', nombreDe(x.creadoPor)]);
     return tope('Tarea', '<button class="rt" data-a="editarTarea" data-id="' + x.id + '" style="border:0;background:none">' + ic('editar', 24) + '</button>') +
@@ -3593,7 +3593,7 @@ ACC.verFijo = el => Nav.ir('fijoVer', { fid: el.dataset.id });
    Las tarjetas sin nada que enseñar no salen (salvo en el modo editar). */
 const [cCO, cLI, cLA, cVE, cTU, cAZ, cLV, cRO] = COL;
 const yoId = () => S.cfg && S.cfg.persona;
-const mias = t => t.para === yoId() || t.para === 'todos';
+const mias = t => esPara(t, yoId());
 const lab = (t, link) => '<div class="wl"><span>' + t + '</span>' + (link || '') + '</div>';
 const wlink = (t, a) => '<button class="wa" data-a="' + a + '">' + t + '</button>';
 const big = (n, t) => '<div class="bign"><b>' + n + '</b><span>' + (t || '') + '</span></div>';
@@ -3640,7 +3640,7 @@ const wd = (k, t, sec, sz, col, desc, f) => { W[k] = { t: t, sec: sec, sz: sz, c
 wd('hoy', 'Hoy', 'Agenda', 'L', cAZ, 'El día en línea de tiempo: eventos y tus tareas', () => {
   const h = hoyISO(), evs = eventosDia(h), ts = lista('tareas').filter(t => !t.hecho && t.fecha && t.fecha <= h && mias(t)).sort((a, b) => (a.hora || '99').localeCompare(b.hora || '99'));
   const it = evs.map(e => [e.todoDia ? 'Todo el día' : hora(new Date(e.inicio)), '<span class="pb" style="background:' + colorEv(e) + '"></span><button class="tt2" data-a="verEvento" data-id="' + esc(e.id) + '">' + esc(e.titulo) + '</button>', e.todoDia ? '0' : hora(new Date(e.inicio))])
-    .concat(ts.map(t => [t.fecha < h ? 'Atrasada' : (t.hora || 'Hoy'), wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button>', t.fecha < h ? '00' : (t.hora || '99')]))
+    .concat(ts.map(t => [t.fecha < h ? 'Atrasada' : (t.hora || 'Hoy'), wck(colorPara(t), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button>', t.fecha < h ? '00' : (t.hora || '99')]))
     .sort((a, b) => a[2].localeCompare(b[2])).slice(0, 6);
   const d = new Date();
   return { vacio: !it.length, h: lab('Hoy', wlink('Agenda', 'wAgenda')) + '<div class="hoyw"><div class="dia3"><b>' + d.getDate() + '</b><span>' + DIAS[d.getDay()] + '</span></div><div class="tl">' + (it.length ? it.map(x => '<div class="ti"><small>' + x[0] + '</small><div class="tb">' + x[1] + '</div></div>').join('') : '<p class="mu2">Nada para hoy</p>') + '</div></div>' };
@@ -3694,7 +3694,7 @@ wd('tareas', 'Mis tareas', 'Tareas', 'L', cLI, 'Cuántas llevas hechas hoy y las
   const l = lista('tareas').filter(mias), pend = l.filter(t => !t.hecho).sort((a, b) => ((a.fecha || '9999') + (a.hora || '99')).localeCompare((b.fecha || '9999') + (b.hora || '99')));
   const hoyT = l.filter(t => t.fecha === hoyISO() || (t.hecho && t.hechoEn && isoDia(new Date(t.hechoEn)) === hoyISO())), hechas = hoyT.filter(t => t.hecho).length;
   return { vacio: !pend.length && !hoyT.length, h: lab('Mis tareas', wlink(pend.length ? 'Ver las ' + pend.length : 'Tareas', 'wTareas')) + '<div class="prg"><b>' + hechas + '</b><span>de ' + hoyT.length + ' hechas hoy</span></div><div class="bar2"><i style="width:' + (hoyT.length ? Math.round(100 * hechas / hoyT.length) : 0) + '%;background:' + cLI + '"></i></div>' +
-    (pend.length ? pend.slice(0, 3).map(t => '<div class="rw">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button><small>' + (t.para === 'todos' ? 'Todos' : t.fecha ? cuando(t.fecha).replace('Atrasada · ', '') : '') + '</small></div>').join('') : '<p class="mu2">Nada pendiente</p>') };
+    (pend.length ? pend.slice(0, 3).map(t => '<div class="rw">' + wck(colorPara(t), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button><small>' + (t.para === 'todos' ? 'Todos' : t.fecha ? cuando(t.fecha).replace('Atrasada · ', '') : '') + '</small></div>').join('') : '<p class="mu2">Nada pendiente</p>') };
 });
 wd('paraHoy', 'Para hoy', 'Tareas', 'S', cLI, 'Cuántas y de quién', () => {
   const l = lista('tareas').filter(t => !t.hecho && t.fecha && t.fecha <= hoyISO());
@@ -3703,11 +3703,11 @@ wd('paraHoy', 'Para hoy', 'Tareas', 'S', cLI, 'Cuántas y de quién', () => {
 });
 wd('atras', 'Atrasadas', 'Tareas', 'S', cCO, 'Solo lo que se ha pasado', () => {
   const l = lista('tareas').filter(t => !t.hecho && t.fecha && t.fecha < hoyISO()).sort((a, b) => a.fecha.localeCompare(b.fecha));
-  return { vacio: !l.length, h: lab('Atrasadas') + '<div class="alert">' + ic('aviso', 22, 0) + '<b>' + l.length + '</b></div>' + l.slice(0, 2).map(t => '<div class="rw">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button></div>').join('') };
+  return { vacio: !l.length, h: lab('Atrasadas') + '<div class="alert">' + ic('aviso', 22, 0) + '<b>' + l.length + '</b></div>' + l.slice(0, 2).map(t => '<div class="rw">' + wck(colorPara(t), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tt2" data-a="verTarea" data-id="' + t.id + '">' + esc(t.titulo) + candado(t) + '</button></div>').join('') };
 });
 wd('quien', 'Quién tiene qué', 'Tareas', 'S', cVE, 'Tareas pendientes de cada persona', () => {
-  const l = lista('tareas').filter(t => !t.hecho), mx = Math.max(1, ...personas().map(p => l.filter(t => t.para === p.id).length));
-  return { vacio: !l.length, h: lab('Quién tiene qué') + personas().map(p => { const n = l.filter(t => t.para === p.id).length; return '<div class="qq">' + av(p, 26) + '<div class="f"><b>' + esc(p.nombre) + ' · ' + n + '</b><div class="bar2 sm"><i style="width:' + Math.round(100 * n / mx) + '%;background:' + p.color + '"></i></div></div></div>'; }).join('') + '<small class="mu2">' + l.filter(t => t.para === 'todos').length + ' de todos · ' + l.filter(t => t.fecha === hoyISO()).length + ' para hoy</small>' };
+  const l = lista('tareas').filter(t => !t.hecho), mx = Math.max(1, ...personas().map(p => l.filter(t => paraIds(t).indexOf(p.id) >= 0).length));
+  return { vacio: !l.length, h: lab('Quién tiene qué') + personas().map(p => { const n = l.filter(t => paraIds(t).indexOf(p.id) >= 0).length; return '<div class="qq">' + av(p, 26) + '<div class="f"><b>' + esc(p.nombre) + ' · ' + n + '</b><div class="bar2 sm"><i style="width:' + Math.round(100 * n / mx) + '%;background:' + p.color + '"></i></div></div></div>'; }).join('') + '<small class="mu2">' + l.filter(t => t.para === 'todos').length + ' de todos · ' + l.filter(t => t.fecha === hoyISO()).length + ' para hoy</small>' };
 });
 function racha() {
   const l = lista('tareas');
@@ -4169,8 +4169,9 @@ function ordenarAqui(texto) {
     if (horaT && /\b(cita|cena|comida|reunion|medico|dentista|cumple|cumpleanos|fiesta|quedada|quedamos|cine|teatro|partido|concierto|viaje|vuelo|tren)\b/.test(s)) { items.push({ tipo: 'evento', titulo: limpia(f), fecha: fecha || isoDia(h0), hora: horaT }); return; }
     if (/^(nota|apunta que|el wifi|la clave|el telefono|el numero)\b/.test(s)) { items.push({ tipo: 'nota', titulo: limpia(f.replace(/^nota:?\s*/i, '')) }); return; }
     if (f.split(' ').length <= 2 && !fecha && adivinarSeccion(f) !== 'otros') { const c = partirCantidad(f); items.push({ tipo: 'compra', titulo: cap(c.nombre), cantidad: c.cantidad }); return; }
-    const para = personas().find(x => new RegExp('\\b(para |que |a )?' + sinAcentos(x.nombre) + '\\b').test(s));
-    items.push({ tipo: 'tarea', titulo: limpia(f), fecha: fecha, hora: horaT, para: para ? para.nombre : '' });
+    /* 1.0.1: «para Ana y Mikel» la asigna a los dos */
+    const para = personas().filter(x => new RegExp('\\b(para |que |a )?' + sinAcentos(x.nombre) + '\\b').test(s));
+    items.push({ tipo: 'tarea', titulo: limpia(f), fecha: fecha, hora: horaT, para: para.map(x => x.nombre).join(', ') });
   });
   return items.filter(x => x.titulo);
 }
@@ -4291,7 +4292,7 @@ ACC.diloAnadir = el => conEspera(el, async () => {
   for (const x of Dilo.items) {
     try {
       if (x.tipo === 'compra') { const l = L.find(y => y.nombre === x.lista) || L.find(y => y.id === LSUPER) || L[0]; anadirProducto((x.cantidad ? x.cantidad + ' ' : '') + x.titulo, l ? l.id : LSUPER); }
-      else if (x.tipo === 'tarea') { const pa = personas().find(y => sinAcentos(y.nombre) === sinAcentos(x.para || '')); cambiar('tareas', 't' + uid(), { titulo: cap(x.titulo), para: pa ? pa.id : S.cfg.persona, fecha: x.fecha || '', hora: x.hora || '', hecho: false, creadoPor: S.cfg.persona, orden: Date.now(), cal: false }); }
+      else if (x.tipo === 'tarea') { const pa = paraDeNombres(x.para); cambiar('tareas', 't' + uid(), { titulo: cap(x.titulo), para: pa || S.cfg.persona, fecha: x.fecha || '', hora: x.hora || '', hecho: false, creadoPor: S.cfg.persona, orden: Date.now(), cal: false }); }
       else if (x.tipo === 'evento') { const d = deISO(x.fecha) || new Date(); const ini = new Date(d); let todo = true; if (x.hora) { ini.setHours(+x.hora.slice(0, 2), +x.hora.slice(3)); todo = false; } await api('evento-guardar', { ev: { titulo: cap(x.titulo), inicio: ini.getTime(), fin: todo ? sumaDias(d, 1).getTime() : ini.getTime() + 3600000, todoDia: todo, quien: S.cfg.persona } }); }
       else if (x.tipo === 'gasto' && cuenta) { const yoP = (cuenta.participantes || []).find(y => y.persona === S.cfg.persona) || cuenta.participantes[0]; cambiar('movs', 'm' + uid(), { cuenta: cuenta.id, tipo: 'gasto', importe: Number(x.importe) || 0, concepto: cap(x.titulo), fecha: x.fecha || hoyISO(), pagadoPor: yoP.id, categoria: 'otro', reparto: { modo: 'iguales', quienes: cuenta.participantes.map(y => y.id) }, creado: Date.now(), por: S.cfg.persona }); }
       else { const t = x.tipo === 'gasto' ? 'Gasto: ' + cap(x.titulo) + (x.importe ? ' · ' + euros(x.importe) : '') : cap(x.titulo); cambiar('notas', 'n' + uid(), { titulo: t, texto: '', html: '', color: '', editada: Date.now(), por: S.cfg.persona }); x.tipo = 'nota'; }
@@ -5463,7 +5464,7 @@ wd('tareasLista', 'Mis tareas en lista', 'Tareas', 'S', cLI, 'Tus tareas con su 
   return {
     vacio: !l.length,
     h: lab('Mis tareas', '<span class="tlc">' + l.length + '</span>') +
-      (l.length ? '<div class="tlw"><div class="tls">' + l.map(t => '<div class="tlr it">' + wck(t.para === 'todos' ? 'var(--ink)' : colorDe(t.para), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tlt" data-a="verTarea" data-id="' + t.id + '"><b>' + esc(t.titulo) + candado(t) + '</b>' + extraTarea(t) + '</button></div>').join('') + '</div><span class="tlbar"><i></i></span></div>'
+      (l.length ? '<div class="tlw"><div class="tls">' + l.map(t => '<div class="tlr it">' + wck(colorPara(t), false, 'hacerTarea', 'data-id="' + t.id + '"') + '<button class="tlt" data-a="verTarea" data-id="' + t.id + '"><b>' + esc(t.titulo) + candado(t) + '</b>' + extraTarea(t) + '</button></div>').join('') + '</div><span class="tlbar"><i></i></span></div>'
         : '<p class="mu2">Nada pendiente</p>')
   };
 });
@@ -6506,7 +6507,7 @@ function rnWTareas() {
   const pend = l.filter(t => !t.hecho).sort((a, b) => ((a.fecha || '9999') + (a.hora || '99')).localeCompare((b.fecha || '9999') + (b.hora || '99')) || (a.orden || 0) - (b.orden || 0));
   const deHoy = l.filter(t => t.fecha === h || (t.hecho && t.hechoEn && isoDia(new Date(t.hechoEn)) === h && t.fecha === h));
   const hechas = deHoy.filter(t => t.hecho).length;
-  const der = t => { if (t.fecha && t.fecha < h) return '<span class="rn-q rn-rojo">Atrasada</span>'; if (t.para === 'todos') return '<span class="rn-q">Todos</span>'; return t.fecha ? '<span class="rn-q">' + (t.fecha === h ? 'Hoy' : cuando(t.fecha)) + '</span>' : ''; };
+  const der = t => { if (t.fecha && t.fecha < h) return '<span class="rn-q rn-rojo">Atrasada</span>'; if (t.para === 'todos') return '<span class="rn-q">Todos</span>'; if (paraIds(t).length > 1) return rnCarasPara(t, 22); return t.fecha ? '<span class="rn-q">' + (t.fecha === h ? 'Hoy' : cuando(t.fecha)) + '</span>' : ''; };
   return rnCd('<div class="rn-wtop"><button class="rn-wtop-b" data-a="rnVerMias">' + rnAro(hechas, deHoy.length, 56, 8) + '<div class="rn-wnum"><b class="rn-num">' + hechas + ' de ' + deHoy.length + '</b><span>hechas hoy</span></div></button>' +
     '<button class="rn-wlink" data-a="rnVerMias">' + (pend.length ? 'Ver las ' + pend.length : 'Tareas') + '</button></div>' +
     (pend.length ? pend.slice(0, 3).map(t => '<div class="rn-rw">' + rnCk(false, t.fecha && t.fecha < h, 'rnHacer', t.id) + '<button class="rn-rwt" data-a="rnVerTarea" data-id="' + t.id + '"><span class="rn-t">' + esc(t.titulo) + rnCandado(t) + '</span></button>' + der(t) + '</div>').join('')
@@ -6648,14 +6649,14 @@ function rnFilaTarea(x, f) {
 /* A la derecha: la foto de quién es la tarea, o «Todos» */
 function rnDeQuien(x) {
   if (x.para === 'todos' || !x.para) return '<span class="rn-q rn-todos">Todos</span>';
-  const p = dato('personas', x.para); return p ? '<span class="rn-dq" title="' + esc(p.nombre) + '">' + rnAvFoto(p, 26) + '</span>' : '';
+  return rnCarasPara(x, 26);
 }
 /* Filtro: por a quién está asignada. Las de «Todos» salen en todos los filtros. */
 function rnFiltrar(l, f) {
   const yoId = S.cfg.persona;
   if (f === 'hechas') return l.filter(x => x.hecho);
-  if (f === 'mias') return l.filter(x => !x.hecho && (x.para === yoId || x.para === 'todos'));
-  if (f !== 'todas') return l.filter(x => !x.hecho && (x.para === f || x.para === 'todos'));
+  if (f === 'mias') return l.filter(x => !x.hecho && esPara(x, yoId));
+  if (f !== 'todas') return l.filter(x => !x.hecho && esPara(x, f));
   return l.filter(x => !x.hecho);
 }
 
@@ -6666,7 +6667,7 @@ P.tareas = {
     const todas = tareasOrdenadas(), l = rnFiltrar(todas, f).slice(0, 300);
     const otros = personas().filter(x => x.id !== yoId);
     /* La semana: puntos con las tareas de cada día (las del filtro, hechas o no) */
-    const lun = lunesDe(H), base = f === 'hechas' ? todas : todas.filter(x => f === 'todas' || f === 'mias' ? (f === 'todas' || x.para === yoId || x.para === 'todos') : (x.para === f || x.para === 'todos'));
+    const lun = lunesDe(H), base = f === 'hechas' ? todas : todas.filter(x => f === 'todas' || f === 'mias' ? (f === 'todas' || esPara(x, yoId)) : esPara(x, f));
     const sem = [0, 1, 2, 3, 4, 5, 6].map(i => {
       const d = sumaDias(lun, i), iso = isoDia(d), n = Math.min(4, base.filter(x => x.fecha === iso).length);
       return '<button class="rn-sd' + (iso === h ? ' rn-hoy' : iso < h ? ' rn-pas' : ' rn-fut') + '" data-a="rnIrDia" data-v="' + iso + '" aria-label="' + DIAS_CAP[d.getDay()] + ' ' + d.getDate() + (n ? ', ' + n + (n === 1 ? ' tarea' : ' tareas') : '') + '"><small>' + LETRAS[i] + '</small><b class="rn-num">' + d.getDate() + '</b><span class="rn-pts">' + '<i></i>'.repeat(n) + '</span></button>';
@@ -6680,7 +6681,7 @@ P.tareas = {
     const gr = [];
     l.forEach(x => { const g = rnGrupoDe(x); const u = gr.length && gr[gr.length - 1].k === g[0] ? gr[gr.length - 1] : (gr.push({ k: g[0], t: g[1], xs: [] }), gr[gr.length - 1]); u.xs.push(x); });
     gr.sort((a, b) => (a.k === 'a' ? '0' : a.k === 'z' ? '9' : a.k).localeCompare(b.k === 'a' ? '0' : b.k === 'z' ? '9' : b.k));
-    const dePer = x => f === 'todas' || x.para === 'todos' || x.para === (f === 'mias' ? yoId : f);
+    const dePer = x => f === 'todas' || esPara(x, f === 'mias' ? yoId : f);
     o += gr.map(g => {
       let cnt = String(g.xs.length);
       if (g.k === h) { const dh = todas.filter(x => x.fecha === h && dePer(x)); cnt = dh.filter(x => x.hecho).length + ' de ' + dh.length; }
@@ -6739,11 +6740,10 @@ P.tareaVer = {
     const x = dato('tareas', p.id);
     if (!x) return rnTitulo('Tarea', { peq: 1, atras: 'Tareas' }) + rnCd('<p class="rn-txt" style="padding:6px 0 12px">Esta tarea ya no existe.</p>');
     const sub = [x.fecha ? 'Para ' + rnDiaTexto(x.fecha, true) + (deISO(x.fecha) && Math.round((deISO(x.fecha) - hoy0()) / 86400000) > 1 && Math.round((deISO(x.fecha) - hoy0()) / 86400000) < 7 ? ' ' + deISO(x.fecha).getDate() : '') : 'Sin fecha', x.limite ? 'con límite ' + rnDiaTexto(x.limite, true) : ''].filter(Boolean).join(', ');
-    const per = x.para === 'todos' ? null : dato('personas', x.para);
     const linea = (t, v, der, a) => '<' + (a ? 'button data-a="' + a + '" data-id="' + x.id + '"' : 'div') + ' class="rn-rw rn-li"><span class="rn-t">' + t + '</span><span class="rn-lv">' + v + '</span>' + (der === undefined ? rnFle : der) + '</' + (a ? 'button' : 'div') + '>';
     const fecha = x.fecha ? cap(DIAS[deISO(x.fecha).getDay()]) + ' ' + deISO(x.fecha).getDate() + ' de ' + MESES[deISO(x.fecha).getMonth()] + (x.hora ? ', ' + x.hora : '') : 'Sin fecha';
     let o = rnTitulo(esc(x.titulo), { peq: 1, atras: 'Tareas', sub: sub, der: rnRb('editar', 'rnEditarTarea', 'Cambiar', ' data-id="' + x.id + '"') + rnRb('borrar', 'rnBorrarTarea', 'Borrar', ' data-id="' + x.id + '"') }) +
-      rnCd(linea('Para', esc(x.para === 'todos' ? 'Todos' : nombreDe(x.para)), per ? rnAv(per, 26) : '', null) + linea('Cuándo', fecha, undefined, 'rnEditarTarea') +
+      rnCd(linea('Para', esc(nombresPara(x)), x.para === 'todos' || !x.para ? '' : rnCarasPara(x, 26), null) + linea('Cuándo', fecha, undefined, 'rnEditarTarea') +
         (x.limite ? linea('Límite', cap(DIAS[deISO(x.limite).getDay()]) + ' ' + deISO(x.limite).getDate(), undefined, 'rnEditarTarea') : '') +
         linea('Repetir', esc(textoRepe(x.repite)), undefined, 'rnEditarTarea') + linea('Solo para mí', x.solo ? 'Sí' : 'No', x.solo ? '<span class="rn-fle">' + rnIc('candado', 18, 2) + '</span>' : '', null), 'rn-k-lima rn-cdv') +
       '<button class="rn-btnp" data-a="rnHacerVer" data-id="' + x.id + '">' + rnIc('hecho', 20, 2.2) + (x.hecho ? 'Marcar como pendiente' : 'Marcar como hecha') + '</button>';
@@ -6807,7 +6807,7 @@ function rnPintarTarea(abrir) {
   const linea = (lab, v, der, a, campo) => '<label class="rn-rw rn-li"' + (a ? ' data-a="' + a + '"' : '') + '><span class="rn-t">' + lab + '</span><span class="rn-lv">' + v + '</span>' + (der === undefined ? rnFle : der) + (campo || '') + '</label>';
   const html = rnCabHoja(t.id ? 'Cambiar tarea' : 'Nueva tarea') +
     '<label class="rn-fld"><small>Qué hay que hacer</small><input id="rnTit" value="' + esc(t.titulo) + '" placeholder="Por ejemplo, cambiar la bombilla" maxlength="120" autocomplete="off" enterkeyhint="done"></label>' +
-    (t.solo ? '' : '<p class="rn-et">Para quién</p>' + chips(ps.map(p => [p.id, esc(p.nombre)]).concat([['todos', 'Todos']]), t.para, 'rnTPara')) +
+    (t.solo ? '' : '<p class="rn-et">Para quién <span class="rn-et-n">Puedes elegir varias personas</span></p><div class="rn-qcs">' + ps.map(p => '<button class="rn-qc' + (paraIds(t).indexOf(p.id) >= 0 ? ' rn-on' : '') + '" data-a="rnTPara" data-v="' + p.id + '" aria-pressed="' + (paraIds(t).indexOf(p.id) >= 0) + '">' + esc(p.nombre) + '</button>').join('') + '<button class="rn-qc' + (t.para === 'todos' ? ' rn-on' : '') + '" data-a="rnTPara" data-v="todos" aria-pressed="' + (t.para === 'todos') + '">Todos</button></div>') +
     '<p class="rn-et">Cuándo</p>' + chips([['hoy', 'Hoy'], ['man', 'Mañana'], ['fd', fd[1]], ['otro', otroDia + '<input type="date" id="rnFec" class="rn-oc" value="' + esc(atajo === 'otro' ? t.fecha : '') + '" aria-label="Elegir día">']], atajo, 'rnTCuando') +
     '<div class="rn-lis">' +
     linea('Hora', t.hora || 'Sin hora', undefined, null, '<input type="time" id="rnHor" class="rn-oc" value="' + esc(t.hora) + '" aria-label="Hora">') +
@@ -6833,7 +6833,8 @@ function rnMontarTarea(h) {
   const hr = $('#rnHor', h); if (hr) hr.addEventListener('change', () => { RN_T.hora = hr.value; rnPintarTarea(); });
 }
 const rnLeerTit = () => { const i = $('#rnTit'); if (i) RN_T.titulo = i.value; };
-ACC.rnTPara = el => { rnLeerTit(); RN_T.para = el.dataset.v; rnPintarTarea(); };
+/* 1.0.1: se pueden marcar varias personas. «Todos» las quita; marcar a todas es lo mismo que «Todos»; quitar a la última deja «Todos». */
+ACC.rnTPara = el => { rnLeerTit(); RN_T.para = paraConmutar(RN_T.para, el.dataset.v); rnPintarTarea(); };
 ACC.rnTCuando = el => {
   rnLeerTit();
   const v = el.dataset.v;
@@ -7231,7 +7232,7 @@ P.agenda = {
     let o = cab + '<div class="rn-cd rn-gl rn-cal" data-r="cal">' + cal + '</div>';
     const ev = iso => {
       const es = eventosDia(iso).map(x => ({ h: x.todoDia ? 'Todo el día' : hora(new Date(x.inicio)), t: x.titulo, s: [x.lugar, String(x.quien || '').split(',').filter(q => rnPersona(q)).length > 1 ? 'Los dos' : String(x.quien || '').split(',').filter(q => rnPersona(q)).map(q => 'solo ' + nombreDe(q)).join('')].filter(Boolean).join(' · '), k: 'azul', a: 'verEvento', id: x.id, o: x.todoDia ? '00' : hora(new Date(x.inicio)) }));
-      const ts = lista('tareas').filter(t => !t.hecho && t.fecha === iso && mias(t)).map(t => ({ h: t.hora || '', t: t.titulo, s: 'Tarea · de ' + (t.para === 'todos' ? 'todos' : nombreDe(t.para)), k: 'lima', a: 'rnVerTarea', id: t.id, o: t.hora || '99' }));
+      const ts = lista('tareas').filter(t => !t.hecho && t.fecha === iso && mias(t)).map(t => ({ h: t.hora || '', t: t.titulo, s: 'Tarea · de ' + (t.para === 'todos' ? 'todos' : nombresPara(t)), k: 'lima', a: 'rnVerTarea', id: t.id, o: t.hora || '99' }));
       return es.concat(ts).sort((a, b) => a.o.localeCompare(b.o));
     };
     const fila = x => '<button class="rn-rw rn-ev" data-a="' + x.a + '" data-id="' + esc(x.id) + '"><i class="rn-evb rn-k-' + x.k + '"></i><span class="rn-fat"><span class="rn-t">' + esc(x.t) + '</span>' + (x.s ? '<span class="rn-n">' + esc(x.s) + '</span>' : '') + '</span><span class="rn-hr">' + esc(x.h) + '</span></button>';
@@ -8120,7 +8121,7 @@ function rnWTareas() {
   let pend = l.filter(t => !t.hecho).filter(t => c.q !== 'hoy' || (t.fecha && t.fecha <= h)).filter(t => c.atr || !(t.fecha && t.fecha < h))
     .sort((a, b) => ((a.fecha || '9999') + (a.hora || '99')).localeCompare((b.fecha || '9999') + (b.hora || '99')) || (a.orden || 0) - (b.orden || 0));
   const deHoy = l.filter(t => t.fecha === h), hechas = deHoy.filter(t => t.hecho).length;
-  const der = t => { if (t.fecha && t.fecha < h) return '<span class="rn-q rn-rojo">Atrasada</span>'; if (t.para === 'todos') return '<span class="rn-q">Todos</span>'; return t.fecha ? '<span class="rn-q">' + (t.fecha === h ? 'Hoy' : cuando(t.fecha)) + '</span>' : ''; };
+  const der = t => { if (t.fecha && t.fecha < h) return '<span class="rn-q rn-rojo">Atrasada</span>'; if (t.para === 'todos') return '<span class="rn-q">Todos</span>'; if (paraIds(t).length > 1) return rnCarasPara(t, 22); return t.fecha ? '<span class="rn-q">' + (t.fecha === h ? 'Hoy' : cuando(t.fecha)) + '</span>' : ''; };
   const n = c.n || pend.length;
   return rnCd('<div class="rn-wtop"><button class="rn-wtop-b" data-a="rnVerMias">' + rnAro(hechas, deHoy.length, 56, 8) + '<div class="rn-wnum"><b class="rn-num">' + hechas + ' de ' + deHoy.length + '</b><span>hechas hoy</span></div></button>' +
     '<button class="rn-wlink" data-a="rnVerMias">' + (pend.length ? 'Ver las ' + pend.length : 'Tareas') + '</button></div>' +
@@ -9074,9 +9075,58 @@ async function rnArrancar() {
   quitarArranque();
 }
 
+/* ---- 58_rn_101.js ---- */
+/* ===================== 1.0.1 · TAREAS PARA VARIAS PERSONAS =====================
+   «para» sigue siendo un texto, como siempre: 'todos', el id de una persona o, ahora, varios ids separados por comas.
+   Así las tareas de antes siguen igual y el script no cambia (guarda el texto tal cual). */
+function paraIds(t) {
+  const p = t && t.para;
+  if (!p || p === 'todos') return [];
+  return String(p).split(',').map(x => x.trim()).filter(Boolean);
+}
+/* ¿Le toca a esta persona? Las de «Todos», a todas */
+function esPara(t, id) { return !!t && (t.para === 'todos' || paraIds(t).indexOf(id) >= 0); }
+/* El color del círculo: el de la persona si es una sola; si es de varias o de todos, el neutro */
+function colorPara(t) { const l = paraIds(t); return l.length === 1 ? colorDe(l[0]) : 'var(--ink)'; }
+/* «Ana», «Ana y Mikel», «Ana, Mikel y Jon», «Todos» */
+function nombresPara(t) {
+  if (!t || !t.para || t.para === 'todos') return 'Todos';
+  const n = paraIds(t).map(nombreDe).filter(Boolean);
+  return n.length < 2 ? (n[0] || '') : n.slice(0, -1).join(', ') + ' y ' + n[n.length - 1];
+}
+/* Las caras, una encima de otra: hasta 3 y «+N» */
+function rnCarasPara(t, tam) {
+  const ps = paraIds(t).map(id => dato('personas', id)).filter(Boolean);
+  if (!ps.length) return '';
+  if (ps.length === 1) return '<span class="rn-dq" title="' + esc(ps[0].nombre) + '">' + rnAv(ps[0], tam) + '</span>';
+  const vis = ps.slice(0, 3), mas = ps.length - vis.length;
+  return '<span class="rn-dq rn-caras" title="' + esc(nombresPara(t)) + '" style="--cr:' + tam + 'px">' + vis.map(p => '<span class="rn-cara">' + rnAv(p, tam) + '</span>').join('') +
+    (mas ? '<span class="rn-cara rn-cara-mas">+' + mas + '</span>' : '') + '</span>';
+}
+/* Marcar o desmarcar una persona en el selector */
+function paraConmutar(actual, v) {
+  if (v === 'todos') return 'todos';
+  const ids = actual === 'todos' ? [] : paraIds({ para: actual });
+  const i = ids.indexOf(v); if (i >= 0) ids.splice(i, 1); else ids.push(v);
+  const todas = personas().map(p => p.id);
+  const orden = todas.filter(id => ids.indexOf(id) >= 0);           /* siempre en el orden de la casa */
+  if (!orden.length) return 'todos';
+  if (orden.length === todas.length && todas.length > 1) return 'todos';
+  return orden.join(',');
+}
+/* Dilo: «Ana, Mikel y Jon» → sus ids */
+function paraDeNombres(txt) {
+  const s = sinAcentos(String(txt || '')).toLowerCase();
+  if (!s.trim()) return '';
+  if (/\b(todos|todas)\b/.test(s)) return 'todos';
+  const ids = personas().filter(p => new RegExp('\\b' + sinAcentos(p.nombre).toLowerCase() + '\\b').test(s)).map(p => p.id);
+  if (!ids.length) return '';
+  return ids.length === personas().length && ids.length > 1 ? 'todos' : ids.join(',');
+}
+
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
-window.RONDA = Object.assign(window.RONDA || {}, { rnMedir, S, Nav, ACC, P, DB, VERSION, cambiar, lista, rnSecciones, rnNuevaTarea, PRUEBA, PI, PR, MODO, EN_CASA, RN_PAL, Sync, Cal, rnAurora, Dilo, rnPalBolas, W, PLANTILLAS, fijarInicio, ordenInicio, rnBarra, locLeer, actLoc, rnPalabra, apiReal, saldosDe, reembolsos, hoyISO, ordenAgua, nivelAgua, dato, toast });
+window.RONDA = Object.assign(window.RONDA || {}, { paraConmutar, paraDeNombres, rnMedir, S, Nav, ACC, P, DB, VERSION, cambiar, lista, rnSecciones, rnNuevaTarea, PRUEBA, PI, PR, MODO, EN_CASA, RN_PAL, Sync, Cal, rnAurora, Dilo, rnPalBolas, W, PLANTILLAS, fijarInicio, ordenInicio, rnBarra, locLeer, actLoc, rnPalabra, apiReal, saldosDe, reembolsos, hoyISO, ordenAgua, nivelAgua, dato, toast });
 rnArrancar().catch(e => {
   anotar('arranque', e);
   const a = $('#arranque'); if (a) a.remove();
