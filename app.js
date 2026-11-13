@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.16 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.17 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.16';  /* = 1.0.8 (sin los menús nuevos ni lo posterior) + Vaciar papelera */
+const VERSION = '1.0.17';  /* = 1.0.8 (sin los menús nuevos ni lo posterior) + Vaciar papelera */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -8571,14 +8571,10 @@ function rnSecciones() {
     } });
   RN_MAS_ABIERTA = true;
   /* 0.3.3: el hueco de la barra, en píxeles (en el iPhone, con porcentajes, la hoja no crecía: aparecía de golpe) */
-  h.style.setProperty('--ct', Math.max(0, h.offsetHeight - 82) + 'px'); h.getBoundingClientRect();
-  if (hojaAbierta) hojaAbierta.velo.classList.add('rn-velo-prof');
-  r.classList.add('rn-mas', 'rn-prof');
+  /* 1.0.17: «Más» se abre como «Añadir» (sube desde abajo): sin desenfoque ni encoger la pantalla de detrás, sin recorte y sin ola.
+     Era lo que la hacía lenta en el iPhone. */
+  r.classList.add('rn-mas');
   Nav.barra();
-  /* La ola: cada sección sale desde la esquina de «Más», las más cercanas primero */
-  const m = $('#nav .rn-tab[data-id="mas"]'), o = m ? m.getBoundingClientRect() : { left: innerWidth - 60, top: innerHeight - 60, width: 0, height: 0 };
-  const ox = o.left + o.width / 2, oy = o.top + o.height / 2;
-  $$('.rn-sc', h).forEach(c => { const q = c.getBoundingClientRect(), dx = ox - (q.left + q.width / 2), dy = oy - (q.top + q.height / 2), d = Math.hypot(dx, dy) || 1; c.style.setProperty('--d', Math.round(80 + d / 1.5) + 'ms'); c.style.setProperty('--ux', (dx / d * 14).toFixed(1) + 'px'); c.style.setProperty('--uy', (dy / d * 14).toFixed(1) + 'px'); });
   return h;
 }
 const _secElegir57 = ACC.rnSecElegir;
