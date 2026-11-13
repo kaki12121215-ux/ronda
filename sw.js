@@ -1,6 +1,6 @@
 /* RONDA · service worker: abre sin conexión y recibe versiones nuevas. Nunca toca las llamadas a Google.
    Solo borra sus propias cachés («ronda-…»): la de la 1.8.0 se va al activarse esta. */
-const VERSION = 'ronda-1.0.6';
+const VERSION = 'ronda-1.0.7';
 const ARCHIVOS = ['./', 'index.html', 'ronda.css', 'app.js', 'manifest.webmanifest',
   'fonts/inter-400.woff', 'fonts/inter-500.woff', 'fonts/inter-600.woff', 'fonts/inter-700.woff', 'fonts/inter-display-600.woff', 'fonts/inter-display-700.woff',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/favicon-32.png', 'lista.html'];

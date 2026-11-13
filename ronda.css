@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.6 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.7 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2207,3 +2207,31 @@ html.rn-mas[data-tema="oscuro"] .rn-b5c { background: #232C31; box-shadow: 0 -10
 .rn-swbg { position: absolute; top: 0; bottom: 0; left: 100%; width: 100vw; background: #E0613F; color: #fff; display: flex; align-items: center; padding-left: 22px; pointer-events: none; }
 .rn-swcd { overflow: hidden !important; }
 .rn-it[data-lp] { touch-action: pan-y; }
+
+/* 1.0.7 · Orden de «Más» y botón principal de Feedback */
+.rn-mo { touch-action: pan-y; transition: transform .18s ease; background: inherit; }
+.rn-mo.rn-mo-coge { transition: none; z-index: 2; position: relative; box-shadow: 0 8px 24px rgba(0,0,0,.18); border-radius: 14px; background: var(--b, #fff); }
+.rn-asa { opacity: .55; padding: 8px; touch-action: none; }
+.rn-hj .btn.pri { background: #2B3A42; color: #FFFFFF; }
+[data-tema="oscuro"] .rn-hj .btn.pri { background: #EEF2F4; color: #1B2328; }
+
+/* Papelera */
+.rn-pap { opacity: .6; }
+.rn-pap svg { width: 18px; height: 18px; }
+.rn-recup { flex: none; border: 0; border-radius: 999px; padding: 8px 14px; font: 600 14px/1 var(--f-texto); background: rgba(127,127,127,.18); color: var(--txt); }
+[data-tema="oscuro"] .rn-recup { color: #fff; }
+
+/* 1.0.7 · Gasto: segmentos en una línea y − / + centrados */
+.seg button { white-space: nowrap; font-size: 15px; padding-left: 8px; padding-right: 8px; }
+.pm button { display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1; text-align: center; }
+
+/* Ordenar «Más» desde la propia hoja */
+.rn-hj-mas .rn-sc { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.rn-hj-mas.rn-mas-ed .rn-sc { animation: rn-tiembla .3s ease-in-out infinite alternate; touch-action: none; }
+.rn-hj-mas.rn-mas-ed .rn-sc:nth-child(2n) { animation-delay: -.15s; }
+@keyframes rn-tiembla { from { rotate: -1.6deg; } to { rotate: 1.6deg; } }
+.rn-hj-mas .rn-sc.rn-sc-coge { animation: none; z-index: 5; position: relative; transition: none; opacity: 1; box-shadow: 0 12px 30px rgba(0,0,0,.22); border-radius: 18px; background: rgba(127,127,127,.22); }
+.rn-mas-listo { margin-left: auto; border: 0; border-radius: 999px; padding: 8px 16px; font: 600 15px/1 var(--f-texto); background: #2B3A42; color: #fff; }
+[data-tema="oscuro"] .rn-mas-listo { background: #EEF2F4; color: #1B2328; }
+.rn-mas-aviso { margin: -4px 0 10px; font-size: 14px; opacity: .65; text-align: center; }
+@media (prefers-reduced-motion: reduce) { .rn-hj-mas.rn-mas-ed .rn-sc { animation: none; } }

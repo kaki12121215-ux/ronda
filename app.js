@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.6 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.7 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.6';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.7';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -2525,7 +2525,7 @@ P.mov = {
     const imp = numero(pv(p, 'mImp', p.importe ? String(p.importe).replace('.', ',') : ''));
     let h = tope(p.id ? 'Cambiar gasto' : 'Nuevo gasto') + '<div class="amount"><input id="mImp" inputmode="decimal" placeholder="0,00" value="' + esc(pv(p, 'mImp', p.importe ? String(p.importe).replace('.', ',') : '')) + '" style="width:70%;text-align:center;border:0;background:none;font:inherit;color:inherit;outline:0"><small> €</small></div>' +
       fldTxt('mCon', 'Concepto', pv(p, 'mCon', p.concepto), 'Cena, gasolina, entradas…', 'maxlength="80"') +
-      '<label class="fld"><small>Fecha</small><input type="date" id="mFec" value="' + esc(pv(p, 'mFec', p.fecha)) + '"></label>' +
+      '<label class="fld"><small>Fecha</small><input type="date" id="mFec" value="' + esc(pv(p, 'mFec', p.fecha || hoyISO())) + '"></label>' +
       '<p class="lab2">Pagado por</p><div class="chips">' + c.participantes.map((x, i) => '<button class="chip' + (p.pagadoPor === x.id ? ' on' : '') + '" data-a="pSet" data-k="pagadoPor" data-v="' + x.id + '">' + esc(x.nombre) + '</button>').join('') + '</div>' +
       '<p class="lab2">Categoría</p><div class="chips">' + CAT_MOV.concat(lista('categorias').map(x => [x.id, x.nombre])).map(k => '<button class="chip' + (p.categoria === k[0] ? ' on' : '') + '" data-a="pSet" data-k="categoria" data-v="' + k[0] + '">' + esc(k[1]) + '</button>').join('') + '</div>' +
       '<p class="lab2">Para quién</p><div class="seg">' + [['iguales', 'A partes iguales'], ['partes', 'Por partes'], ['importes', 'Por importes']].map(m => '<button class="' + (p.modo === m[0] ? 'on' : '') + '" data-a="pSet" data-k="modo" data-v="' + m[0] + '">' + m[1] + '</button>').join('') + '</div><div class="card grp" style="margin-top:8px">';
@@ -6679,7 +6679,7 @@ P.tareas = {
       const d = sumaDias(lun, i), iso = isoDia(d), n = Math.min(4, base.filter(x => x.fecha === iso).length);
       return '<button class="rn-sd' + (iso === h ? ' rn-hoy' : iso < h ? ' rn-pas' : ' rn-fut') + '" data-a="rnIrDia" data-v="' + iso + '" aria-label="' + DIAS_CAP[d.getDay()] + ' ' + d.getDate() + (n ? ', ' + n + (n === 1 ? ' tarea' : ' tareas') : '') + '"><small>' + LETRAS[i] + '</small><b class="rn-num">' + d.getDate() + '</b><span class="rn-pts">' + '<i></i>'.repeat(n) + '</span></button>';
     }).join('');
-    let o = rnTitulo('Tareas', { der: rnRb('buscar', 'rnBuscar', 'Buscar') }) +
+    let o = rnTitulo('Tareas', { der: rnBtnPapelera('tareas') + rnRb('buscar', 'rnBuscar', 'Buscar') }) +
       rnCd('<div class="rn-sem">' + sem + '</div>', 'rn-semc') +
       '<div class="rn-flw"><div class="rn-fl rn-gl" role="tablist">' + [['todas', 'Todas'], ['mias', 'Mías']].concat(otros.map(x => [x.id, 'De ' + x.nombre])).concat([['hechas', 'Hechas']]).map(c => '<button class="' + (f === c[0] ? 'rn-on' : '') + '" role="tab" aria-selected="' + (f === c[0]) + '" data-a="rnFiltro" data-v="' + c[0] + '">' + esc(c[1]) + '</button>').join('') + '</div></div>' + rnFiltroCats();
     if (!l.length) return o + rnVacia(f);
@@ -7105,7 +7105,7 @@ P.compra = {
     const ls = listasCompra(), tot = lista('compra').filter(x => !x.hecho && ls.some(l => l.id === listaDe(x))).length;
     const conAlgo = ls.filter(l => pendientesDe(l.id)).length;
     const lid = ultimaLista(), L = datoLista(lid) || ls[0];
-    return rnTitulo('Compra', { der: rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: tot ? tot + (tot === 1 ? ' cosa' : ' cosas') + ' por comprar' + (conAlgo > 1 ? ' en ' + conAlgo + ' listas' : '') : 'Nada por comprar' }) +
+    return rnTitulo('Compra', { der: rnBtnPapelera('compra') + rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: tot ? tot + (tot === 1 ? ' cosa' : ' cosas') + ' por comprar' + (conAlgo > 1 ? ' en ' + conAlgo + ' listas' : '') : 'Nada por comprar' }) +
       '<form class="rn-cd rn-gl rn-qbar" onsubmit="return false"><input id="rnCN" class="rn-qai" placeholder="¿Qué falta?" autocomplete="off" enterkeyhint="done" maxlength="60" data-lid="' + L.id + '" aria-label="¿Qué falta?"><button type="button" class="rn-tg" data-a="rnCLista">' + esc(L.nombre) + '</button><button type="button" class="rn-qmic" data-a="rnDilo" aria-label="Dictar">' + rnIc('microfono', 21, 2) + '</button><button type="button" class="rn-qab" data-a="rnCOk" aria-label="Añadir">' + rnIc('anadir', 22, 2.2) + '</button></form>' +
       rnCd(rnGrupo('Vuestras listas', String(ls.length)) + ls.map(l => {
         const todos = lista('compra').filter(x => listaDe(x) === l.id), n = todos.filter(x => !x.hecho).length, carro = todos.filter(x => x.hecho && x.hechoEn && Date.now() - x.hechoEn < 3 * 86400000).length;
@@ -7398,7 +7398,7 @@ P.notas = {
     if (f === 'mias') l = l.filter(n => n.por === yoId); else if (f === 'fijadas') l = l.filter(n => n.fijada); else if (f !== 'todas') l = l.filter(n => n.por === f);
     const tarjeta = n => { const k = RN_NOTACOL[String(colorNota(n) || '').toUpperCase()] || 'lavanda'; const d = n.editada ? isoDia(new Date(n.editada)) : ''; const cuando2 = d === hoyISO() ? 'Hoy' : d === isoDia(sumaDias(hoy0(), -1)) ? 'Ayer' : d ? deISO(d).getDate() + ' ' + MESES[deISO(d).getMonth()].slice(0, 3) : ''; return '<button class="rn-nt rn-k-' + k + (colorNota(n) ? '' : ' rn-nt-blanca') + '" data-a="verNota" data-lp="notaMenu" data-id="' + n.id + '"><b>' + (n.fijada ? '<i class="rn-fij" aria-label="Fijada">' + rnIc('etiqueta', 13, 2.3) + '</i>' : '') + (n.emoji ? esc(n.emoji) + ' ' : '') + esc(n.titulo || 'Nota') + '</b><span class="rn-ntx">' + esc((n.texto || '').slice(0, 160)) + '</span><span class="rn-s rn-ntp">' + [cuando2, nombreDe(n.por)].filter(Boolean).map(esc).join(' · ') + '</span></button>'; };
     const c1 = l.filter((x, i) => i % 2 === 0), c2 = l.filter((x, i) => i % 2 === 1);
-    return rnTitulo('Notas', { der: rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: total + (total === 1 ? ' nota' : ' notas') }) +
+    return rnTitulo('Notas', { der: rnBtnPapelera('notas') + rnRb('buscar', 'rnBuscarEn', 'Buscar'), sub: total + (total === 1 ? ' nota' : ' notas') }) +
       rnFiltros([['todas', 'Todas'], ['mias', 'Mías']].concat(otros.map(o => [o.id, 'De ' + o.nombre])).concat([['fijadas', 'Fijadas']]), f) +
       (l.length ? '<div class="rn-ng"><div>' + c1.map(tarjeta).join('') + '</div><div>' + c2.map(tarjeta).join('') + '</div></div>' : '<div class="rn-vac">' + rnIlu('sin-documentos') + '<h2>Sin notas</h2><p class="rn-txt">El wifi, el teléfono del fontanero, ideas para el viaje…</p></div>');
   },
@@ -7887,6 +7887,7 @@ P.ajustes.html = () => {
     '<h2 class="rn-gt">La app</h2><div class="rn-cd">' +
     fila('sol', 'Apariencia', { claro: 'Claro', oscuro: 'Oscuro', auto: 'Automático' }[tema], 'apariencia') +
     fila('ordenar', 'Barra de abajo', rnBarra().map(k => rnCorto(k)).join(' y '), 'barra') +
+    fila('filtrar', 'Orden de «Más»', { def: 'Predeterminado', az: 'De la A a la Z', pers: 'Personalizado' }[rnMasModo()], 'masOrden') +
     fila('paraguas', 'El tiempo', esc(ciudad), 'tiempoAj') +
     fila('nota', 'Resumen del domingo', res, 'resumenAj') +
     fila('sincronizar', 'Sincronización', sync, 'sincronizacion') +
@@ -8560,7 +8561,7 @@ function rnSecciones() {
   if (RN_MAS_ABIERTA) return cerrarHoja();
   const act = Nav.pila[0] && Nav.pila[0].id, r = document.documentElement;
   const h = abrirHoja(rnCabHoja('Secciones', '<button class="rn-x" data-a="rnBuscar" aria-label="Buscar">' + rnIc('buscar', 22, 2) + '</button>') +
-    '<div class="rn-secs">' + RN_ORDEN_SEC.map(k => '<button class="rn-sc rn-k-' + RN_SEC[k][2] + (k === act ? ' rn-on' : '') + '" data-a="rnSecElegir" data-id="' + k + '">' + rnChip(RN_SEC[k][1], 40) + '<span>' + RN_SEC[k][0] + '</span></button>').join('') + '</div>',
+    '<div class="rn-secs">' + rnOrdenMas().map(k => '<button class="rn-sc rn-k-' + RN_SEC[k][2] + (k === act ? ' rn-on' : '') + '" data-a="rnSecElegir" data-id="' + k + '">' + rnChip(RN_SEC[k][1], 40) + '<span>' + RN_SEC[k][0] + '</span></button>').join('') + '</div>',
     { clase: 'rn-hj-sec rn-hj-mas', alCerrar: () => {
       RN_MAS_ABIERTA = false; r.classList.remove('rn-prof');
       /* 0.3.5: la barra deja de estar por encima justo cuando la hoja ya no está (antes, 20 ms antes: la hoja blanca la tapaba un instante y parpadeaba) */
@@ -9277,6 +9278,119 @@ const RN_SW_BORRA = { menuProducto: 'borrarProducto', rnMenuTarea: 'rnBorrarTare
   document.addEventListener('touchmove', ev => { if (sw && sw.activo) ev.preventDefault(); }, { passive: false, capture: true });
   document.addEventListener('click', ev => { if (Date.now() - anularClic < 400) { ev.stopPropagation(); ev.preventDefault(); } }, true);
 })();
+
+/* ---- 58_rn_107.js ---- */
+/* ===================== 1.0.7 · ORDEN DE «MÁS» =====================
+   Ajustes › Orden de «Más»: Predeterminado, De la A a la Z o Personalizado (arrastrando). Se guarda en este móvil. */
+const rnMasModo = () => { try { return localStorage.getItem('ronda-mas-orden') || 'def'; } catch (e) { return 'def'; } };
+function rnOrdenMas() {
+  const m = rnMasModo();
+  if (m === 'az') return RN_ORDEN_SEC.slice().sort((a, b) => sinAcentos(RN_SEC[a][0]).localeCompare(sinAcentos(RN_SEC[b][0]), 'es'));
+  if (m === 'pers') {
+    let l = []; try { l = JSON.parse(localStorage.getItem('ronda-mas-pers') || '[]'); } catch (e) { }
+    l = l.filter(k => RN_ORDEN_SEC.indexOf(k) >= 0);
+    return l.concat(RN_ORDEN_SEC.filter(k => l.indexOf(k) < 0));       /* las nuevas, al final */
+  }
+  return RN_ORDEN_SEC.slice();
+}
+P.masOrden = {
+  html: () => {
+    const m = rnMasModo(), op = (v, t, s) => '<button class="rn-op" data-a="rnMasModo" data-v="' + v + '"><span>' + t + (s ? '<small class="rn-n" style="display:block">' + s + '</small>' : '') + '</span>' + (m === v ? '<span class="rn-fle">' + rnIc('hecho', 20, 2.4) + '</span>' : '') + '</button>';
+    let o = rnTitulo('Orden de «Más»', { peq: 1, atras: 'Ajustes' }) +
+      rnCd('<div class="rn-ops">' + op('def', 'Predeterminado') + op('az', 'De la A a la Z') + op('pers', 'Personalizado', 'En «Más», mantén pulsada una sección y arrástrala') + '</div>');
+    return o;
+  }
+};
+ACC.rnMasModo = el => {
+  try { localStorage.setItem('ronda-mas-orden', el.dataset.v); if (el.dataset.v === 'pers' && !localStorage.getItem('ronda-mas-pers')) localStorage.setItem('ronda-mas-pers', JSON.stringify(RN_ORDEN_SEC)); } catch (e) { }
+  Nav.refrescar(true);
+};
+/* Ordenar desde la propia hoja de «Más»: mantener pulsada una sección (0,45 s) la coge; se arrastra y las demás se
+   apartan. Al soltar, el orden queda guardado como «Personalizado». «Listo» (o cerrar la hoja) termina. */
+let RN_MAS_ED = false;
+function rnMasOrdenar(h) {
+  const cont = h && $('.rn-secs', h); if (!cont) return;
+  let t = 0, d = null, ini = null;
+  const guardar = () => { const l = $$('.rn-sc', cont).map(c => c.dataset.id); try { localStorage.setItem('ronda-mas-pers', JSON.stringify(l)); localStorage.setItem('ronda-mas-orden', 'pers'); } catch (e) { } };
+  const editar = () => {
+    if (RN_MAS_ED) return; RN_MAS_ED = true; h.classList.add('rn-mas-ed');
+    const cab = $('.rn-hjcab', h); if (cab && !$('.rn-mas-listo', h)) cab.insertAdjacentHTML('beforeend', '<button class="rn-mas-listo" data-a="rnMasListo">Listo</button>');
+    if (!$('.rn-mas-aviso', h)) cont.insertAdjacentHTML('beforebegin', '<p class="rn-mas-aviso">Arrastra las secciones para ordenarlas</p>');
+  };
+  const coger = (c, x, y) => {
+    editar(); const r = c.getBoundingClientRect();
+    d = { c, dx: x - r.left, dy: y - r.top, x0: r.left, y0: r.top };
+    c.classList.add('rn-sc-coge'); if (navigator.vibrate) try { navigator.vibrate(10); } catch (e) { }
+  };
+  cont.addEventListener('pointerdown', ev => {
+    const c = ev.target.closest('.rn-sc'); if (!c) return;
+    ini = { x: ev.clientX, y: ev.clientY };
+    if (RN_MAS_ED) { coger(c, ev.clientX, ev.clientY); return; }
+    clearTimeout(t); t = setTimeout(() => coger(c, ini.x, ini.y), 450);
+  });
+  const mover = ev => {
+    if (!d) { if (ini && Math.hypot(ev.clientX - ini.x, ev.clientY - ini.y) > 10) clearTimeout(t); return; }
+    ev.preventDefault();
+    const c = d.c; c.style.transform = 'translate(' + (ev.clientX - d.dx - d.x0) + 'px,' + (ev.clientY - d.dy - d.y0) + 'px) scale(1.08)';
+    c.style.pointerEvents = 'none';
+    const sob = document.elementFromPoint(ev.clientX, ev.clientY), o = sob && sob.closest('.rn-sc');
+    c.style.pointerEvents = '';
+    if (o && o !== c && o.parentNode === cont) {
+      const ls = $$('.rn-sc', cont), io = ls.indexOf(o), ic = ls.indexOf(c);
+      const r0 = c.getBoundingClientRect();
+      cont.insertBefore(c, io > ic ? o.nextSibling : o);
+      /* la celda cogida sigue bajo el dedo aunque su sitio haya cambiado */
+      const r1 = c.getBoundingClientRect(); d.x0 += r1.left - r0.left; d.y0 += r1.top - r0.top;
+      c.style.transform = 'translate(' + (ev.clientX - d.dx - d.x0) + 'px,' + (ev.clientY - d.dy - d.y0) + 'px) scale(1.08)';
+    }
+  };
+  const soltar = () => { clearTimeout(t); ini = null; if (!d) return; const c = d.c; d = null; c.classList.remove('rn-sc-coge'); c.style.transform = ''; guardar(); };
+  document.addEventListener('pointermove', mover, { passive: false });
+  document.addEventListener('pointerup', soltar); document.addEventListener('pointercancel', soltar);
+  cont.addEventListener('touchmove', ev => { if (d) ev.preventDefault(); }, { passive: false });
+  /* Mientras se ordena, tocar una sección no la abre */
+  cont.addEventListener('click', ev => { if (RN_MAS_ED) { ev.stopPropagation(); ev.preventDefault(); } }, true);
+  cont.addEventListener('contextmenu', ev => ev.preventDefault());
+}
+ACC.rnMasListo = () => { RN_MAS_ED = false; const h = $('.rn-hj-mas'); if (h) { h.classList.remove('rn-mas-ed'); $$('.rn-mas-listo,.rn-mas-aviso', h).forEach(x => x.remove()); } };
+const _rnSecciones107 = rnSecciones;
+rnSecciones = function () {
+  const abierta = RN_MAS_ABIERTA, h = _rnSecciones107.apply(this, arguments);
+  RN_MAS_ED = false;
+  if (!abierta && h) rnMasOrdenar(h);
+  return h;
+};
+
+/* ---- 58_rn_108.js ---- */
+/* ===================== 1.0.7 · PAPELERA =====================
+   Lo borrado no desaparece: queda marcado como borrado en la hoja. Un botón pequeño de papelera en Tareas, Compra y Notas
+   (solo si hay algo borrado en los últimos 30 días) abre la lista para recuperarlo. */
+const RN_PAP = { tareas: ['Tareas', 'titulo'], compra: ['Compra', 'nombre'], notas: ['Notas', 'titulo'] };
+function rnBorrados(col) {
+  const R = S.recs[col] || {}, lim = Date.now() - 30 * 86400000;
+  return Object.keys(R).filter(id => R[id].f && R[id].f._b).map(id => ({ id, f: R[id].f, cuando: (R[id].t && R[id].t._b) || 0 }))
+    .filter(x => !x.cuando || x.cuando > lim).sort((a, b) => b.cuando - a.cuando);
+}
+function rnBtnPapelera(col) {
+  return rnBorrados(col).length ? '<button class="rn-rb rn-gl rn-pap" data-a="rnPapelera" data-col="' + col + '" aria-label="Papelera">' + rnIc('borrar', 18, 2) + '</button>' : '';
+}
+ACC.rnPapelera = el => Nav.ir('papelera', { col: el.dataset.col });
+P.papelera = {
+  html: p => {
+    const col = p.col || 'tareas', c = RN_PAP[col] || ['', 'titulo'], l = rnBorrados(col);
+    let o = rnTitulo('Papelera', { peq: 1, atras: c[0], sub: 'Lo borrado en los últimos 30 días' });
+    if (!l.length) return o + rnCd('<p class="rn-txt" style="padding:6px 0 12px">No hay nada borrado.</p>');
+    return o + rnCd(l.map(x => '<div class="rn-rw"><span class="rn-fat"><span class="rn-t">' + esc(x.f[c[1]] || x.f.texto || 'Sin título') + '</span>' +
+      (x.cuando ? '<span class="rn-n">Borrado ' + rnDiaTexto(isoDia(new Date(x.cuando)), true) + '</span>' : '') + '</span>' +
+      '<button class="rn-recup" data-a="rnRecuperar" data-col="' + col + '" data-id="' + x.id + '">Recuperar</button></div>').join(''));
+  }
+};
+ACC.rnRecuperar = el => {
+  const col = el.dataset.col, id = el.dataset.id, r = (S.recs[col] || {})[id]; if (!r) return;
+  cambiar(col, id, { _b: 0 });
+  toast('«' + (r.f[(RN_PAP[col] || [])[1]] || 'Elemento') + '» recuperado', null, null, 'hecho');
+  Nav.refrescar(true);
+};
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
