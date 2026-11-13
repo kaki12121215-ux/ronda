@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.5 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.6 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.5';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.6';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -6620,6 +6620,8 @@ function rnDiaTexto(iso, conArt) {
 /* Título de cada grupo */
 function rnGrupoDe(x) {
   const h = hoyISO();
+  /* 1.0.6: también atrasada si se pasó la fecha límite */
+  if (x.limite && x.limite < h && !x.hecho) return ['a', 'Atrasadas'];
   if (!x.fecha) return ['z', 'Sin fecha'];
   if (x.fecha < h) return ['a', 'Atrasadas'];
   const d = deISO(x.fecha), dif = Math.round((d - hoy0()) / 86400000);
@@ -6633,17 +6635,18 @@ function rnGrupoDe(x) {
 function rnNotaTarea(x, f) {
   const h = hoyISO();
   if (x.hecho) return (x.cat ? esc(x.cat) + ' · ' : '') + 'Hecha por ' + esc(nombreDe(x.hechoPor) || 'alguien') + (x.hechoEn ? ', ' + rnDiaTexto(isoDia(new Date(x.hechoEn)), true) : '');
+  if (x.limite && x.limite < h) return (x.cat ? esc(x.cat) + ' · ' : '') + '<span class="rn-lim">Se pasó el límite: ' + rnDiaTexto(x.limite, true) + '</span>';
   if (x.fecha && x.fecha < h) { const d = deISO(x.fecha); return 'Era ' + (Math.round((hoy0() - d) / 86400000) < 7 ? 'el ' + DIAS[d.getDay()] + ' ' + d.getDate() : 'el ' + d.getDate() + ' de ' + MESES[d.getMonth()]); }
   const p = [];
   /* 0.3.0: de quién es va a la derecha (su foto, o «Todos») */
   if (x.cat) p.push(esc(x.cat));
   if (x.subs && x.subs.length) p.push(x.subs.filter(y => y.h).length + '/' + x.subs.length + ' subtareas');
   if (x.repite && x.repite.cada) p.push(textoRepe(x.repite));
-  if (x.limite) p.push('Límite: ' + rnDiaTexto(x.limite, true));
+  if (x.limite) p.push('<span class="rn-lim">Límite: ' + rnDiaTexto(x.limite, true) + '</span>');
   return p.join(' · ');
 }
 function rnFilaTarea(x, f) {
-  const atras = !x.hecho && x.fecha && x.fecha < hoyISO(), nota = rnNotaTarea(x, f);
+  const atras = !x.hecho && ((x.fecha && x.fecha < hoyISO()) || (x.limite && x.limite < hoyISO())), nota = rnNotaTarea(x, f);
   return '<div class="rn-rw rn-it' + (x.hecho ? ' rn-dn' : '') + '" data-id="' + x.id + '" data-lp="rnMenuTarea">' + rnCk(x.hecho, atras, 'rnHacer', x.id) +
     '<button class="rn-rwt" data-a="rnVerTarea" data-id="' + x.id + '"><span class="rn-t">' + esc(x.titulo) + rnCandado(x) + '</span>' + (nota ? '<span class="rn-n' + (atras ? ' rn-rojo' : '') + '">' + nota + '</span>' : '') + '</button>' +
     (x.hora && !x.hecho ? '<span class="rn-hr">' + esc(x.hora) + '</span>' : '') + rnDeQuien(x) + '</div>';
@@ -7279,7 +7282,7 @@ P.gastos = {
       '<div class="rn-b2">' + pag.map(x => '<i class="rn-k-' + kp(x[0]) + '" style="flex:' + Math.max(0.5, x[1]) + '"></i>').join('') + '</div><div class="rn-s rn-gpg">' + pag.map((x, i) => '<span>' + (i === 0 ? esc(x[0].nombre) + ' ha pagado ' : esc(x[0].nombre) + ' ') + euros(x[1]) + '</span>').join('') + '</div>' +
       (r ? '<button class="rn-saldo" data-a="ir" data-id="cuenta" data-cid="' + c.id + '">' + rnAv(rnPersona((ps.find(q => q.id === r.de) || {}).persona), 28) + '<span class="rn-t rn-b" style="flex:1">' + esc(partNombre(c, r.de)) + ' le debe a ' + esc(partNombre(c, r.a)) + ' ' + euros(r.importe) + '</span><b class="rn-sal">Saldar</b></button>' : '<p class="rn-s" style="margin:12px 2px 4px">Estáis en paz</p>') + '<div style="height:12px"></div>', 'rn-k-rosa');
     const ult = movs.slice().sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '') || (b.creado || 0) - (a.creado || 0)).slice(0, 5);
-    o += rnCd(rnGrupo('Últimos gastos', String(movs.length)) + (ult.length ? ult.map(m => { const pp = ps.find(x => x.id === m.pagadoPor) || {}; const rep = m.reparto && m.reparto.quienes && m.reparto.quienes.length === 1 ? 'solo ' + partNombre(c, m.reparto.quienes[0]) : 'a medias'; return '<button class="rn-rw" data-a="verMov" data-id="' + m.id + '">' + (rnPersona(pp.persona) ? rnAv(rnPersona(pp.persona), 30) : '') + '<span class="rn-fat"><span class="rn-t">' + esc(m.concepto || 'Gasto') + '</span><span class="rn-n">' + rnDiaCorto(m.fecha) + ' · ' + rep + '</span></span><span class="rn-hr">' + euros(m.importe) + '</span></button>'; }).join('') : '<div class="rn-rw"><span class="rn-n rn-vacio">Sin gastos todavía</span></div>'), 'rn-gr rn-k-rosa');
+    o += rnCd(rnGrupo('Últimos gastos', String(movs.length)) + (ult.length ? ult.map(m => { const pp = ps.find(x => x.id === m.pagadoPor) || {}; const rep = m.reparto && m.reparto.quienes && m.reparto.quienes.length === 1 ? 'solo ' + partNombre(c, m.reparto.quienes[0]) : 'a medias'; return '<button class="rn-rw" data-a="verMov" data-id="' + m.id + '">' + rnAvPart(pp, 30) + '<span class="rn-fat"><span class="rn-t">' + esc(m.concepto || 'Gasto') + '</span><span class="rn-n">' + rnDiaCorto(m.fecha) + ' · ' + rep + '</span></span><span class="rn-hr">' + euros(m.importe) + '</span></button>'; }).join('') : '<div class="rn-rw"><span class="rn-n rn-vacio">Sin gastos todavía</span></div>'), 'rn-gr rn-k-rosa');
     const otras = lista('cuentas').filter(x => x.id !== c.id);
     if (otras.length) o += rnCd(rnGrupo('Otras cuentas', String(otras.length)) + otras.map(x => { const t = lista('movs').filter(m => m.cuenta === x.id && m.tipo !== 'transferencia').reduce((a, m) => a + (Number(m.importe) || 0), 0); return '<button class="rn-rw" data-a="ir" data-id="cuenta" data-cid="' + x.id + '"><span class="rn-fat"><span class="rn-t">' + (x.emoji ? esc(x.emoji) + ' ' : '') + esc(x.nombre) + '</span><span class="rn-n">' + (x.archivada ? 'Archivada' : x.saldada ? 'Saldada' : 'Abierta') + ' · ' + euros(t) + '</span></span>' + rnFle + '</button>'; }).join(''), 'rn-gr rn-k-rosa');
     return o;
@@ -9219,6 +9222,61 @@ ACC.rnSubAdd = el => {
 ACC.rnSubHecha = el => { const [id, s] = el.dataset.id.split('|'), subs = rnSubs(id), y = subs.find(z => z.id === s); if (!y) return; y.h = !y.h; cambiar('tareas', id, { subs: subs }); Nav.refrescar(true); };
 ACC.rnSubBorrar = el => { const [id, s] = el.dataset.id.split('|'); cambiar('tareas', id, { subs: rnSubs(id).filter(z => z.id !== s) }); Nav.refrescar(true); };
 document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target && ev.target.id === 'rnSubN') { ev.preventDefault(); ACC.rnSubAdd(ev.target); } }, true);
+
+/* 1.0.6 · Gastos: la foto de quien pagó. Si el participante no está enlazado a una persona de la casa, se busca por
+   nombre; si tampoco, un círculo con su inicial (nunca un hueco). */
+function rnAvPart(pp, tam) {
+  pp = pp || {};
+  const nom = sinAcentos(String(pp.nombre || '')).toLowerCase().trim();
+  const per = rnPersona(pp.persona) || (nom ? personas().find(x => sinAcentos(x.nombre).toLowerCase().trim() === nom) : null);
+  if (per) return rnAv(per, tam);
+  return '<span class="rn-avi" style="width:' + tam + 'px;height:' + tam + 'px;font-size:' + Math.round(tam * .42) + 'px">' + esc((pp.nombre || '?').charAt(0).toUpperCase()) + '</span>';
+}
+
+/* ---- 58_rn_106.js ---- */
+/* ===================== 1.0.6 · DESLIZAR PARA BORRAR =====================
+   En las filas de compra y de tareas: deslizar a la izquierda muestra la papelera en coral; si se suelta pasado el
+   40 % de la fila, se borra (con «Deshacer», el mismo borrado de siempre). Mantener pulsado sigue abriendo el menú. */
+const RN_SW_BORRA = { menuProducto: 'borrarProducto', rnMenuTarea: 'rnBorrarTarea' };
+(() => {
+  let sw = null, anularClic = 0;
+  const fin = () => { if (!sw) return; const s = sw; sw = null;
+    const r = s.el, w = s.w, borra = s.activo && s.dx < -w * 0.4;
+    if (!s.activo) return;
+    anularClic = Date.now();
+    if (borra) {
+      r.classList.add('rn-sw-sale'); r.style.transform = 'translateX(' + (-w - 40) + 'px)'; r.style.opacity = '0';
+      setTimeout(() => { const a = ACC[RN_SW_BORRA[r.dataset.lp]]; if (a) a({ dataset: { id: r.dataset.id } }); }, 220);
+    } else {
+      r.classList.add('rn-sw-vuelve'); r.style.transform = '';
+      setTimeout(() => { r.classList.remove('rn-desl', 'rn-sw-vuelve'); const b = $('.rn-swbg', r); if (b) b.remove(); if (s.cd) s.cd.classList.remove('rn-swcd'); }, 260);
+    }
+  };
+  document.addEventListener('pointerdown', ev => {
+    const r = ev.target.closest && ev.target.closest('.rn-it[data-lp]');
+    if (!r || !RN_SW_BORRA[r.dataset.lp] || ev.target.closest('.rn-ck')) return;
+    sw = { el: r, x: ev.clientX, y: ev.clientY, dx: 0, activo: false, cd: r.closest('.rn-cd'), w: Math.max(r.offsetWidth, (r.closest('.rn-cd') || r).offsetWidth - 40, 200) };
+  }, true);
+  document.addEventListener('pointermove', ev => {
+    if (!sw) return;
+    const dx = ev.clientX - sw.x, dy = ev.clientY - sw.y;
+    if (!sw.activo) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { sw = null; return; }   /* es scroll */
+      if (dx < -12 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        sw.activo = true; sw.el.classList.add('rn-desl');
+        if (!$('.rn-swbg', sw.el)) sw.el.insertAdjacentHTML('beforeend', '<span class="rn-swbg" aria-hidden="true">' + rnIc('borrar', 22, 2) + '</span>');
+        if (sw.cd) sw.cd.classList.add('rn-swcd');
+        clearTimeout(window.RN_LP_T);                                   /* que no salte el menú de mantener pulsado */
+      } else return;
+    }
+    sw.dx = Math.min(0, dx); sw.el.style.transform = 'translateX(' + sw.dx + 'px)';
+  }, true);
+  document.addEventListener('pointerup', fin, true);
+  document.addEventListener('pointercancel', fin, true);
+  /* Mientras se desliza, la página no se mueve de lado ni hace scroll */
+  document.addEventListener('touchmove', ev => { if (sw && sw.activo) ev.preventDefault(); }, { passive: false, capture: true });
+  document.addEventListener('click', ev => { if (Date.now() - anularClic < 400) { ev.stopPropagation(); ev.preventDefault(); } }, true);
+})();
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */

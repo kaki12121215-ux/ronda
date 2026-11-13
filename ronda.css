@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.5 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.6 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2185,3 +2185,25 @@ html[data-tema="oscuro"] .rn-subadd { color: #fff; }
 .rn-sub .rn-t { color: var(--txt); }
 html[data-tema="oscuro"] .rn-sub .rn-t { color: #fff; }
 .rn-sub.rn-dn .rn-t { opacity: .5; }
+
+/* 1.0.6 · Límite en coral; botón de la ficha por encima de la sombra de la tarjeta */
+.rn-lim { color: #E0613F; }
+html[data-tema="oscuro"] .rn-lim { color: #FF8F72; }
+.rn-n.rn-rojo .rn-lim { color: inherit; }
+.pg .rn-cdv + .rn-btnp { position: relative; z-index: 2; margin-top: 18px; }
+.rn-avi { flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(127,127,127,.22); color: var(--txt); font-weight: 600; }
+/* 1.0.6 · «Más»: la barra tapa lo que pasa por debajo (mismo color que la hoja) y las últimas secciones se pueden ver */
+html.rn-mas .rn-b5c { background: #FFFFFF; box-shadow: 0 -10px 24px -14px rgba(0,0,0,.18); }
+html.rn-mas[data-tema="oscuro"] .rn-b5c { background: #232C31; box-shadow: 0 -10px 24px -14px rgba(0,0,0,.5); }
+.rn-hj-mas .rn-hjc { padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
+/* Menús de mantener pulsado: «Borrar» en coral */
+.rn-hj :is([data-a*="orrar"], [data-a*="liminar"], .rn-peligro), .rn-hj :is([data-a*="orrar"], [data-a*="liminar"]) b { color: #E0613F; }
+[data-tema="oscuro"] .rn-hj :is([data-a*="orrar"], [data-a*="liminar"], .rn-peligro), [data-tema="oscuro"] .rn-hj :is([data-a*="orrar"], [data-a*="liminar"]) b { color: #FF8F72; }
+.rn-hj :is([data-a*="orrar"], .rn-peligro) svg { color: inherit; stroke: currentColor; }
+/* Deslizar para borrar */
+.rn-it.rn-desl { position: relative; z-index: 1; transition: none; }
+.rn-it.rn-sw-vuelve { transition: transform .25s var(--e-muelle, ease); }
+.rn-it.rn-sw-sale { transition: transform .22s ease-in, opacity .22s ease-in; }
+.rn-swbg { position: absolute; top: 0; bottom: 0; left: 100%; width: 100vw; background: #E0613F; color: #fff; display: flex; align-items: center; padding-left: 22px; pointer-events: none; }
+.rn-swcd { overflow: hidden !important; }
+.rn-it[data-lp] { touch-action: pan-y; }
