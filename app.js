@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.1 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.2 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.1';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.2';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -6632,10 +6632,11 @@ function rnGrupoDe(x) {
 /* La nota gris debajo del título */
 function rnNotaTarea(x, f) {
   const h = hoyISO();
-  if (x.hecho) return 'Hecha por ' + esc(nombreDe(x.hechoPor) || 'alguien') + (x.hechoEn ? ', ' + rnDiaTexto(isoDia(new Date(x.hechoEn)), true) : '');
+  if (x.hecho) return (x.cat ? esc(x.cat) + ' · ' : '') + 'Hecha por ' + esc(nombreDe(x.hechoPor) || 'alguien') + (x.hechoEn ? ', ' + rnDiaTexto(isoDia(new Date(x.hechoEn)), true) : '');
   if (x.fecha && x.fecha < h) { const d = deISO(x.fecha); return 'Era ' + (Math.round((hoy0() - d) / 86400000) < 7 ? 'el ' + DIAS[d.getDay()] + ' ' + d.getDate() : 'el ' + d.getDate() + ' de ' + MESES[d.getMonth()]); }
   const p = [];
   /* 0.3.0: de quién es va a la derecha (su foto, o «Todos») */
+  if (x.cat) p.push(esc(x.cat));
   if (x.repite && x.repite.cada) p.push(textoRepe(x.repite));
   if (x.limite) p.push('Límite: ' + rnDiaTexto(x.limite, true));
   return p.join(' · ');
@@ -6655,6 +6656,8 @@ function rnDeQuien(x) {
 function rnFiltrar(l, f) {
   const yoId = S.cfg.persona;
   if (f === 'hechas') return l.filter(x => x.hecho);
+  /* 1.0.2: filtro por categoría (va aparte: rnCatF) */
+  if (RN_CATF) l = l.filter(x => x.cat === RN_CATF);
   if (f === 'mias') return l.filter(x => !x.hecho && esPara(x, yoId));
   if (f !== 'todas') return l.filter(x => !x.hecho && esPara(x, f));
   return l.filter(x => !x.hecho);
@@ -6674,14 +6677,14 @@ P.tareas = {
     }).join('');
     let o = rnTitulo('Tareas', { der: rnRb('buscar', 'rnBuscar', 'Buscar') }) +
       rnCd('<div class="rn-sem">' + sem + '</div>', 'rn-semc') +
-      '<div class="rn-flw"><div class="rn-fl rn-gl" role="tablist">' + [['todas', 'Todas'], ['mias', 'Mías']].concat(otros.map(x => [x.id, 'De ' + x.nombre])).concat([['hechas', 'Hechas']]).map(c => '<button class="' + (f === c[0] ? 'rn-on' : '') + '" role="tab" aria-selected="' + (f === c[0]) + '" data-a="rnFiltro" data-v="' + c[0] + '">' + esc(c[1]) + '</button>').join('') + '</div></div>';
+      '<div class="rn-flw"><div class="rn-fl rn-gl" role="tablist">' + [['todas', 'Todas'], ['mias', 'Mías']].concat(otros.map(x => [x.id, 'De ' + x.nombre])).concat([['hechas', 'Hechas']]).map(c => '<button class="' + (f === c[0] ? 'rn-on' : '') + '" role="tab" aria-selected="' + (f === c[0]) + '" data-a="rnFiltro" data-v="' + c[0] + '">' + esc(c[1]) + '</button>').join('') + '</div></div>' + rnFiltroCats();
     if (!l.length) return o + rnVacia(f);
     if (f === 'hechas') return o + rnCd(rnGrupo('Hechas', String(l.length)) + l.map(x => rnFilaTarea(x, f)).join(''), 'rn-gr');
     /* Por días, cada día en su tarjeta */
     const gr = [];
     l.forEach(x => { const g = rnGrupoDe(x); const u = gr.length && gr[gr.length - 1].k === g[0] ? gr[gr.length - 1] : (gr.push({ k: g[0], t: g[1], xs: [] }), gr[gr.length - 1]); u.xs.push(x); });
     gr.sort((a, b) => (a.k === 'a' ? '0' : a.k === 'z' ? '9' : a.k).localeCompare(b.k === 'a' ? '0' : b.k === 'z' ? '9' : b.k));
-    const dePer = x => f === 'todas' || esPara(x, f === 'mias' ? yoId : f);
+    const dePer = x => (!RN_CATF || x.cat === RN_CATF) && (f === 'todas' || esPara(x, f === 'mias' ? yoId : f));
     o += gr.map(g => {
       let cnt = String(g.xs.length);
       if (g.k === h) { const dh = todas.filter(x => x.fecha === h && dePer(x)); cnt = dh.filter(x => x.hecho).length + ' de ' + dh.length; }
@@ -6745,7 +6748,7 @@ P.tareaVer = {
     let o = rnTitulo(esc(x.titulo), { peq: 1, atras: 'Tareas', sub: sub, der: rnRb('editar', 'rnEditarTarea', 'Cambiar', ' data-id="' + x.id + '"') + rnRb('borrar', 'rnBorrarTarea', 'Borrar', ' data-id="' + x.id + '"') }) +
       rnCd(linea('Para', esc(nombresPara(x)), x.para === 'todos' || !x.para ? '' : rnCarasPara(x, 26), null) + linea('Cuándo', fecha, undefined, 'rnEditarTarea') +
         (x.limite ? linea('Límite', cap(DIAS[deISO(x.limite).getDay()]) + ' ' + deISO(x.limite).getDate(), undefined, 'rnEditarTarea') : '') +
-        linea('Repetir', esc(textoRepe(x.repite)), undefined, 'rnEditarTarea') + linea('Solo para mí', x.solo ? 'Sí' : 'No', x.solo ? '<span class="rn-fle">' + rnIc('candado', 18, 2) + '</span>' : '', null), 'rn-k-lima rn-cdv') +
+        (x.cat ? linea('Categoría', esc(x.cat), undefined, 'rnEditarTarea') : '') + linea('Repetir', esc(textoRepe(x.repite)), undefined, 'rnEditarTarea') + linea('Solo para mí', x.solo ? 'Sí' : 'No', x.solo ? '<span class="rn-fle">' + rnIc('candado', 18, 2) + '</span>' : '', null), 'rn-k-lima rn-cdv') +
       '<button class="rn-btnp" data-a="rnHacerVer" data-id="' + x.id + '">' + rnIc('hecho', 20, 2.2) + (x.hecho ? 'Marcar como pendiente' : 'Marcar como hecha') + '</button>';
     if (x.veces) o += rnCd(rnGrupo('Hecha', x.veces + (x.veces === 1 ? ' vez' : ' veces')) + '<p class="rn-txt rn-nota">La última vez, ' + esc(nombreDe(x.ultimaPor)) + ' ' + rnDiaTexto(isoDia(new Date(x.ultimaVez)), true) + '.</p>');
     if (x.notas) o += rnCd(rnGrupo('Nota') + '<p class="rn-txt rn-nota">' + esc(x.notas) + '</p>');
@@ -6808,6 +6811,7 @@ function rnPintarTarea(abrir) {
   const html = rnCabHoja(t.id ? 'Cambiar tarea' : 'Nueva tarea') +
     '<label class="rn-fld"><small>Qué hay que hacer</small><input id="rnTit" value="' + esc(t.titulo) + '" placeholder="Por ejemplo, cambiar la bombilla" maxlength="120" autocomplete="off" enterkeyhint="done"></label>' +
     (t.solo ? '' : '<p class="rn-et">Para quién <span class="rn-et-n">Puedes elegir varias personas</span></p><div class="rn-qcs">' + ps.map(p => '<button class="rn-qc' + (paraIds(t).indexOf(p.id) >= 0 ? ' rn-on' : '') + '" data-a="rnTPara" data-v="' + p.id + '" aria-pressed="' + (paraIds(t).indexOf(p.id) >= 0) + '">' + esc(p.nombre) + '</button>').join('') + '<button class="rn-qc' + (t.para === 'todos' ? ' rn-on' : '') + '" data-a="rnTPara" data-v="todos" aria-pressed="' + (t.para === 'todos') + '">Todos</button></div>') +
+    rnSelectorCat(t) +
     '<p class="rn-et">Cuándo</p>' + chips([['hoy', 'Hoy'], ['man', 'Mañana'], ['fd', fd[1]], ['otro', otroDia + '<input type="date" id="rnFec" class="rn-oc" value="' + esc(atajo === 'otro' ? t.fecha : '') + '" aria-label="Elegir día">']], atajo, 'rnTCuando') +
     '<div class="rn-lis">' +
     linea('Hora', t.hora || 'Sin hora', undefined, null, '<input type="time" id="rnHor" class="rn-oc" value="' + esc(t.hora) + '" aria-label="Hora">') +
@@ -6863,7 +6867,7 @@ ACC.rnGuardarTarea = () => {
   const t = RN_T, titulo = cap(String(t.titulo || '').trim());
   if (!titulo) { const i = $('#rnTit'); if (i) i.focus(); return toast('Escribe qué hay que hacer.'); }
   const id = t.id || 'tarea-' + uid();
-  const campos = { titulo: titulo, para: t.solo ? S.cfg.persona : (t.para || S.cfg.persona), fecha: t.fecha || '', hora: t.hora || '', repite: t.repite && t.repite.cada ? t.repite : null, aviso: '', cal: false, solo: t.solo ? S.cfg.persona : '', limite: t.limite || '', notas: t.notas || '' };
+  const campos = { titulo: titulo, para: t.solo ? S.cfg.persona : (t.para || S.cfg.persona), fecha: t.fecha || '', hora: t.hora || '', repite: t.repite && t.repite.cada ? t.repite : null, aviso: '', cal: false, solo: t.solo ? S.cfg.persona : '', limite: t.limite || '', notas: t.notas || '', cat: t.cat || '' };
   /* 0.3.0: igual que la app de hoy. Con aviso va al calendario de la casa (necesita fecha); «Solo para mí», nunca. */
   const conAviso = !t.solo && t.aviso !== '' && t.aviso != null;
   if (conAviso && !campos.fecha) return toast('Para avisarte, ponle fecha.');
@@ -9123,6 +9127,40 @@ function paraDeNombres(txt) {
   if (!ids.length) return '';
   return ids.length === personas().length && ids.length > 1 ? 'todos' : ids.join(',');
 }
+
+/* ---- 58_rn_102.js ---- */
+/* ===================== 1.0.2 · CATEGORÍAS EN LAS TAREAS =====================
+   Campo «cat» (texto) en la tarea: Casa, Instituto… o una propia. Las propias salen de las tareas que ya la usan
+   (no se guardan aparte). En Tareas, una fila de categorías para filtrar. El script no cambia. */
+const RN_CATS_BASE = ['Casa', 'Instituto', 'Trabajo', 'Compras', 'Salud', 'Coche'];
+let RN_CATF = '';
+function rnCats() {
+  const usadas = lista('tareas').map(x => x.cat).filter(Boolean);
+  return RN_CATS_BASE.concat(usadas.filter((c, i) => usadas.indexOf(c) === i && RN_CATS_BASE.indexOf(c) < 0).sort((a, b) => a.localeCompare(b, 'es')));
+}
+function rnSelectorCat(t) {
+  const cs = rnCats(); if (t.cat && cs.indexOf(t.cat) < 0) cs.push(t.cat);
+  return '<p class="rn-et">Categoría</p><div class="rn-qcs">' + cs.map(c => '<button class="rn-qc' + (t.cat === c ? ' rn-on' : '') + '" data-a="rnTCat" data-v="' + esc(c) + '">' + esc(c) + '</button>').join('') +
+    '<button class="rn-qc" data-a="rnTCatNueva">+ Otra</button></div>';
+}
+ACC.rnTCat = el => { rnLeerTit(); RN_T.cat = RN_T.cat === el.dataset.v ? '' : el.dataset.v; rnPintarTarea(); };
+ACC.rnTCatNueva = () => {
+  rnLeerTit();
+  const hc = $('.rn-hjc', hojaAbierta.h);
+  hc.innerHTML = rnCabHoja('Nueva categoría', '<button class="rn-x" data-a="rnVolverTarea" aria-label="Volver">' + rnIc('atras', 22, 2) + '</button>') +
+    '<label class="rn-fld"><small>Nombre</small><input id="rnCatN" placeholder="Por ejemplo, Huerta" maxlength="24" autocomplete="off" enterkeyhint="done"></label>' +
+    '<button class="rn-btnp" data-a="rnTCatOk">Usar esta categoría</button>';
+  const i = $('#rnCatN', hc); setTimeout(() => i && i.focus(), 60);
+  i.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); ACC.rnTCatOk(); } });
+};
+ACC.rnTCatOk = () => { const v = cap(String(($('#rnCatN') || {}).value || '').trim()); if (!v) return toast('Escribe un nombre.'); RN_T.cat = v; rnPintarTarea(); };
+function rnFiltroCats() {
+  const cs = rnCats().filter(c => lista('tareas').some(x => x.cat === c));
+  if (RN_CATF && cs.indexOf(RN_CATF) < 0) RN_CATF = '';
+  if (!cs.length) return '';
+  return '<div class="rn-flw rn-flcat"><div class="rn-fl rn-gl">' + [['', 'Todas las categorías']].concat(cs.map(c => [c, c])).map(c => '<button class="' + (RN_CATF === c[0] ? 'rn-on' : '') + '" data-a="rnCatFiltro" data-v="' + esc(c[0]) + '">' + esc(c[1]) + '</button>').join('') + '</div></div>';
+}
+ACC.rnCatFiltro = el => { RN_CATF = el.dataset.v; Nav.refrescar(true); };
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
