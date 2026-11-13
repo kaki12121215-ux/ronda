@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.3 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.4 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2163,3 +2163,12 @@ html.conteclado #capa .rn-dilo-p .dring svg { width: 84px; height: 84px; }
 .rn-rpu { justify-content: center; }
 .rn-rpt { text-align: center; margin: 14px 0 18px; opacity: .75; }
 .rn-rpb { display: flex; align-items: center; justify-content: center; padding: 0; background: rgba(127,127,127,.18); }
+
+/* 1.0.4 · Categorías: fila discreta, separada de la de personas y que no se sale de la pantalla */
+.rn-cats { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 12px -14px 2px; padding: 0 14px; -webkit-overflow-scrolling: touch; }
+.rn-cats::-webkit-scrollbar { display: none; }
+.rn-cat { flex: none; border: 1px solid color-mix(in srgb, currentColor 22%, transparent); background: transparent; color: inherit; border-radius: 999px; padding: 6px 13px; font: 500 14px/1.2 var(--f-texto); opacity: .85; white-space: nowrap; }
+.rn-cat.rn-on { opacity: 1; background: color-mix(in srgb, currentColor 14%, transparent); border-color: transparent; font-weight: 600; }
+/* Personalizar: el − y el + con buen contraste */
+.rn-rpb { color: var(--txt); background: rgba(127,127,127,.18); }
+html[data-tema="oscuro"] .rn-rpb { color: #fff; background: rgba(255,255,255,.14); }

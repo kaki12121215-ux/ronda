@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.3 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.4 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.3';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.4';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9158,7 +9158,8 @@ function rnFiltroCats() {
   const cs = rnCats().filter(c => lista('tareas').some(x => x.cat === c));
   if (RN_CATF && cs.indexOf(RN_CATF) < 0) RN_CATF = '';
   if (!cs.length) return '';
-  return '<div class="rn-flw rn-flcat"><div class="rn-fl rn-gl">' + [['', 'Todas las categorías']].concat(cs.map(c => [c, c])).map(c => '<button class="' + (RN_CATF === c[0] ? 'rn-on' : '') + '" data-a="rnCatFiltro" data-v="' + esc(c[0]) + '">' + esc(c[1]) + '</button>').join('') + '</div></div>';
+  /* 1.0.4: fila ligera (sin cristal) que se desliza de lado, más discreta que la de personas */
+  return '<div class="rn-cats" role="group" aria-label="Categorías">' + [['', 'Todas']].concat(cs.map(c => [c, c])).map(c => '<button class="rn-cat' + (RN_CATF === c[0] ? ' rn-on' : '') + '" data-a="rnCatFiltro" data-v="' + esc(c[0]) + '">' + esc(c[1]) + '</button>').join('') + '</div>';
 }
 ACC.rnCatFiltro = el => { RN_CATF = el.dataset.v; Nav.refrescar(true); };
 
