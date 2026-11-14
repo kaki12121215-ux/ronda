@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.22 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.23 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.22';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.23';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -8595,7 +8595,15 @@ ACC.rnSecElegir = el => { RN_MAS_ELIGE = true; setTimeout(() => { RN_MAS_ELIGE =
 ACC.rnTab = el => {
   if (RN_MR && RN_MR.anular) return;
   const k = el.dataset.id;
-  if (RN_MAS_ABIERTA) { cerrarHoja(); if (k !== 'mas') setTimeout(() => rnAbrir(k), 160); return; }
+  /* 1.0.23 (igual que en la 1.0.18): con «Secciones» abierta, tocar otra pestaña va directa a ella; la burbuja ya no
+     vuelve primero a la pestaña de antes ni se espera 160 ms */
+  if (RN_MAS_ABIERTA) {
+    if (k === 'mas') return cerrarHoja();
+    const misma = Nav.pila.length === 1 && Nav.pila[0] && Nav.pila[0].id === k;
+    RN_MAS_ELIGE = true; cerrarHoja(); RN_MAS_ELIGE = false;
+    rnAbrir(k); if (misma) Nav.barra();
+    return;
+  }
   rnAbrir(k);
 };
 
