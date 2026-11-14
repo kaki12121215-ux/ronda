@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.21 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.22 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.21';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.22';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -628,7 +628,7 @@ function abrirHoja(html, opts) {
   velo.addEventListener('click', () => cerrarHoja());
   /* Arrastrar hacia abajo para cerrar, solo si el contenido está arriba del todo. */
   let y0 = null, dy = 0;
-  h.addEventListener('touchstart', e => { const hc = $('.hc', h); if (hc.scrollTop > 0 || e.target.closest('input,textarea')) { y0 = null; return; } y0 = e.touches[0].clientY; dy = 0; h.style.transition = 'none'; }, { passive: true });
+  h.addEventListener('touchstart', e => { const hc = $('.hc', h) || $('.hc', h) || $('.rn-hjc', h); if ((hc && hc.scrollTop > 0) || e.target.closest('input,textarea')) { y0 = null; return; } y0 = e.touches[0].clientY; dy = 0; h.style.transition = 'none'; }, { passive: true });
   h.addEventListener('touchmove', e => { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); if (dy > 0) h.style.transform = 'translateY(' + dy + 'px)'; }, { passive: true });
   h.addEventListener('touchend', () => { if (y0 === null) return; h.style.transition = ''; h.style.transform = ''; if (dy > 90) cerrarHoja(); y0 = null; });
   prepararCampos(h);
@@ -927,6 +927,7 @@ ACC.limpiarCampo = el => {
   document.addEventListener('touchend', fin);
   document.addEventListener('touchcancel', fin);
 })();
+function hcDe(h) { return $('.hc', h) || $('.rn-hjc', h); }  /* 1.0.22: hojas antiguas dentro del diseño nuevo */
 
 /* ---- 04_entrada.js ---- */
 /* ============================ ENTRADA: crear o unirse ============================ */
@@ -2715,7 +2716,7 @@ ACC.menuACompra = () => {
   const sel = {}; l.forEach((g, gi) => g.ing.forEach((x, i) => { if (!x.ya) sel[gi + '_' + i] = true; }));
   const pinta = () => { const n = Object.keys(sel).filter(k => sel[k]).length; return '<h3>Para esta semana hace falta</h3>' + l.map((g, gi) => '<p class="lab2">' + esc(g.plato.split('\n')[0].slice(0, 50)) + ' · ' + g.dia + '</p><div class="card grp">' + g.ing.map((x, i) => '<div class="row' + (x.ya ? ' dn' : '') + '"' + (x.ya ? '' : ' data-a="mcTog" data-k="' + gi + '_' + i + '"') + '><span class="ck' + (sel[gi + '_' + i] ? ' on' : '') + '" style="' + (sel[gi + '_' + i] ? 'background:' + COL[1] + ';border-color:transparent' : '') + '">' + tick(14) + '</span><b style="flex:1">' + esc(x.n) + '</b>' + (x.ya ? '<small class="k">ya en la lista</small>' : '') + '</div>').join('') + '</div>').join('') + '<button class="btn pri" data-a="mcOk" style="margin-top:16px"' + (n ? '' : ' disabled') + '>Añadir ' + n + ' a ' + esc((datoLista(LSUPER) || { nombre: 'Supermercado' }).nombre) + '</button>'; };
   const h = abrirHoja(pinta());
-  ACC.mcTog = el => { sel[el.dataset.k] = !sel[el.dataset.k]; $('.hc', h).innerHTML = pinta(); };
+  ACC.mcTog = el => { sel[el.dataset.k] = !sel[el.dataset.k]; hcDe(h).innerHTML = pinta(); };
   ACC.mcOk = () => {
     let n = 0; const vistos = {};
     l.forEach((g, gi) => g.ing.forEach((x, i) => { const k = sinAcentos(x.n).trim(); if (!sel[gi + '_' + i] || vistos[k]) return; vistos[k] = 1; if (!anadirProducto(x.n, LSUPER, { para: g.plato.split('\n')[0].slice(0, 30) + ' · ' + g.dia })) n++; }));
@@ -3838,8 +3839,8 @@ ACC.wSemanaOpc = () => {
     '<p class="lab2">Qué días</p><div class="chips">' + [['adelante', 'De hoy en adelante'], ['semana', 'Semana entera'], ['dos', 'Hoy y mañana'], ['hoy', 'Solo hoy']].map(x => '<button class="chip' + (cfg.dias === x[0] ? ' on' : '') + '" data-a="wsDia" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
     '<p class="cap">Solo cambia la tarjeta: el menú sigue teniendo todas sus comidas.</p>';
   const h = abrirHoja(pinta(), { alCerrar: () => { fijarCfg({ semana: cfg }); Nav.refrescar(true); } });
-  ACC.wsCom = el => { const v = el.dataset.v, i = cfg.comidas.indexOf(v); if (i >= 0) { if (cfg.comidas.length === 1) return toast('Deja al menos una.'); cfg.comidas.splice(i, 1); } else cfg.comidas.push(v); $('.hc', h).innerHTML = pinta(); };
-  ACC.wsDia = el => { cfg.dias = el.dataset.v; $('.hc', h).innerHTML = pinta(); };
+  ACC.wsCom = el => { const v = el.dataset.v, i = cfg.comidas.indexOf(v); if (i >= 0) { if (cfg.comidas.length === 1) return toast('Deja al menos una.'); cfg.comidas.splice(i, 1); } else cfg.comidas.push(v); hcDe(h).innerHTML = pinta(); };
+  ACC.wsDia = el => { cfg.dias = el.dataset.v; hcDe(h).innerHTML = pinta(); };
 };
 
 
@@ -4132,7 +4133,7 @@ ACC.wAccesos = () => {
   const sel = (cfgInicio().accesos || ['documentos', 'notas', 'acuario', 'coche']).slice();
   const pinta = () => '<h3>Accesos directos</h3><p class="texto" style="font-size:14px;margin-bottom:12px">Hasta 4.</p><div class="card grp">' + Object.keys(MODS).map(k => '<button class="row" data-a="wAccTog" data-k="' + k + '">' + ic(MODS[k][1], 24, MODS[k][2]) + '<b style="flex:1">' + MODS[k][0] + '</b><span class="rad' + (sel.indexOf(k) >= 0 ? ' on' : '') + '"></span></button>').join('') + '</div>';
   const h = abrirHoja(pinta(), { alCerrar: () => { fijarCfg({ accesos: sel }); Nav.refrescar(true); } });
-  ACC.wAccTog = el => { const k = el.dataset.k, i = sel.indexOf(k); if (i >= 0) sel.splice(i, 1); else { if (sel.length >= 4) return toast('Como mucho 4: quita uno antes.'); sel.push(k); } $('.hc', h).innerHTML = pinta(); };
+  ACC.wAccTog = el => { const k = el.dataset.k, i = sel.indexOf(k); if (i >= 0) sel.splice(i, 1); else { if (sel.length >= 4) return toast('Como mucho 4: quita uno antes.'); sel.push(k); } hcDe(h).innerHTML = pinta(); };
 };
 
 /* ---- 14_dilo.js ---- */
@@ -4540,7 +4541,7 @@ ACC.pagoAnadir = el => {
       '<button class="btn pri" data-a="pgOk" style="margin-top:16px">Añadir</button>';
   };
   const h = abrirHoja(pinta());
-  ACC.pgSet = b => { st[b.dataset.k] = b.dataset.v; $('.hc', h).innerHTML = pinta(); };
+  ACC.pgSet = b => { st[b.dataset.k] = b.dataset.v; hcDe(h).innerHTML = pinta(); };
   ACC.pgOk = () => {
     const c = dato('cuentas', st.cid), ps = c.participantes || [];
     const pq = ps.find(q => q.persona === st.paga) || ps[0];
@@ -5715,7 +5716,9 @@ function fbHoja() {
 function fbPintar() {
   if (!hojaAbierta || !FB) return;
   const t = $('#fbTxt', hojaAbierta.h); if (t) FB.texto = t.value;
-  const hc = $('.hc', hojaAbierta.h), y = hc.scrollTop;
+  /* 1.0.22: la hoja del diseño nuevo usa .rn-hjc en vez de .hc */
+  const hc = $('.hc', hojaAbierta.h) || $('.rn-hjc', hojaAbierta.h); if (!hc) return;
+  const y = hc.scrollTop;
   hc.innerHTML = fbHojaHtml(); hc.scrollTop = y;
   fbMontar();
 }
@@ -5831,7 +5834,7 @@ function fbArchNombre(a, j, todos) {
   return tipo + '_' + n + (a.tipo === 'vid' ? ((String(a.nombre || '').match(/\.[a-z0-9]{2,4}$/i) || ['.mov'])[0].toLowerCase()) : '.jpg');
 }
 ACC.fbExportar = () => { FBX = { q: 'p' }; abrirHoja(fbExpHtml()); };
-ACC.fbExpQ = el => { if (FBX.bajando) return; FBX.q = el.dataset.v; const hc = hojaAbierta && $('.hc', hojaAbierta.h); if (hc) hc.innerHTML = fbExpHtml(); };
+ACC.fbExpQ = el => { if (FBX.bajando) return; FBX.q = el.dataset.v; const hc = hojaAbierta && ($('.hc', hojaAbierta.h) || $('.rn-hjc', hojaAbierta.h)); if (hc) hc.innerHTML = fbExpHtml(); };
 function fbTexto(l) {
   const L = ['FEEDBACK DE RONDA', 'Exportado el ' + fechaCortaTxt(hoyISO()) + ' de ' + new Date().getFullYear() + ' a las ' + hora(new Date()) + ' · versión ' + VERSION, l.length + (l.length === 1 ? ' nota' : ' notas') + (FBX.q === 't' ? ' (todas)' : ' (pendientes)'), ''];
   l.forEach((x, i) => {
@@ -5850,7 +5853,7 @@ ACC.fbZip = async () => {
   if (FBX.bajando) return;
   const l = fbNotas(FBX.q === 't' ? 't' : 'p').slice().reverse(), raiz = fbZipNombre() + '/';
   const todos = []; l.forEach((x, i) => (x.adj || []).forEach((a, j) => todos.push([i, x, a, j])));
-  const pintar = () => { const hc = hojaAbierta && $('.hc', hojaAbierta.h); if (hc && $('.fbexh', hc)) hc.innerHTML = fbExpHtml(); };
+  const pintar = () => { const hc = hojaAbierta && ($('.hc', hojaAbierta.h) || $('.rn-hjc', hojaAbierta.h)); if (hc && $('.fbexh', hc)) hc.innerHTML = fbExpHtml(); };
   const archivos = [{ nombre: raiz + 'feedback.txt', datos: new TextEncoder().encode(fbTexto(l)) }];
   const fallos = [];
   try {
@@ -6384,7 +6387,7 @@ function abrirHoja(html, opts) {
   velo.addEventListener('click', () => cerrarHoja());
   /* Arrastrar hacia abajo para cerrar, solo si el contenido está arriba del todo */
   let y0 = null, dy = 0;
-  h.addEventListener('touchstart', e => { const hc = $('.rn-hjc', h); if (hc.scrollTop > 0 || e.target.closest('input,textarea')) { y0 = null; return; } y0 = e.touches[0].clientY; dy = 0; h.style.transition = 'none'; }, { passive: true });
+  h.addEventListener('touchstart', e => { const hc = $('.rn-hjc', h) || $('.hc', h) || $('.rn-hjc', h); if ((hc && hc.scrollTop > 0) || e.target.closest('input,textarea')) { y0 = null; return; } y0 = e.touches[0].clientY; dy = 0; h.style.transition = 'none'; }, { passive: true });
   h.addEventListener('touchmove', e => { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); if (dy > 0) h.style.transform = 'translateY(' + dy + 'px)'; }, { passive: true });
   h.addEventListener('touchend', () => { if (y0 === null) return; h.style.transition = ''; h.style.transform = ''; if (dy > 90) cerrarHoja(); y0 = null; });
   requestAnimationFrame(() => requestAnimationFrame(() => { velo.classList.add('rn-ver'); h.classList.add('rn-ver'); }));
