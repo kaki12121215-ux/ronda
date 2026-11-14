@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.20 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.21 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.20';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.21';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -1552,7 +1552,7 @@ P.invitar = {
   fija: true,
   html: p => {
     p.para = p.para || 'nueva'; p.rol = p.rol || 'integrante';
-    const otros = personas().filter(x => x.id !== S.cfg.persona);
+    const otros = personasTodas().filter(x => x.id !== S.cfg.persona);
     let h = tope('Invitar a alguien');
     if (p.res) {
       return h + '<div class="ill mid">' + ilu('invita-a-los-tuyos') + '</div><div class="card inv"><p class="eye">' + (p.res.para ? 'Código para ' + esc(p.res.para) : 'Su código') + '</p><div class="code">' + esc(p.res.codigo) + '</div>' +
@@ -1564,7 +1564,7 @@ P.invitar = {
     }
     h += '<div class="ill mid">' + ilu('invita-a-los-tuyos') + '</div><p class="lab2">Para quién</p><div class="seg"><button class="' + (p.para === 'nueva' ? 'on' : '') + '" data-a="invPara" data-v="nueva">Persona nueva</button><button class="' + (p.para !== 'nueva' ? 'on' : '') + '" data-a="invPara" data-v="vieja"' + (otros.length || true ? '' : ' disabled') + '>Volver a conectar</button></div>';
     if (p.para === 'nueva') h += '<p class="lab2">Rol</p><div class="seg"><button class="' + (p.rol === 'integrante' ? 'on' : '') + '" data-a="invRol" data-v="integrante">Integrante</button><button class="' + (p.rol === 'admin' ? 'on' : '') + '" data-a="invRol" data-v="admin">Administrador</button></div><p class="texto" style="font-size:14px;margin-top:6px">' + (p.rol === 'admin' ? 'Podrá invitar, quitar personas y elegir el calendario.' : 'Podrá usar todo el espacio, pero no invitar ni quitar personas.') + '</p>';
-    else h += '<p class="texto" style="font-size:14px;margin:4px 0 10px">Para un móvil nuevo o si alguien ha perdido el acceso. Entra con su perfil de siempre.</p><div class="list">' + personas().map(x => '<button class="row card' + (p.pid === x.id ? ' sel' : '') + '" data-a="invPid" data-v="' + x.id + '">' + av(x, 40) + '<b>' + esc(x.nombre) + (x.id === S.cfg.persona ? ' · tú' : '') + '</b><span class="rad' + (p.pid === x.id ? ' on' : '') + '"></span></button>').join('') + '</div>';
+    else h += '<p class="texto" style="font-size:14px;margin:4px 0 10px">Para un móvil nuevo o si alguien ha perdido el acceso. Entra con su perfil de siempre.</p><div class="list">' + personasTodas().map(x => '<button class="row card' + (p.pid === x.id ? ' sel' : '') + '" data-a="invPid" data-v="' + x.id + '">' + av(x, 40) + '<b>' + esc(x.nombre) + (x.id === S.cfg.persona ? ' · tú' : '') + '</b><span class="rad' + (p.pid === x.id ? ' on' : '') + '"></span></button>').join('') + '</div>';
     return h + '<div data-r="err"></div><button class="btn pri" data-a="crearInv" style="margin-top:18px">Crear código</button>';
   }
 };
@@ -6900,7 +6900,7 @@ P.ajustes = {
     const fila = (id, t, s, ir) => '<button class="rn-rw rn-fa" data-a="rnAjIr" data-ir="' + ir + '">' + '<span class="rn-chip">' + rnIc(id, 26, 2) + '</span><span class="rn-fat"><span class="rn-t">' + t + '</span>' + (s ? '<span class="rn-n">' + s + '</span>' : '') + '</span>' + rnFle + '</button>';
     return rnTitulo('Ajustes') +
       '<button class="rn-cd rn-perfil" data-a="rnAjIr" data-ir="miperfil">' + rnAv(x, 50) + '<span class="rn-fat"><b>' + esc(x.nombre || '') + '</b><span class="rn-n">' + (esAdmin() ? 'Administrador' : 'Miembro') + ' de ' + esc(e.nombre) + '</span></span>' + rnFle + '</button>' +
-      '<h2 class="rn-gt">La casa</h2><div class="rn-cd">' + fila('hogar-espacio', 'Nombre y emoji del hogar', esc(e.nombre), 'hogarAj') + fila('personas', 'Personas', ps.map(p => esc(p.nombre)).join(' y '), 'personas') + fila('reloj', 'Actividad', 'Quién ha cambiado qué. Se puede deshacer', 'actividad') + fila('modulo-calendario', 'Avisos en tu calendario', 'Calendario «' + esc((S.cal || {}).nombre || 'Casa') + '» (de ejemplo)', 'avisos') + '</div>' +
+      '<h2 class="rn-gt">La casa</h2><div class="rn-cd">' + fila('hogar-espacio', 'Nombre y emoji del hogar', esc(e.nombre), 'hogarAj') + fila('personas', 'Personas', personasTodas().map(p => esc(p.nombre)).join(', '), 'personas') + fila('reloj', 'Actividad', 'Quién ha cambiado qué. Se puede deshacer', 'actividad') + fila('modulo-calendario', 'Avisos en tu calendario', 'Calendario «' + esc((S.cal || {}).nombre || 'Casa') + '» (de ejemplo)', 'avisos') + '</div>' +
       '<h2 class="rn-gt">La app</h2><div class="rn-cd">' + fila('sol', 'Apariencia', { claro: 'Claro', oscuro: 'Oscuro', auto: 'Automático: como el iPhone' }[tema], 'apariencia') + fila('ordenar', 'Barra de abajo', rnBarra().map(k => rnCorto(k)).join(', '), 'barra') + fila('nube-sincronizada', 'Sincronización', 'Sin conexión: los datos son de ejemplo', 'sincronizacion') + fila('descargar', 'Copia de seguridad', 'No hay en la prueba', 'copia') + fila('escudo', 'Comprobaciones', 'Errores y datos del móvil', 'comprobaciones') + fila('informacion', 'Acerca de Ronda', '', 'acerca') + '</div>' +
       '<p class="rn-version">Ronda · prueba ' + VERSION + ' · datos de ejemplo</p>' +
       '<p class="rn-version rn-medidas">' + esc(rnMedidas()) + '</p>' +
@@ -7131,7 +7131,7 @@ P.lista = {
   html: (p, e) => {
     const L = datoLista(p.lid) || { id: p.lid, nombre: 'Lista', secciones: false };
     const l = lista('compra').filter(x => listaDe(x) === L.id), falta = l.filter(x => !x.hecho), hechos = l.filter(x => x.hecho);
-    const fila = x => { const quien = rnPersona(x.creadoPor); return '<div class="rn-rw rn-it' + (x.hecho ? ' rn-dn' : '') + '" data-lp="menuProducto" data-id="' + x.id + '"><button class="rn-ck' + (x.hecho ? ' rn-on' : '') + '" data-a="marcar" data-id="' + x.id + '" aria-label="Comprado">' + rnTick + '</button><button class="rn-rwt" data-a="marcar" data-id="' + x.id + '"><span class="rn-t">' + esc(x.nombre) + '</span>' + ((x.cantidad || (x.para && !x.hecho)) ? '<span class="rn-n">' + [x.cantidad ? esc(textoCantidad(x.cantidad)) : '', x.para && !x.hecho ? esc(textoPara(x.para)) : ''].filter(Boolean).join(' · ') + '</span>' : '') + '</button>' + (quien && quien.id !== S.cfg.persona && !x.hecho ? rnAv(quien, 26) : '') + '</div>'; };
+    const fila = x => { const quien = rnPersona(x.creadoPor); return '<div class="rn-rw rn-it' + (x.hecho ? ' rn-dn' : '') + '" data-lp="menuProducto" data-id="' + x.id + '"><button class="rn-ck' + (x.hecho ? ' rn-on' : '') + '" data-a="marcar" data-id="' + x.id + '" aria-label="Comprado">' + rnTick + '</button><button class="rn-rwt" data-a="marcar" data-id="' + x.id + '"><span class="rn-t">' + esc(x.nombre) + '</span>' + ((x.cantidad || (x.para && !x.hecho) || (quien && quien.oculta)) ? '<span class="rn-n">' + [x.cantidad ? esc(textoCantidad(x.cantidad)) : '', x.para && !x.hecho ? esc(textoPara(x.para)) : '', quien && quien.oculta ? 'Desde ' + esc(quien.nombre) : ''].filter(Boolean).join(' · ') + '</span>' : '') + '</button>' + (quien && quien.id !== S.cfg.persona && !quien.oculta && !x.hecho ? rnAv(quien, 26) : '') + '</div>'; };
     const orden = (a, b) => (a.orden || 0) - (b.orden || 0);
     let h = rnTitulo((L.emoji ? esc(L.emoji) + ' ' : '') + esc(L.nombre), { peq: 1, atras: 'Compra', der: rnBtnPapelera('compra') + rnRb('compartir', 'rnCompartirLista', 'Compartir', ' data-id="' + esc(L.id) + '"') + rnRb('menu', 'rnOpcLista', 'Opciones', ' data-id="' + esc(L.id) + '"'), sub: l.length ? falta.length + ' por comprar y ' + hechos.length + ' en el carro' : 'Lista vacía' }) +
       '<form class="rn-cd rn-gl rn-qbar" onsubmit="return false"><input id="nuevo" class="rn-qai" placeholder="Añadir a ' + esc(L.nombre) + '" autocomplete="off" enterkeyhint="done" maxlength="60" aria-label="Añadir producto"><button type="button" class="rn-qmic" data-a="rnDilo" aria-label="Dictar">' + rnIc('microfono', 21, 2) + '</button><button type="submit" class="rn-qab" data-a="anadirCompra" aria-label="Añadir">' + rnIc('anadir', 22, 2.2) + '</button></form>';
@@ -7883,7 +7883,7 @@ P.ajustes.html = () => {
     '<h2 class="rn-gt">La casa</h2><div class="rn-cd">' +
     fila('nube-sincronizada', 'Tus datos', EN_CASA ? esc(e.nombre || 'Vuestra casa') + ' · conectada' : 'Datos de ejemplo', 'conexion') +
     fila('casa', 'Nombre y emoji del hogar', esc(e.nombre || ''), 'hogarAj') +
-    fila('personas', 'Personas', ps.map(p => esc(p.nombre)).join(' y '), 'personas') +
+    fila('personas', 'Personas', personasTodas().map(p => esc(p.nombre)).join(', '), 'personas') +
     fila('modulo-calendario', 'Avisos en tu calendario', S.cal ? 'Calendario «' + esc(S.cal.nombre || 'Casa') + '»' : 'Sin elegir', 'avisos') +
     fila('tarjeta', 'Tarjetas conectadas', nt ? nt + (nt === 1 ? ' tarjeta' : ' tarjetas') : 'Ninguna', 'tarjetasC') +
     fila('reloj', 'Actividad', 'Quién ha cambiado qué', 'actividad') + '</div>' +
@@ -9564,9 +9564,44 @@ ACC.rnTab = el => {
   return _rnTab114(el);
 };
 
+/* ---- 58_rn_110.js ---- */
+/* 1.0.21 · Personas ocultas (pensado para «Sazo», la app de recetas que añade cosas a la compra).
+   Una persona oculta (campo «oculta» en su ficha, lo cambia quien administra y se sincroniza en todos los móviles)
+   no sale en tareas, agenda, turnos, repartos de gastos, «Quién tiene qué» ni Dilo. Sigue existiendo: en la compra
+   se ve «Desde Sazo» y en Actividad sale quién lo añadió. En Ajustes > Personas se ve con «Oculta» y se puede volver a mostrar. */
+function personasTodas() { return lista('personas').sort((a, b) => (a.alta || 0) - (b.alta || 0)); }
+function personas() { return personasTodas().filter(p => !p.oculta || (S.cfg && p.id === S.cfg.persona)); }
+
+/* Lista de Personas (Ajustes > Personas): todas, las ocultas con su etiqueta */
+P.personas.html = () => {
+  const ps = personasTodas();
+  let h = tope('') + '<div data-r="banda">' + banda() + '</div>' + head('Personas', esc(espacio().nombre)) + '<div class="list">' + ps.map(p =>
+    '<button class="row card" data-a="ir" data-id="persona" data-pid="' + p.id + '">' + av(p, 46) + '<div class="f"><b>' + esc(p.nombre) +
+    (p.id === S.cfg.persona ? ' <span style="color:var(--mu);font-weight:500">(tú)</span>' : '') + '</b><small>' + (p.oculta ? 'Oculta: solo se ve en la compra' : NOMROL(p.rol)) + '</small></div>' + ic('flecha', 20) + '</button>').join('') + '</div>';
+  if (esAdmin()) h += '<button class="btn pri" data-a="ir" data-id="invitar" style="margin-top:16px">' + ic('invitar', 22) + 'Invitar a alguien</button>';
+  return h;
+};
+
+/* Ficha de una persona: interruptor para ocultarla (solo quien administra, y nunca a uno mismo) */
+const _personaHtml110 = P.persona.html;
+P.persona.html = p => {
+  let h = _personaHtml110(p);
+  const x = dato('personas', p.pid);
+  if (!x || !esAdmin() || x.id === S.cfg.persona) return h;
+  return h + '<div class="rn-cd" style="margin-top:16px"><div class="rn-rw rn-li"><span class="rn-fat" style="flex:1"><span class="rn-t">Ocultar en la app</span>' +
+    '<span class="rn-n">No sale en tareas, agenda, turnos ni gastos. En la compra se ve «Desde ' + esc(x.nombre) + '».</span></span>' + rnSw(!!x.oculta, 'rnOcultarPersona" data-pid="' + x.id) + '</div></div>';
+};
+ACC.rnOcultarPersona = el => {
+  const x = dato('personas', el.dataset.pid); if (!x) return;
+  const o = !x.oculta;
+  cambiar('personas', x.id, { oculta: o });
+  Nav.refrescar(true);
+  toast(o ? x.nombre + ' ya no sale en tareas ni repartos' : x.nombre + ' vuelve a salir en toda la app', null, null, 'hecho');
+};
+
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
-window.RONDA = Object.assign(window.RONDA || {}, { paraConmutar, paraDeNombres, rnMedir, S, Nav, ACC, P, DB, VERSION, cambiar, lista, rnSecciones, rnNuevaTarea, PRUEBA, PI, PR, MODO, EN_CASA, RN_PAL, Sync, Cal, rnAurora, Dilo, rnPalBolas, W, PLANTILLAS, fijarInicio, ordenInicio, rnBarra, locLeer, actLoc, rnPalabra, apiReal, saldosDe, reembolsos, hoyISO, ordenAgua, nivelAgua, dato, toast });
+window.RONDA = Object.assign(window.RONDA || {}, { paraConmutar, personas, personasTodas, paraDeNombres, rnMedir, S, Nav, ACC, P, DB, VERSION, cambiar, lista, rnSecciones, rnNuevaTarea, PRUEBA, PI, PR, MODO, EN_CASA, RN_PAL, Sync, Cal, rnAurora, Dilo, rnPalBolas, W, PLANTILLAS, fijarInicio, ordenInicio, rnBarra, locLeer, actLoc, rnPalabra, apiReal, saldosDe, reembolsos, hoyISO, ordenAgua, nivelAgua, dato, toast });
 rnArrancar().catch(e => {
   anotar('arranque', e);
   const a = $('#arranque'); if (a) a.remove();
