@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.24 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.25 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.24';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.25';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9623,6 +9623,54 @@ ACC.rnOcultarPersona = el => {
   Nav.refrescar(true);
   toast(o ? x.nombre + ' ya no sale en tareas ni repartos' : x.nombre + ' vuelve a salir en toda la app', null, null, 'hecho');
 };
+
+/* ---- 58_rn_124.js ---- */
+/* ===================== 1.0.25 · Acuario: las medidas se guardan ===================== */
+/* La pantalla nueva del acuario (47) no traía «montar»: las casillas de Medidas no tenían quien las guardase,
+   y al cerrar la app se perdía lo escrito. Ahora se guarda al escribir (cada número, al momento) y al salir de la casilla.
+   Además, el botón de Parámetros (y desde él, «Importar medidas de otra app») vuelve a la cabecera de Medidas. */
+function acGuardarCasilla(i, p, final) {
+  const t = String(i.value || '').trim(), k = i.dataset.k, dia = p.dia || hoyISO();
+  const n = Number(t.replace(',', '.'));
+  if (t !== '' && (isNaN(n) || /[.,]$/.test(t) || t === '-')) { if (final && isNaN(n)) toast('Escribe un número.'); return; }
+  const m = medidaDe(dia), antes = valorDe(m, k), nuevo = t === '' ? null : n;
+  if (antes === nuevo) return;
+  const c = { fecha: dia }; c['v_' + k] = nuevo === null ? '' : nuevo;
+  if (!m) c.creado = Date.now();
+  cambiar('medidas', idMedida(dia), c);
+}
+function acMontarMedidas(el, p) {
+  if (!el || p.tab !== 'medidas') return;
+  $$('.minp', el).forEach(i => {
+    if (i._acOk) return; i._acOk = 1;
+    let tm = 0;
+    i.addEventListener('input', () => { clearTimeout(tm); tm = setTimeout(() => acGuardarCasilla(i, p, false), 350); });
+    i.addEventListener('change', () => {
+      clearTimeout(tm); acGuardarCasilla(i, p, true);
+      const v = valorDe(medidaDe(p.dia || hoyISO()), i.dataset.k); i.value = v === null ? '' : numTxt(v);
+      clearTimeout(P.acuario.t); P.acuario.t = setTimeout(() => { const a = document.activeElement; if (!a || !a.classList.contains('minp')) Nav.refrescar(true); }, 900);
+    });
+    i.addEventListener('blur', () => { clearTimeout(tm); acGuardarCasilla(i, p, false); });
+  });
+  const f = $('[data-r="acFoto"]', el);
+  if (f && !f._acOk) { f._acOk = 1; f.addEventListener('change', () => subirFotoAcuario(f, p)); }
+}
+/* Si se cierra la app con una casilla a medio escribir, se guarda antes */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'hidden') return;
+  const a = document.activeElement, e = Nav.actual && Nav.actual();
+  if (a && a.classList && a.classList.contains('minp') && e && e.id === 'acuario') acGuardarCasilla(a, e.params, false);
+});
+P.acuario.montar = (el, p) => acMontarMedidas(el, p);
+P.acuario.tras = (el, p) => acMontarMedidas(el, p);
+(function () {
+  const h0 = P.acuario.html;
+  P.acuario.html = (p, e) => {
+    let h = h0(p, e);
+    if (p.tab === 'medidas') h = h.replace(rnRb('grafica-linea', 'ir', 'Gráficas', ' data-id="acGraficas"'), rnRb('grafica-linea', 'ir', 'Gráficas', ' data-id="acGraficas"') + rnRb('ajustes', 'ir', 'Parámetros', ' data-id="acParams"'));
+    return h;
+  };
+})();
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
