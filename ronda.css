@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.0.25 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.0.26 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2316,3 +2316,27 @@ html.rn-prof #app, html.rn-prof-nav #nav { transform: none !important; }
 button.rn-avs { background: none; border: 0; padding: 4px; margin: -4px; cursor: pointer; font: inherit; color: inherit; }
 /* 1.0.24 · Tareas: quitar la hora (por encima del selector invisible) */
 .rn-quitarh { position: relative; z-index: 2; padding: 6px 12px; font-size: 13px; margin-left: 6px; }
+
+/* 1.0.26 · Tareas: la tarjeta de hoy, con un tono verde suave para reconocerla */
+.rn-cd.rn-gl.rn-gr-hoy { background-image: linear-gradient(color-mix(in srgb, var(--b, #A9C94F) 16%, transparent), color-mix(in srgb, var(--b, #A9C94F) 10%, transparent)); box-shadow: var(--cristal-sombra), inset 0 0 0 1.5px color-mix(in srgb, var(--b, #A9C94F) 38%, transparent); }
+[data-tema="oscuro"] .rn-cd.rn-gl.rn-gr-hoy { background-image: linear-gradient(color-mix(in srgb, var(--b, #A9C94F) 20%, transparent), color-mix(in srgb, var(--b, #A9C94F) 11%, transparent)); }
+
+/* 1.0.26 · Tu inicio: los dos botones van arriba, antes de las tarjetas */
+.rn-dos.rn-dos-arriba { margin-top: 14px; margin-bottom: 4px; }
+/* 1.0.26 · Gastos: «Ver cuenta» al lado del nombre */
+.rn-gcd { display: flex; align-items: center; gap: 8px; flex: none; }
+.rn-gabrir { display: inline-flex; align-items: center; gap: 2px; border: 0; font: 700 13px/1 var(--f-texto, inherit); color: var(--t, var(--txt)); background: color-mix(in srgb, var(--b, #E9A3BC) 22%, transparent); padding: 7px 8px 7px 12px; border-radius: 999px; cursor: pointer; }
+.rn-gabrir svg { transform: rotate(180deg); }
+[data-tema="oscuro"] .rn-gabrir { color: var(--f, #F2B8CC); }
+.rn-gct { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 8px; }
+/* 1.0.26 · Categorías propias */
+.chip.rn-catnueva { display: inline-flex; align-items: center; gap: 4px; border-style: dashed; }
+.rn-catics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 18px; }
+.rn-catic { aspect-ratio: 1; display: grid; place-items: center; border-radius: 18px; border: 1.5px solid var(--raya, rgba(0,0,0,.1)); background: transparent; color: var(--txt); cursor: pointer; }
+.rn-catic.rn-on { background: color-mix(in srgb, var(--b, #E9A3BC) 28%, transparent); border-color: var(--b, #E9A3BC); color: var(--t, var(--txt)); }
+[data-tema="oscuro"] .rn-catic.rn-on { color: var(--f, #F2B8CC); }
+.rn-catmini { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 12px; background: color-mix(in srgb, var(--b, #E9A3BC) 20%, transparent); margin-right: 12px; flex: none; }
+.rn-catborrar { border: 0; background: var(--c-coral-b); color: var(--c-coral-t); font: 700 14px/1 var(--f-texto, inherit); padding: 9px 14px; border-radius: 999px; cursor: pointer; }
+/* 1.0.26 · Modo oscuro: en las pantallas neutras (Actividad, Personas…) el título, «Volver» y el texto de debajo, en blanco */
+[data-tema="oscuro"] .rn-k-neutro .rn-tit h1, [data-tema="oscuro"] .rn-k-neutro .rn-sub, [data-tema="oscuro"] .rn-k-neutro .rn-atrasb,
+[data-tema="oscuro"] .rn-k-neutro .hd h1, [data-tema="oscuro"] .rn-k-neutro .hd p { color: #FFFFFF; }

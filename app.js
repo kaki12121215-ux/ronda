@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.25 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.26 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.25';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.26';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -2330,7 +2330,7 @@ const cadaP = c => { const m = String(c || '').match(/^p:(\d+):([dsma])$/); retu
 const mesesDe = c => { const q = cadaP(c); if (q) return Math.max(0.03, q.n * uni(q.u)[3] / 30.44); return (CADA.find(x => x[0] === c) || CADA[0])[2]; };
 const textoCadaF = c => { const q = cadaP(c); return q ? textoU(q.n, q.u) : (CADA.find(x => x[0] === c) || CADA[0])[1]; };
 const catF = id => CAT_FIJO.find(x => x[0] === id) || CAT_FIJO[CAT_FIJO.length - 1];
-const catM = id => CAT_MOV.find(x => x[0] === id) || (lista('categorias').find(x => x.id === id) ? [id, lista('categorias').find(x => x.id === id).nombre, 'etiqueta', 6] : CAT_MOV[CAT_MOV.length - 1]);
+const catM = id => CAT_MOV.find(x => x[0] === id) || (lista('categorias').find(x => x.id === id) ? [id, lista('categorias').find(x => x.id === id).nombre, lista('categorias').find(x => x.id === id).ic || 'etiqueta', 6] : CAT_MOV[CAT_MOV.length - 1]);
 const ajGastos = () => dato('ajustes', 'gastos') || {};
 function avanzar(iso, cada) { const d = deISO(iso) || new Date(); const q = cadaP(cada); if (q) return isoDia(sumarU(d, q.n, q.u)); d.setMonth(d.getMonth() + mesesDe(cada)); return isoDia(d); }
 function primerCobro(dia) { const h = new Date(); let d = new Date(h.getFullYear(), h.getMonth(), Math.min(28, dia || 1)); if (d < new Date(h.getFullYear(), h.getMonth(), h.getDate())) d.setMonth(d.getMonth() + 1); return isoDia(d); }
@@ -6703,7 +6703,7 @@ P.tareas = {
     o += gr.map(g => {
       let cnt = String(g.xs.length);
       if (g.k === h) { const dh = todas.filter(x => x.fecha === h && dePer(x)); cnt = dh.filter(x => x.hecho).length + ' de ' + dh.length; }
-      return '<div class="rn-cd rn-gl rn-gr" data-g="' + g.k + '">' + rnGrupo(g.t, cnt, g.k === 'a' ? 'coral' : '') + g.xs.map(x => rnFilaTarea(x, f)).join('') + '</div>';
+      return '<div class="rn-cd rn-gl rn-gr' + (g.k === h ? ' rn-gr-hoy' : '') + '" data-g="' + g.k + '">' + rnGrupo(g.t, cnt, g.k === 'a' ? 'coral' : '') + g.xs.map(x => rnFilaTarea(x, f)).join('') + '</div>';
     }).join('');
     return o;
   },
@@ -7212,7 +7212,7 @@ P.menu = {
     const m = dato('menu', idSemana(lun)) || {};
     [0, 1, 2, 3, 4, 5, 6].forEach(i => {
       const d = sumaDias(lun, i), hoy = isoDia(d) === hoyISO();
-      h += '<button class="rn-cd rn-gl rn-md2' + (esta && d < hoy0() ? ' rn-md-pasado' : '') + '" data-a="rnMenuDia" data-d="' + (i + 1) + '" data-s="' + p.semana + '">' + rnGrupo(cap(DIAS[d.getDay()]) + ' ' + d.getDate(), hoy ? 'Hoy' : '') +
+      h += '<button class="rn-cd rn-gl rn-md2' + (d < hoy0() ? ' rn-md-pasado' : '') + '" data-a="rnMenuDia" data-d="' + (i + 1) + '" data-s="' + p.semana + '">' + rnGrupo(cap(DIAS[d.getDay()]) + ' ' + d.getDate(), hoy ? 'Hoy' : '') +
         cs.map(c => { const t = m['d' + (i + 1) + c[0]]; return '<span class="rn-rw rn-plato"><span class="rn-pic2">' + rnIc(ICOMIDA[c[0]] || 'cubiertos', 18, 2) + '</span><span class="rn-s rn-pl2">' + c[1] + '</span><span class="rn-pt2' + (t ? '' : ' rn-mv') + '">' + (t ? esc(t) : 'Sin poner') + '</span></span>'; }).join('') + '</button>';
     });
     return h;
@@ -7298,7 +7298,7 @@ P.gastos = {
     const pag = ps.map((x, i) => [x, movs.filter(m => m.pagadoPor === x.id).reduce((a, m) => a + (Number(m.importe) || 0), 0), i]);
     const r = reembolsos(saldosDe(c.id))[0];
     const kp = x => { const pp = x && x.persona && rnPersona(x.persona); return pp ? rnKPer(pp) : 'azul'; };
-    let o = cab + rnCd('<div class="rn-gc"><span class="rn-gct">' + (c.emoji ? esc(c.emoji) + ' ' : '') + esc(c.nombre) + '</span>' + rnTg(c.saldada ? 'Saldada' : 'Abierta', 'rosa') + '</div><div class="rn-num rn-gtot">' + euros(tot) + '</div><p class="rn-s rn-gsub">en ' + movs.length + (movs.length === 1 ? ' gasto' : ' gastos') + ' este mes</p>' +
+    let o = cab + rnCd('<div class="rn-gc"><span class="rn-gct">' + (c.emoji ? esc(c.emoji) + ' ' : '') + esc(c.nombre) + '</span><span class="rn-gcd">' + rnTg(c.saldada ? 'Saldada' : 'Abierta', 'rosa') + '<button class="rn-gabrir" data-a="ir" data-id="cuenta" data-cid="' + c.id + '">Ver cuenta' + rnIc('atras', 15, 2.4) + '</button></span></div><div class="rn-num rn-gtot">' + euros(tot) + '</div><p class="rn-s rn-gsub">en ' + movs.length + (movs.length === 1 ? ' gasto' : ' gastos') + ' este mes</p>' +
       '<div class="rn-b2">' + pag.map(x => '<i class="rn-k-' + kp(x[0]) + '" style="flex:' + Math.max(0.5, x[1]) + '"></i>').join('') + '</div><div class="rn-s rn-gpg">' + pag.map((x, i) => '<span>' + (i === 0 ? esc(x[0].nombre) + ' ha pagado ' : esc(x[0].nombre) + ' ') + euros(x[1]) + '</span>').join('') + '</div>' +
       (r ? '<button class="rn-saldo" data-a="ir" data-id="cuenta" data-cid="' + c.id + '">' + rnAv(rnPersona((ps.find(q => q.id === r.de) || {}).persona), 28) + '<span class="rn-t rn-b" style="flex:1">' + esc(partNombre(c, r.de)) + ' le debe a ' + esc(partNombre(c, r.a)) + ' ' + euros(r.importe) + '</span><b class="rn-sal">Saldar</b></button>' : '<p class="rn-s" style="margin:12px 2px 4px">Estáis en paz</p>') + '<div style="height:12px"></div>', 'rn-k-rosa');
     const ult = movs.slice().sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '') || (b.creado || 0) - (a.creado || 0)).slice(0, 5);
@@ -8168,8 +8168,9 @@ P.inicio = Object.assign({}, _ini47, {
       const vis = ordenInicio().map(k => rnTarjeta(k, 'edit')).join(''), hid = ocultasInicio().map(k => rnTarjeta(k, 'hid')).join('');
       return '<div class="rn-tit rn-tit-in"><h1>Tu inicio</h1><div class="rn-titd"><button class="rn-btnp rn-btnc rn-btno rn-listo" data-a="inicioListo">Listo</button></div></div>' +
         '<p class="rn-sub">Mantén pulsada una tarjeta y arrástrala. El ojo la oculta; la rueda, sus ajustes.</p>' +
+        /* 1.0.26: «Añadir tarjeta» y «Plantillas», arriba, antes de las tarjetas */
+        '<div class="rn-dos rn-dos-arriba"><button class="rn-btnp rn-btng rn-gl" data-a="ir" data-id="tarjetas">' + rnIc('anadir', 20, 2.2) + 'Añadir tarjeta</button><button class="rn-btnp rn-btng rn-gl" data-a="ir" data-id="plantillas">' + rnIc('duplicar', 20, 2) + 'Plantillas</button></div>' +
         '<div class="rn-mos rn-mos-ed" data-r="mos">' + vis + '</div>' +
-        '<div class="rn-dos"><button class="rn-btnp rn-btng rn-gl" data-a="ir" data-id="tarjetas">' + rnIc('anadir', 20, 2.2) + 'Añadir tarjeta</button><button class="rn-btnp rn-btng rn-gl" data-a="ir" data-id="plantillas">' + rnIc('duplicar', 20, 2) + 'Plantillas</button></div>' +
         (hid ? '<h2 class="rn-gt">Ocultas</h2><p class="rn-txt rn-pie-txt">Toca el ojo para volver a mostrarlas.</p><div class="rn-mos rn-mos-hid">' + hid + '</div>' : '') +
         '<button class="rn-version rn-verbv rn-rst" data-a="inicioRestablecer">Restablecer el orden original</button>';
     }
@@ -9671,6 +9672,64 @@ P.acuario.tras = (el, p) => acMontarMedidas(el, p);
     return h;
   };
 })();
+
+/* ---- 58_rn_126.js ---- */
+/* ===================== 1.0.26 · Categorías de gasto propias, con un icono de la app ===================== */
+/* Ya existía la colección «categorias» ({nombre}); ahora también lleva «ic» (un icono de la app) y se crean desde el gasto. */
+const CAT_ICONOS = [['etiqueta', 'Etiqueta'], ['mascotas-gasto', 'Mascotas'], ['regalo', 'Regalo'], ['ropa', 'Ropa'], ['deporte', 'Deporte'], ['viaje', 'Viaje'], ['hogar-y-reformas', 'Hogar'], ['habitacion-infantil', 'Niños'],
+  ['salud', 'Salud'], ['educacion', 'Formación'], ['internet', 'Tecnología'], ['cuidado-personal', 'Belleza'], ['ocio', 'Ocio'], ['impuestos', 'Impuestos'], ['suscripciones', 'Suscripciones'], ['corazon', 'Donativo']];
+const catPropias = () => lista('categorias').filter(x => x.nombre).sort((a, b) => (a.creado || 0) - (b.creado || 0));
+/* En el formulario del gasto: la última es «Nueva» */
+(function () {
+  const h0 = P.mov.html;
+  P.mov.html = p => {
+    let h = h0(p);
+    const i = h.indexOf('<p class="lab2">Categoría</p><div class="chips">');
+    if (i < 0) return h;
+    const j = h.indexOf('</div>', i + 46);
+    return h.slice(0, j) + '<button class="chip rn-catnueva" data-a="catNueva">' + rnIc('anadir', 16, 2.4) + 'Nueva</button>' + h.slice(j);
+  };
+})();
+let CAT_NUEVA = { n: '', ic: 'etiqueta' };
+function catHojaHtml() {
+  const tuyas = catPropias();
+  return rnCabHoja('Nueva categoría') +
+    '<label class="rn-fld"><small>Nombre</small><input id="catNom" value="' + esc(CAT_NUEVA.n) + '" placeholder="Por ejemplo, Mascotas" maxlength="30" autocomplete="off" enterkeyhint="done"></label>' +
+    '<p class="rn-et">Icono</p><div class="rn-catics">' + CAT_ICONOS.map(x => '<button class="rn-catic' + (CAT_NUEVA.ic === x[0] ? ' rn-on' : '') + '" data-a="catIcono" data-v="' + x[0] + '" aria-label="' + x[1] + '" aria-pressed="' + (CAT_NUEVA.ic === x[0]) + '">' + rnIc(x[0], 24, 2) + '</button>').join('') + '</div>' +
+    '<button class="rn-btnp" data-a="catNuevaOk">Añadir categoría</button>' +
+    (tuyas.length ? '<p class="rn-et" style="margin-top:22px">Vuestras categorías</p><div class="rn-lis">' + tuyas.map(x => '<div class="rn-rw rn-li"><span class="rn-catmini">' + rnIc(x.ic || 'etiqueta', 20, 2) + '</span><span class="rn-t" style="flex:1">' + esc(x.nombre) + '</span><button class="rn-catborrar" data-a="catBorrarPropia" data-id="' + x.id + '">Borrar</button></div>').join('') + '</div>' : '');
+}
+function catRepintarHoja() {
+  if (!hojaAbierta) return;
+  const c = $('.rn-hjc', hojaAbierta.h); if (!c) return;
+  const y = c.scrollTop; c.innerHTML = catHojaHtml(); c.scrollTop = y; catMontar(hojaAbierta.h);
+}
+function catMontar(h) { const i = $('#catNom', h); if (i) { i.addEventListener('input', () => { CAT_NUEVA.n = i.value; }); i.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); i.blur(); } }); } }
+ACC.catNueva = () => {
+  const e = Nav.actual(); if (e && e.el) try { guardarCampos(e); } catch (x) { }
+  CAT_NUEVA = { n: '', ic: 'etiqueta' };
+  abrirHoja(catHojaHtml(), { clase: 'rn-k-rosa rn-hj-form', montar: catMontar });
+  setTimeout(() => { const i = $('#catNom'); if (i && hojaAbierta) i.focus(); }, 380);
+};
+ACC.catIcono = el => { const i = $('#catNom'); if (i) CAT_NUEVA.n = i.value; CAT_NUEVA.ic = el.dataset.v; catRepintarHoja(); };
+ACC.catNuevaOk = () => {
+  const i = $('#catNom'); if (i) CAT_NUEVA.n = i.value;
+  const n = cap(String(CAT_NUEVA.n || '').trim());
+  if (!n) { if (i) i.focus(); return toast('Escribe el nombre de la categoría.'); }
+  const ya = CAT_MOV.find(x => x[1].toLowerCase() === n.toLowerCase()) || catPropias().find(x => x.nombre.toLowerCase() === n.toLowerCase());
+  const id = ya ? (ya.id || ya[0]) : 'g' + uid();
+  if (!ya) cambiar('categorias', id, { nombre: n, ic: CAT_NUEVA.ic || 'etiqueta', creado: Date.now(), creadoPor: S.cfg.persona });
+  cerrarHoja();
+  const e = Nav.actual(); if (e && e.id === 'mov') { e.params.categoria = id; repintar(); }
+  toast(ya ? '«' + n + '» ya estaba: elegida' : 'Categoría «' + n + '» añadida');
+};
+ACC.catBorrarPropia = el => {
+  const x = dato('categorias', el.dataset.id); if (!x) return;
+  cambiar('categorias', x.id, { _b: 1 });
+  const e = Nav.actual(); if (e && e.id === 'mov' && e.params.categoria === x.id) e.params.categoria = 'otro';
+  catRepintarHoja(); if (e && e.id === 'mov') repintar();
+  toast('«' + x.nombre + '» borrada. Los gastos que la tenían pasan a «Otro».');
+};
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
