@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.23 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.0.24 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.23';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.0.24';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -5649,7 +5649,7 @@ try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () =
    Los archivos van a la carpeta de Drive de Ronda con el mismo sistema que las fotos (el script no cambia; máximo 20 MB por archivo).
    «Exportar» descarga un zip hecho en el propio móvil: feedback.txt y una carpeta por nota con sus archivos. */
 
-const FB_MAX = 100 * 1024 * 1024; /* 1.7.0: con subida directa a Drive; con el script antiguo, 20 MB */
+const FB_MAX = 20 * 1024 * 1024; /* 1.0.24: 20 MB como máximo, también con el script de antes de la 1.7.0 */
 MODS.feedback = ['Feedback', 'comentario', 0, () => { const n = lista('feedback').filter(x => x.estado !== 'h').length; return n ? n + (n === 1 ? ' pendiente' : ' pendientes') : 'Ideas para mejorar'; }];
 SECC.feedback = [0, 'comentario'];
 COLBARRA.feedback = 0;
@@ -5657,9 +5657,11 @@ COLBARRA.feedback = 0;
 /* Secciones para elegir: todas las de la app y «General» */
 function fbSecciones() {
   const s = [['general', 'General', '#9FB0B8'], ['inicio', 'Inicio', COL[0]]];
-  Object.keys(MODS).filter(k => k !== 'feedback' && k !== 'buscar').forEach(k => { const c = SECC[k] ? (SECC[k][0] < 0 ? TINTA : COL[SECC[k][0]]) : COL[MODS[k][2]]; s.push([k, MODS[k][0], c]); });
+  Object.keys(MODS).filter(k => k !== 'buscar').forEach(k => { const c = SECC[k] ? (SECC[k][0] < 0 ? TINTA : COL[SECC[k][0]]) : COL[MODS[k][2]]; s.push([k, MODS[k][0], c]); });
   s.push(['gastos', 'Gastos', COL[7]], ['mas', 'Más', TINTA], ['ajustes', 'Ajustes', TINTA]);
-  const vistos = {}; return s.filter(x => vistos[x[0]] ? false : (vistos[x[0]] = 1));
+  if (!s.some(x => x[0] === 'feedback')) s.push(['feedback', 'Feedback', TINTA]);
+  /* 1.0.24: por orden alfabético, con General la primera */
+  const vistos = {}; return s.filter(x => vistos[x[0]] ? false : (vistos[x[0]] = 1)).sort((a, b) => a[0] === 'general' ? -1 : b[0] === 'general' ? 1 : a[1].localeCompare(b[1], 'es'));
 }
 const fbSec = k => fbSecciones().find(x => x[0] === k) || ['general', 'General', '#9FB0B8'];
 function fbCuando(ts) {
@@ -5705,7 +5707,7 @@ function fbHojaHtml() {
     '<p class="lab2">Sección</p><div class="fbsecs">' + fbSecciones().map(x => '<button class="' + (s === x[0] ? 'on' : '') + '" data-a="fbSecElegir" data-v="' + x[0] + '"><i style="background:' + x[2] + '"></i>' + esc(x[1]) + '</button>').join('') + '</div>' +
     '<p class="lab2">Capturas y vídeos</p><div class="fbadj">' + FB.adj.map((a, i) => '<span class="fbw">' + fbMini(a, 72, 112) + (FB.subiendo ? '' : '<button class="fbq" data-a="fbQuitar" data-i="' + i + '" aria-label="Quitar">' + ic('cerrar', 12) + '</button>') + '</span>').join('') +
     (FB.subiendo ? '' : '<label class="fbadd">' + ic('camara', 24, 0) + '<small>Foto o vídeo</small><input type="file" id="fbArch" accept="image/*,video/*" multiple hidden></label>') + '</div>' +
-    '<p class="cap fbnota">Vídeos de hasta 100 MB (un par de minutos de grabación de pantalla). Se guardan en vuestro Drive, en la carpeta «Ronda · archivos».</p>' +
+    '<p class="cap fbnota">Fotos y vídeos de hasta 20 MB (unos 30 segundos de grabación de pantalla). Se guardan en vuestro Drive, en la carpeta «Ronda · archivos».</p>' +
     (FB.subiendo ? '<div class="fbprog"><div class="bar2"><i style="width:' + Math.round(100 * (FB.prog || 0)) + '%;background:' + COL[0] + '"></i></div><small>' + esc(FB.subiendo) + '</small></div>' : btn('Guardar nota', 'fbGuardar')) + '</div>';
 }
 function fbHoja() {
@@ -5754,7 +5756,7 @@ async function fbAnadir(input) {
     if (!FB) return;
     try {
       if (/^video\//.test(file.type)) {
-        if (file.size > FB_MAX) { toast('Ese vídeo pesa ' + fbMB(file.size) + ' y el máximo es 100 MB. Grábalo más corto.'); continue; }
+        if (file.size > FB_MAX) { toast('Ese archivo pesa ' + fbMB(file.size) + ' y el máximo es 20 MB. Grábalo más corto.'); continue; }
         const inf = await fbVideoInfo(file);
         FB.adj.push({ blob: file, tipo: 'vid', mini: inf.mini, dur: inf.dur, bytes: file.size, nombre: file.name || 'video.mov', nuevo: true });
       } else if (/^image\//.test(file.type)) {
@@ -6063,6 +6065,9 @@ ICONOS['modulo-menu-semanal'] = ['<circle cx="12.5" cy="12.5" r="5.8"/><path d="
 ICONOS['menu-comida'] = ['<circle cx="15" cy="12.5" r="7.5"/><path d="M2.5 4v5.5a1.8 1.8 0 0 0 1.8 1.8V20.5"/><path d="M6 4v5.5a1.8 1.8 0 0 1-1.7 1.8"/>', [[15, 12.5, 'c']]];
 
 Object.assign(window.RONDA || (window.RONDA = {}), { subirRapido: subirRapido, ordenAgua: ordenAgua, bajarArchivo: bajarArchivo });
+
+/* 1.0.24: plantas por la próxima fecha de riego (antes, por el agua que les queda) */
+function ordenRiego(l) { return l.slice().sort((a, b) => (a.proximo || '9').localeCompare(b.proximo || '9') || nivelAgua(a) - nivelAgua(b) || String(a.nombre).localeCompare(String(b.nombre), 'es')); }
 
 /* ---- 26_solo171.js ---- */
 /* ===================== 1.7.1 · Tareas «Solo para mí» =====================
@@ -6822,9 +6827,9 @@ function rnPintarTarea(abrir) {
     '<label class="rn-fld"><small>Qué hay que hacer</small><input id="rnTit" value="' + esc(t.titulo) + '" placeholder="Por ejemplo, cambiar la bombilla" maxlength="120" autocomplete="off" enterkeyhint="done"></label>' +
     (t.solo ? '' : '<p class="rn-et">Para quién <span class="rn-et-n">Puedes elegir varias personas</span></p><div class="rn-qcs">' + ps.map(p => '<button class="rn-qc' + (paraIds(t).indexOf(p.id) >= 0 ? ' rn-on' : '') + '" data-a="rnTPara" data-v="' + p.id + '" aria-pressed="' + (paraIds(t).indexOf(p.id) >= 0) + '">' + esc(p.nombre) + '</button>').join('') + '<button class="rn-qc' + (t.para === 'todos' ? ' rn-on' : '') + '" data-a="rnTPara" data-v="todos" aria-pressed="' + (t.para === 'todos') + '">Todos</button></div>') +
     rnSelectorCat(t) +
-    '<p class="rn-et">Cuándo</p>' + chips([['hoy', 'Hoy'], ['man', 'Mañana'], ['fd', fd[1]], ['otro', otroDia + '<input type="date" id="rnFec" class="rn-oc" value="' + esc(atajo === 'otro' ? t.fecha : '') + '" aria-label="Elegir día">']], atajo, 'rnTCuando') +
+    '<p class="rn-et">Cuándo</p>' + chips([['sin', 'Sin fecha'], ['hoy', 'Hoy'], ['man', 'Mañana'], ['fd', fd[1]], ['otro', otroDia + '<input type="date" id="rnFec" class="rn-oc" value="' + esc(atajo === 'otro' ? t.fecha : '') + '" aria-label="Elegir día">']], atajo, 'rnTCuando') +
     '<div class="rn-lis">' +
-    linea('Hora', t.hora || 'Sin hora', undefined, null, '<input type="time" id="rnHor" class="rn-oc" value="' + esc(t.hora) + '" aria-label="Hora">') +
+    linea('Hora', t.hora || 'Sin hora', t.hora ? '<button class="rn-qc rn-quitarh" data-a="rnTSinHora">Quitar</button>' : undefined, null, '<input type="time" id="rnHor" class="rn-oc" value="' + esc(t.hora) + '" aria-label="Hora">') +
     linea('Repetir', esc(textoRepe(t.repite)), undefined, 'rnTRepe') +
     linea('Aviso', esc(textoAviso(t.aviso)), undefined, 'rnTAviso') +
     '<div class="rn-rw rn-li"><span class="rn-t">Solo para mí</span><span class="rn-lv">' + (t.solo ? 'Solo la ves tú' : '') + '</span>' + rnSw(!!t.solo, 'rnTSolo') + '</div></div>' +
@@ -6843,8 +6848,16 @@ function rnPintarTarea(abrir) {
 function rnMontarTarea(h) {
   const i = $('#rnTit', h);
   if (i) { i.addEventListener('input', () => { RN_T.titulo = i.value; }); i.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); i.blur(); } }); }
-  const f = $('#rnFec', h); if (f) f.addEventListener('change', () => { if (f.value) { RN_T.fecha = f.value; rnPintarTarea(); } });
-  const hr = $('#rnHor', h); if (hr) hr.addEventListener('change', () => { RN_T.hora = hr.value; rnPintarTarea(); });
+  /* 1.0.24: mientras el selector del iPhone está abierto no se vuelve a pintar la hoja (eso lo dejaba atascado):
+     se apunta el valor y se pinta al cerrarlo. «Restablecer» deja la tarea sin fecha o sin hora. */
+  const enCurso = (el, fn) => {
+    let pend = false;
+    const pinta = () => { if (pend && hojaAbierta) { pend = false; rnLeerTit(); rnPintarTarea(); } };
+    el.addEventListener('change', () => { fn(el.value || ''); pend = true; if (document.activeElement !== el) setTimeout(pinta, 0); });
+    el.addEventListener('blur', () => setTimeout(pinta, 0));
+  };
+  const f = $('#rnFec', h); if (f) enCurso(f, v => { RN_T.fecha = v; if (!v) RN_T.hora = ''; });
+  const hr = $('#rnHor', h); if (hr) enCurso(hr, v => { RN_T.hora = v; });
 }
 const rnLeerTit = () => { const i = $('#rnTit'); if (i) RN_T.titulo = i.value; };
 /* 1.0.1: se pueden marcar varias personas. «Todos» las quita; marcar a todas es lo mismo que «Todos»; quitar a la última deja «Todos». */
@@ -6852,9 +6865,11 @@ ACC.rnTPara = el => { rnLeerTit(); RN_T.para = paraConmutar(RN_T.para, el.datase
 ACC.rnTCuando = el => {
   rnLeerTit();
   const v = el.dataset.v;
-  if (v === 'hoy') RN_T.fecha = hoyISO(); else if (v === 'man') RN_T.fecha = isoDia(sumaDias(hoy0(), 1)); else if (v === 'fd') RN_T.fecha = rnAtajoFinde()[0];
+  if (v === 'sin') { RN_T.fecha = ''; RN_T.hora = ''; } else if (v === 'hoy') RN_T.fecha = hoyISO(); else if (v === 'man') RN_T.fecha = isoDia(sumaDias(hoy0(), 1)); else if (v === 'fd') RN_T.fecha = rnAtajoFinde()[0];
   rnPintarTarea();
 };
+/* 1.0.24: quitar la hora */
+ACC.rnTSinHora = (el, ev) => { if (ev && ev.preventDefault) { ev.preventDefault(); ev.stopPropagation(); } rnLeerTit(); RN_T.hora = ''; rnPintarTarea(); };
 ACC.rnTSolo = () => { rnLeerTit(); RN_T.solo = RN_T.solo ? '' : S.cfg.persona; if (RN_T.solo) RN_T.para = S.cfg.persona; rnPintarTarea(); };
 /* Repetir y Aviso: lista de opciones dentro de la misma hoja (el selector propio no está dibujado) */
 function rnOpcionesEn(titulo, ops, act, fn) {
@@ -7191,14 +7206,13 @@ P.menu = {
   html: p => {
     const lun = p.semana ? deISO(p.semana) : lunesDe(new Date()); p.semana = isoDia(lun);
     const esta = isoDia(lunesDe(new Date())) === p.semana, fin = sumaDias(lun, 6), cs = comidasOn();
-    const sub = 'Semana del ' + lun.getDate() + (lun.getMonth() !== fin.getMonth() ? ' de ' + MESES[lun.getMonth()] : '') + ' al ' + fin.getDate() + ' de ' + MESES[fin.getMonth()];
-    const botones = rnRb('atras', 'menuSem', 'Semana anterior', ' data-v="-1"') + (esta ? '' : '<button class="rn-rb rn-gl rn-girar" data-a="menuSem" data-v="1" aria-label="Semana siguiente">' + rnIc('atras', 21, 2) + '</button>') + rnRb('ajustes', 'ir', 'Ajustes del menú', ' data-id="menuAjustes"');
+    const sub = (esta ? 'Esta semana: del ' : 'Semana del ') + lun.getDate() + (lun.getMonth() !== fin.getMonth() ? ' de ' + MESES[lun.getMonth()] : '') + ' al ' + fin.getDate() + ' de ' + MESES[fin.getMonth()];
+    const botones = rnRb('atras', 'menuSem', 'Semana anterior', ' data-v="-1"') + '<button class="rn-rb rn-gl rn-girar" data-a="menuSem" data-v="1" aria-label="Semana siguiente">' + rnIc('atras', 21, 2) + '</button>' + rnRb('ajustes', 'ir', 'Ajustes del menú', ' data-id="menuAjustes"');
     let h = rnTitulo('Menú', { der: botones, sub: sub }) + '<button class="rn-btnp rn-tinte" data-a="menuACompra">' + rnIc('modulo-compra', 20, 2) + 'Añadir lo que falta a la compra</button>';
     const m = dato('menu', idSemana(lun)) || {};
     [0, 1, 2, 3, 4, 5, 6].forEach(i => {
       const d = sumaDias(lun, i), hoy = isoDia(d) === hoyISO();
-      if (esta && d < hoy0()) return;
-      h += '<button class="rn-cd rn-gl rn-md2" data-a="rnMenuDia" data-d="' + (i + 1) + '" data-s="' + p.semana + '">' + rnGrupo(cap(DIAS[d.getDay()]) + ' ' + d.getDate(), hoy ? 'Hoy' : '') +
+      h += '<button class="rn-cd rn-gl rn-md2' + (esta && d < hoy0() ? ' rn-md-pasado' : '') + '" data-a="rnMenuDia" data-d="' + (i + 1) + '" data-s="' + p.semana + '">' + rnGrupo(cap(DIAS[d.getDay()]) + ' ' + d.getDate(), hoy ? 'Hoy' : '') +
         cs.map(c => { const t = m['d' + (i + 1) + c[0]]; return '<span class="rn-rw rn-plato"><span class="rn-pic2">' + rnIc(ICOMIDA[c[0]] || 'cubiertos', 18, 2) + '</span><span class="rn-s rn-pl2">' + c[1] + '</span><span class="rn-pt2' + (t ? '' : ' rn-mv') + '">' + (t ? esc(t) : 'Sin poner') + '</span></span>'; }).join('') + '</button>';
     });
     return h;
@@ -7301,12 +7315,12 @@ ACC.rnEstad = () => { const c = cuentasAbiertas()[0]; Nav.ir('estadisticas', c ?
 P.plantas = {
   raiz: true, rn: true,
   html: () => {
-    const l = ordenAgua(lista('plantas')), hoy = l.filter(x => tocaHoy('plantas', x)), resto = l.filter(x => !tocaHoy('plantas', x));
+    const l = ordenRiego(lista('plantas')), hoy = l.filter(x => tocaHoy('plantas', x)), resto = l.filter(x => !tocaHoy('plantas', x));
     let h = rnTitulo('Plantas', { sub: l.length + (l.length === 1 ? ' planta' : ' plantas') + ' · ' + hoy.length + ' para hoy' });
     if (!l.length) return h + '<div class="rn-vac">' + rnIlu('il-plantas') + '<h2>Sin plantas</h2><p class="rn-txt">Apunta cada cuánto se riegan y Ronda os avisa.</p></div>';
     const col = x => { const n = faltan(x.proximo), t = tocaHoy('plantas', x); return '<button class="rn-plc" data-a="rutVer" data-col="plantas" data-id="' + x.id + '">' + rnEmo(x.emoji, 'modulo-plantas', 40) + '<span class="rn-pn">' + esc(x.nombre) + '</span><span class="rn-agua rn-agua2' + (t ? ' rn-toca' : '') + '"><i style="height:' + Math.round(100 * nivelAgua(x)) + '%"></i></span><span class="rn-s' + (t ? ' rn-rojo' : '') + '">' + (t ? 'Hoy' : n === 1 ? 'Mañana' : n + ' días') + '</span></button>'; };
     const fila = (x, boton) => '<div class="rn-rw rn-plr">' + rnEmo(x.emoji, 'modulo-plantas', 40) + '<button class="rn-rwt" data-a="rutVer" data-col="plantas" data-id="' + x.id + '"><span class="rn-t rn-b">' + esc(x.nombre) + '</span><span class="rn-n">' + (boton ? textoCada(x.cada || 1, x) + (x.ultimaPor ? ' · la última, ' + esc(nombreDe(x.ultimaPor)) : '') : cap(rnDiaTexto(x.proximo, true)) + ' · ' + textoCada(x.cada || 1, x).toLowerCase()) + '</span></button>' + (boton ? '<button class="rn-tgb" data-a="rutHecho" data-col="plantas" data-id="' + x.id + '">Regada</button>' : '') + '</div>';
-    h += rnCd(rnGrupo('Cuánta agua les queda', '') .replace('</div>', (hoy.length ? '<span class="rn-chd rn-rojo">' + hoy.length + ' toca' + (hoy.length > 1 ? 'n' : '') + ' hoy</span>' : '') + '</div>') + '<div class="rn-plw">' + l.slice(0, 5).map(col).join('') + '</div>', 'rn-k-verde rn-pltop');
+    h += rnCd(rnGrupo('Cuánta agua les queda', '') .replace('</div>', (hoy.length ? '<span class="rn-chd rn-rojo">' + hoy.length + ' toca' + (hoy.length > 1 ? 'n' : '') + ' hoy</span>' : '') + '</div>') + '<div class="rn-plw' + (l.length > 5 ? ' rn-plw-mov' : '') + '">' + l.map(col).join('') + '</div>', 'rn-k-verde rn-pltop');
     if (hoy.length) h += rnCd(rnGrupo('Hoy', String(hoy.length)) + hoy.map(x => fila(x, 1)).join(''), 'rn-gr rn-k-verde');
     if (resto.length) h += rnCd(rnGrupo('Próximos días', String(resto.length)) + resto.map(x => fila(x)).join(''), 'rn-gr rn-k-verde');
     return h;
@@ -8124,7 +8138,7 @@ ACC.rnWAbrir = (el, ev) => {
 /* Cabecera de Inicio con Dilo (opción A: micrófono en un círculo de cristal) */
 function rnCabInicio() {
   const e = espacio(), ps = personas(), yoN = ((yo() || {}).nombre || '').split(' ')[0];
-  return '<div class="rn-icab"><div class="rn-marca"><span class="rn-logo">' + rnPuntos(24, .125) + '</span><b>' + esc(e.nombre || '') + '</b></div><div class="rn-avs">' + ps.map(p => rnAv(p, 32)).join('') + '</div></div>' +   /* 0.3.2: Dilo ya no va aquí: se abre manteniendo pulsado el «+» */
+  return '<div class="rn-icab"><div class="rn-marca"><span class="rn-logo">' + rnPuntos(24, .125) + '</span><b>' + esc(e.nombre || '') + '</b></div><button class="rn-avs" data-a="ir" data-id="personas" aria-label="Personas">' + ps.map(p => rnAv(p, 32)).join('') + '</button></div>' +   /* 0.3.2: Dilo ya no va aquí: se abre manteniendo pulsado el «+» */
     '<p class="rn-fecha">' + fechaLarga(new Date()) + '</p><h1 class="rn-saludo">' + saludo() + (yoN ? ', ' + esc(yoN) : '') + '</h1>';
 }
 
@@ -9612,7 +9626,7 @@ ACC.rnOcultarPersona = el => {
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
-window.RONDA = Object.assign(window.RONDA || {}, { paraConmutar, personas, personasTodas, paraDeNombres, rnMedir, S, Nav, ACC, P, DB, VERSION, cambiar, lista, rnSecciones, rnNuevaTarea, PRUEBA, PI, PR, MODO, EN_CASA, RN_PAL, Sync, Cal, rnAurora, Dilo, rnPalBolas, W, PLANTILLAS, fijarInicio, ordenInicio, rnBarra, locLeer, actLoc, rnPalabra, apiReal, saldosDe, reembolsos, hoyISO, ordenAgua, nivelAgua, dato, toast });
+window.RONDA = Object.assign(window.RONDA || {}, { fbSecciones, ordenRiego, rnT: () => RN_T, paraConmutar, personas, personasTodas, paraDeNombres, rnMedir, S, Nav, ACC, P, DB, VERSION, cambiar, lista, rnSecciones, rnNuevaTarea, PRUEBA, PI, PR, MODO, EN_CASA, RN_PAL, Sync, Cal, rnAurora, Dilo, rnPalBolas, W, PLANTILLAS, fijarInicio, ordenInicio, rnBarra, locLeer, actLoc, rnPalabra, apiReal, saldosDe, reembolsos, hoyISO, ordenAgua, nivelAgua, dato, toast });
 rnArrancar().catch(e => {
   anotar('arranque', e);
   const a = $('#arranque'); if (a) a.remove();
