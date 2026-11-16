@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.0.26 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.1.0 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.0.26';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.1.0';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9730,6 +9730,191 @@ ACC.catBorrarPropia = el => {
   catRepintarHoja(); if (e && e.id === 'mov') repintar();
   toast('«' + x.nombre + '» borrada. Los gastos que la tenían pasan a «Otro».');
 };
+
+/* ---- 58_rn_pc.js ---- */
+/* ===================== 1.1.0 · RONDA EN ORDENADOR =====================
+   Solo en pantallas anchas con ratón (más de 1024 px, «hover» y puntero fino): en el móvil y en el iPad no cambia nada.
+   - La barra de abajo pasa a un panel a la izquierda con todas las secciones, en tres grupos. Se pliega con la flecha
+     (solo iconos) y se recuerda en este ordenador.
+   - Las secciones se ordenan arrastrándolas en el panel (también de un grupo a otro) y se ocultan con el botón derecho.
+     Se guarda en este ordenador, como el orden de «Más» en el móvil.
+   - El «+» pasa a un botón con texto arriba a la derecha («Nueva tarea», «Nuevo gasto»…). ⌘K / Ctrl+K busca.
+   - Las pantallas se colocan en columnas (Inicio en tres; Tareas, Gastos, Agenda… en dos). Todo el CSS va bajo html.pc. */
+const PC_MQ = window.matchMedia ? window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)') : null;
+const pcActivo = () => !!(PC_MQ && PC_MQ.matches);
+const PC_GRUPOS_DEF = [['', ['tareas', 'agenda', 'menu', 'compra']], ['Casa', ['gastos', 'plantas', 'acuario', 'medicacion', 'turnos', 'coche']], ['Guardado', ['documentos', 'notas', 'listasr', 'feedback']]];
+const PC_FIJAS = ['inicio', 'personas', 'ajustes', 'buscar'];
+const pcLS = (k, v) => { try { if (v === undefined) return JSON.parse(localStorage.getItem('ronda-pc-' + k) || 'null'); localStorage.setItem('ronda-pc-' + k, JSON.stringify(v)); } catch (e) { return null; } };
+function pcGrupos() {
+  const g = pcLS('grupos'), ok = k => RN_SEC[k] && PC_FIJAS.indexOf(k) < 0;
+  const l = Array.isArray(g) && g.length === 3 ? g.map((x, i) => [PC_GRUPOS_DEF[i][0], (x || []).filter(ok)]) : PC_GRUPOS_DEF.map(x => [x[0], x[1].filter(ok)]);
+  const ya = [].concat(...l.map(x => x[1]));
+  Object.keys(RN_SEC).filter(k => ok(k) && ya.indexOf(k) < 0).forEach(k => l[2][1].push(k));   /* las nuevas, al final */
+  return l;
+}
+const pcOcultas = () => pcLS('ocultas') || [];
+const PC_TXT_ANADIR = { tareas: 'Nueva tarea', gastos: 'Nuevo gasto', agenda: 'Nuevo evento', notas: 'Nueva nota', compra: 'Añadir', plantas: 'Nueva planta', documentos: 'Subir', listasr: 'Nueva lista', coche: 'Añadir', medicacion: 'Añadir', acuario: 'Añadir' };
+
+/* ---------- El panel ---------- */
+function pcCuenta(k) {
+  try {
+    if (k === 'tareas') { const h = hoyISO(), mi = typeof mias === 'function' ? mias : () => true; const n = lista('tareas').filter(t => !t.hecho && t.fecha && t.fecha <= h && mi(t)).length; return n || ''; }
+    if (k === 'compra') { const n = lista('compra').filter(x => !x.hecho).length; return n || ''; }
+  } catch (e) { }
+  return '';
+}
+function pcItem(k, act) {
+  const s = k === 'inicio' ? ['Inicio', 'inicio', 'neutro'] : RN_SEC[k]; if (!s) return '';
+  const n = pcCuenta(k);
+  return '<button class="pc-it rn-k-' + s[2] + (act === k ? ' pc-on' : '') + '" data-a="pcIr" data-id="' + k + '" title="' + esc(s[0]) + '"' + (PC_FIJAS.indexOf(k) < 0 ? ' draggable="true"' : '') + (act === k ? ' aria-current="page"' : '') + '>' +
+    '<span class="pc-ic">' + rnIc(s[1], 20, 2) + '</span><span class="pc-tx">' + esc(s[0]) + '</span>' + (n ? '<em>' + n + '</em>' : '') + '</button>';
+}
+function pcPanel() {
+  if (!pcActivo()) { const v = $('#pc-lat'); if (v) v.remove(); return; }
+  let l = $('#pc-lat');
+  if (!l) { l = document.createElement('aside'); l.id = 'pc-lat'; l.setAttribute('aria-label', 'Secciones'); document.body.appendChild(l); pcMontarPanel(l); }
+  if (l.classList.contains('pc-arr')) return;                               /* mientras se arrastra, no se repinta */
+  const act = (Nav.pila[0] || {}).id, e = dato('espacio', 'espacio') || {}, oc = pcOcultas(), ver = l.classList.contains('pc-veroc');
+  const ps = (typeof personas === 'function' ? personas() : []);
+  l.innerHTML = '<div class="pc-marca"><span class="rn-logo">' + rnPuntos(28, .125) + '</span><div class="pc-mt"><b>Ronda</b><small>' + esc(e.nombre || 'Nuestra casa') + '</small></div>' +
+    '<button class="pc-plegar" data-a="pcPlegar" aria-label="' + (document.documentElement.classList.contains('pc-plegado') ? 'Abrir el panel' : 'Plegar el panel') + '" title="Plegar o abrir el panel">' + rnIc('atras', 18, 2.2) + '</button></div>' +
+    '<button class="pc-bus" data-a="rnBuscar" title="Buscar (⌘K)">' + rnIc('buscar', 18, 2) + '<span class="pc-tx">Buscar</span><kbd>⌘K</kbd></button>' +
+    '<div class="pc-nav">' + pcItem('inicio', act) +
+    pcGrupos().map((g, i) => '<div class="pc-gr" data-g="' + i + '">' + (g[0] ? '<p class="pc-gt">' + g[0] + '</p>' : '') + g[1].filter(k => ver || oc.indexOf(k) < 0).map(k => pcItem(k, act).replace('class="pc-it', 'class="pc-it' + (oc.indexOf(k) >= 0 ? ' pc-oc' : ''))).join('') + '</div>').join('') +
+    (oc.length ? '<button class="pc-vo" data-a="pcVerOcultas">' + (ver ? 'Listo' : (oc.length === 1 ? '1 oculta' : oc.length + ' ocultas')) + '</button>' : '') + '</div>' +
+    '<div class="pc-pie"><button class="pc-yo" data-a="pcIr" data-id="personas" title="Personas">' + ps.map(p => rnAv(p, 30)).join('') + '<span class="pc-tx">' + esc(ps.map(p => p.nombre).join(' y ')) + '</span></button>' + pcItem('ajustes', act) + '</div>';
+}
+ACC.pcIr = el => {
+  const k = el.dataset.id; if (!k) return;
+  if (RN_MAS_ABIERTA) try { cerrarHoja(); } catch (e) { }
+  if (hojaAbierta) try { cerrarHoja(); } catch (e) { }
+  if (Nav.pila.length === 1 && Nav.pila[0].id === k) return;
+  Nav.raiz(k, {});
+};
+ACC.pcPlegar = () => {
+  const r = document.documentElement, p = !r.classList.contains('pc-plegado');
+  r.classList.toggle('pc-plegado', p); pcLS('plegado', p); pcPanel();
+};
+ACC.pcVerOcultas = () => { const l = $('#pc-lat'); if (l) { l.classList.toggle('pc-veroc'); pcPanel(); } };
+
+/* Arrastrar para ordenar (también entre grupos) y botón derecho para ocultar o volver a mostrar */
+function pcMontarPanel(l) {
+  let arr = null;
+  l.addEventListener('dragstart', ev => {
+    const it = ev.target.closest && ev.target.closest('.pc-it[draggable]'); if (!it) return;
+    arr = it; l.classList.add('pc-arr'); it.classList.add('pc-coge');
+    try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', it.dataset.id); } catch (e) { }
+  });
+  l.addEventListener('dragover', ev => {
+    if (!arr) return; ev.preventDefault();
+    const gr = ev.target.closest && ev.target.closest('.pc-gr'); if (!gr) return;
+    const sob = ev.target.closest('.pc-it[draggable]');
+    if (sob && sob !== arr) { const r = sob.getBoundingClientRect(); gr.insertBefore(arr, ev.clientY < r.top + r.height / 2 ? sob : sob.nextSibling); }
+    else if (!sob) { const its = $$('.pc-it[draggable]', gr); if (!its.length || ev.clientY > its[its.length - 1].getBoundingClientRect().bottom) gr.appendChild(arr); }
+  });
+  const fin = () => {
+    if (!arr) return; arr.classList.remove('pc-coge'); arr = null; l.classList.remove('pc-arr');
+    const oc = pcOcultas(), ant = pcGrupos();
+    const g = $$('.pc-gr', l).map((gr, i) => { const vis = $$('.pc-it[draggable]', gr).map(x => x.dataset.id); return vis.concat(ant[i][1].filter(k => oc.indexOf(k) >= 0 && vis.indexOf(k) < 0 && !$('.pc-it[data-id="' + k + '"]', l))); });
+    pcLS('grupos', g); pcPanel();
+  };
+  l.addEventListener('drop', ev => { ev.preventDefault(); fin(); });
+  l.addEventListener('dragend', fin);
+  l.addEventListener('contextmenu', ev => {
+    const it = ev.target.closest && ev.target.closest('.pc-it[draggable]'); if (!it) return;
+    ev.preventDefault(); pcMenu(it.dataset.id, ev.clientX, ev.clientY);
+  });
+}
+function pcMenu(k, x, y) {
+  pcCerrarMenu();
+  const oc = pcOcultas().indexOf(k) >= 0, m = document.createElement('div');
+  m.className = 'pc-menu'; m.style.left = x + 'px'; m.style.top = y + 'px';
+  m.innerHTML = '<button data-a="pcOcultar" data-id="' + k + '">' + rnIc(oc ? 'ojo' : 'ojo-tachado', 18, 2) + (oc ? 'Mostrar en el panel' : 'Ocultar del panel') + '</button>';
+  document.body.appendChild(m);
+  setTimeout(() => { document.addEventListener('pointerdown', pcFueraMenu, true); }, 0);
+}
+function pcFueraMenu(ev) { if (!ev.target.closest('.pc-menu')) pcCerrarMenu(); }
+function pcCerrarMenu() { $$('.pc-menu').forEach(m => m.remove()); document.removeEventListener('pointerdown', pcFueraMenu, true); }
+ACC.pcOcultar = el => {
+  const k = el.dataset.id, oc = pcOcultas(), i = oc.indexOf(k);
+  if (i >= 0) oc.splice(i, 1); else oc.push(k);
+  pcLS('ocultas', oc); pcCerrarMenu();
+  const l = $('#pc-lat'); if (l && !oc.length) l.classList.remove('pc-veroc');
+  pcPanel(); toast(i >= 0 ? 'Vuelve a salir en el panel' : 'Oculta. La recuperas abajo, en «ocultas»');
+};
+
+/* ---------- Las pantallas en columnas ---------- */
+function pcCols(c, id, izq, der) {
+  izq = izq.filter(Boolean); der = der.filter(Boolean); if (!izq.length || !der.length) return;
+  const a = document.createElement('div'); a.className = 'pc-2c pc-2c-' + id;
+  const i = document.createElement('div'); i.className = 'pc-izq'; const d = document.createElement('div'); d.className = 'pc-der';
+  izq.forEach(x => i.appendChild(x)); der.forEach(x => d.appendChild(x)); a.append(i, d); c.appendChild(a);
+}
+function pcMes() {
+  const h = new Date(), y = h.getFullYear(), m = h.getMonth(), d0 = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate(), hoy = hoyISO();
+  const mi = typeof mias === 'function' ? mias : () => true, con = {};
+  lista('tareas').filter(t => !t.hecho && t.fecha && mi(t)).forEach(t => { con[t.fecha] = (con[t.fecha] || 0) + 1; });
+  let g = ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(x => '<b class="pc-mw">' + x + '</b>').join('') + '<span></span>'.repeat(d0);
+  for (let i = 1; i <= n; i++) {
+    const iso = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(i).padStart(2, '0');
+    g += '<span class="pc-md' + (iso === hoy ? ' pc-hoy' : iso < hoy ? ' pc-pas' : '') + '">' + i + (con[iso] ? '<i>' + '•'.repeat(Math.min(3, con[iso])) + '</i>' : '') + '</span>';
+  }
+  return '<div class="rn-cd rn-gl pc-mes"><div class="rn-ch"><span class="rn-cht">' + cap(MESES[m]) + ' ' + y + '</span></div><div class="pc-mg">' + g + '</div></div>';
+}
+function pcColocar(pg) {
+  if (!pcActivo() || !pg) return;
+  const c = $('.pgc', pg); if (!c || $(':scope > .pc-hecho', c)) return;
+  c.insertAdjacentHTML('afterbegin', '<i class="pc-hecho" hidden></i>');
+  const id = pg.dataset.p, raiz = pg.classList.contains('raiz'), tit = $(':scope > .rn-tit', c);
+  const hijos = () => [...c.children].filter(x => x.classList.contains('rn-cd'));
+  /* El «+» de la barra, como botón con texto */
+  if (raiz && tit && ['ajustes', 'personas', 'buscar', 'feedback'].indexOf(id) < 0 && !$('.pc-anadir', tit)) {
+    const s = RN_SEC[id] || ['', '', 'neutro'];
+    (($('.rn-titd', tit)) || tit).insertAdjacentHTML('beforeend', '<button class="pc-anadir rn-k-' + s[2] + '" data-a="rnPlus">' + rnIc('anadir', 18, 2.4) + (PC_TXT_ANADIR[id] || 'Añadir') + '</button>');
+  }
+  if (!raiz) return;
+  if (id === 'inicio') { const s = $('.rn-saludo', c); if (s && !$('.pc-anadir', c)) s.insertAdjacentHTML('afterend', '<button class="pc-anadir pc-anadir-ini rn-k-neutro" data-a="rnPlus">' + rnIc('anadir', 18, 2.4) + 'Añadir</button>'); }
+  if (id === 'tareas') { pcCols(c, id, [$(':scope > .rn-semc', c), ...$$(':scope > .rn-flw', c)], $$(':scope > .rn-gr', c)); const i = $('.pc-izq', c); if (i) i.insertAdjacentHTML('beforeend', pcMes()); }
+  if (id === 'gastos') { const gr = $$(':scope > .rn-gr', c); pcCols(c, id, [$(':scope > .rn-flw', c), ...hijos().filter(x => !x.classList.contains('rn-gr'))], gr); }
+  if (id === 'agenda') { const h = hijos(), cal = h.find(x => !x.classList.contains('rn-gr')); if (cal) pcCols(c, id, [$(':scope > .rn-flw', c), cal], h.filter(x => x !== cal)); }
+  if (id === 'plantas' || id === 'acuario') { const g = $$(':scope > .rn-gr', c); if (g.length > 1) pcCols(c, id, [g[0]], g.slice(1)); }
+  if (id === 'medicacion') { const h = hijos(); if (h.length > 1) pcCols(c, id, [h[0]], h.slice(1)); }
+  if (id === 'coche') { const h = hijos(); if (h.length > 2) pcCols(c, id, [h[0], ...h.slice(2)], [h[1]]); }
+  if (id === 'listasr') { const h = hijos(); if (h.length > 1) { const g = document.createElement('div'); g.className = 'pc-rej'; h.forEach(x => g.appendChild(x)); c.appendChild(g); } }
+  if (id === 'menu') {
+    const b = $(':scope > .rn-btnp.rn-tinte', c), an = tit && $('.pc-anadir', tit);
+    if (b && an) { an.replaceWith(b); b.classList.add('pc-anadir'); }
+    const d = $$(':scope > .rn-md2', c); if (d.length) { const g = document.createElement('div'); g.className = 'pc-sem'; d.forEach(x => g.appendChild(x)); c.appendChild(g); }
+  }
+  if (id === 'ajustes') {
+    const w = document.createElement('div'); w.className = 'pc-aj2'; let b = null;
+    [...c.children].filter(x => x !== tit && !x.classList.contains('pc-hecho')).forEach(x => { if (x.tagName === 'H2' || !b) { b = document.createElement('div'); b.className = 'pc-blq'; w.appendChild(b); } b.appendChild(x); });
+    c.appendChild(w);
+  }
+}
+/* Cada vez que se pinta una pantalla (ir, volver, refrescar), se coloca y se pone al día el panel */
+let PC_T = 0;
+function pcTodo() {
+  cancelAnimationFrame(PC_T);
+  PC_T = requestAnimationFrame(() => { if (!pcActivo()) return; $$('#app > .pg').forEach(pcColocar); pcPanel(); });
+}
+function pcModo() {
+  const r = document.documentElement, on = pcActivo(), antes = r.classList.contains('pc');
+  r.classList.toggle('pc', on); r.classList.toggle('pc-plegado', on && !!pcLS('plegado'));
+  if (on) pcTodo(); else { const l = $('#pc-lat'); if (l) l.remove(); pcCerrarMenu(); }
+  if (antes !== on && Nav.pila && Nav.pila.length) try { Nav.refrescar(true); } catch (e) { }
+}
+(function () {
+  const app = $('#app');
+  if (app && window.MutationObserver) new MutationObserver(() => { if (pcActivo()) pcTodo(); }).observe(app, { childList: true, subtree: true });
+  if (PC_MQ) { if (PC_MQ.addEventListener) PC_MQ.addEventListener('change', pcModo); else if (PC_MQ.addListener) PC_MQ.addListener(pcModo); }
+  document.addEventListener('keydown', ev => {
+    if (!pcActivo()) return;
+    if ((ev.metaKey || ev.ctrlKey) && (ev.key === 'k' || ev.key === 'K')) { ev.preventDefault(); ACC.rnBuscar(); }
+    if (ev.key === 'Escape') { if ($('.pc-menu')) return pcCerrarMenu(); if (hojaAbierta) try { cerrarHoja(); } catch (e) { } }
+  });
+  pcModo();
+})();
 
 /* ---- 59_rn_fin.js ---- */
 /* ===================== 0.3.0 · lo último: exportar para las pruebas y arrancar ===================== */
