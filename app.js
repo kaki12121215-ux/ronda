@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.1.0 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.2.0 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.1.0';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.2.0';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9730,6 +9730,218 @@ ACC.catBorrarPropia = el => {
   catRepintarHoja(); if (e && e.id === 'mov') repintar();
   toast('«' + x.nombre + '» borrada. Los gastos que la tenían pasan a «Otro».');
 };
+
+/* ---- 58_rn_lg.js ---- */
+/* ===================== 1.2.0 · CRISTAL LÍQUIDO, PRIMER PASO =====================
+   Solo cambia la apariencia: la barra de abajo, el «+», los controles de pestañas (Todas / Mías…) y los interruptores.
+   No toca qué hace cada cosa: los toques siguen llegando a los mismos botones y a las mismas acciones.
+   - Al pulsar una pestaña, la elegida se levanta como una lente de cristal que amplía lo que tiene debajo; se puede
+     arrastrar a otra pestaña y, al soltar, cae en la más cercana (se le da el mismo «clic» de siempre).
+   - La óptica (un cristal con canto curvo que dobla la imagen) sigue la idea de @zakisheriff/liquid-glass y de
+     GlassSurface de React Bits (licencia MIT): un mapa de desplazamiento pasado por un filtro SVG.
+   - Chrome y Edge: la barra dobla de verdad lo que pasa por debajo (backdrop-filter con el filtro).
+   - Safari (iPhone): la barra es cristal esmerilado con borde de luz, y la lente amplía sin filtro. El filtro completo
+     en Safari se puede activar en Ajustes › Cristal líquido › «Refracción completa (prueba)».
+   - Con «Reducir movimiento» no hay lente. Se apaga entero en Ajustes › Cristal líquido. */
+const LG = { on: true, refr: false, chromium: false };
+(function () {
+  const ua = navigator.userAgent || '';
+  LG.chromium = /Chrom(e|ium)\/|Edg\//.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+  const ls = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const cl = (v, a, b) => Math.max(a, Math.min(b, v));
+  const oscuro = () => document.documentElement.getAttribute('data-tema') === 'oscuro';
+  LG.leer = () => {
+    LG.on = ls('ronda-lg') !== '0'; LG.refr = LG.on && (LG.chromium || ls('ronda-lg-refr') === '1');
+    const r = document.documentElement; r.classList.toggle('lg', LG.on); r.classList.toggle('lg-refr', LG.on && LG.chromium);
+  };
+  LG.leer();
+
+  /* ---------- Óptica: mapa de desplazamiento de un cristal con canto curvo ---------- */
+  const hechos = {}; let nf = 0;
+  function defs() {
+    let s = document.getElementById('lg-defs');
+    if (!s) { document.body.insertAdjacentHTML('beforeend', '<svg id="lg-defs" width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none"><defs></defs></svg>'); s = document.getElementById('lg-defs'); }
+    return s.querySelector('defs');
+  }
+  function filtro(w, h, r, o) {
+    const caja = !LG.chromium, clave = [w, h, r, o.bisel, o.fuerza, o.zoom || 0, o.color || 0, caja].join('_');
+    if (hechos[clave] && document.getElementById(hechos[clave])) return hechos[clave];
+    const q = 2, W = w * q, H = h * q, hx = w / 2, hy = h / 2, ox = new Float32Array(W * H), oy = new Float32Array(W * H); let mx = .01, my = .01;
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
+      const px = (i + .5) / q - hx, py = (j + .5) / q - hy, ax = Math.abs(px) - (hx - r), ay = Math.abs(py) - (hy - r);
+      let dist, nx, ny;
+      if (ax > 0 && ay > 0) { const l = Math.hypot(ax, ay); dist = l - r; nx = ax / l * Math.sign(px); ny = ay / l * Math.sign(py); }
+      else if (ax > ay) { dist = ax - r; nx = Math.sign(px); ny = 0; } else { dist = ay - r; nx = 0; ny = Math.sign(py); }
+      if (dist > 0) continue;
+      const t = cl(1 + dist / o.bisel, 0, 1), m = o.fuerza * (1 - Math.sqrt(1 - t * t)), z = o.zoom ? 1 - 1 / o.zoom : 0, k = j * W + i;
+      ox[k] = -nx * m - px * z; oy[k] = -ny * m - py * z;
+      if (Math.abs(ox[k]) > mx) mx = Math.abs(ox[k]); if (Math.abs(oy[k]) > my) my = Math.abs(oy[k]);
+    }
+    /* En Chrome el desplazamiento va en píxeles; en los demás, en fracciones de la caja (lo único que WebKit pinta bien) */
+    const S = caja ? 2 * Math.max(mx / w, my / h) : 2 * Math.max(mx, my), dx = caja ? S * w : S, dy = caja ? S * h : S;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d'), im = g.createImageData(W, H), d = im.data;
+    for (let k = 0; k < W * H; k++) { d[k * 4] = 128 + ox[k] / dx * 255; d[k * 4 + 1] = 128 + oy[k] / dy * 255; d[k * 4 + 2] = 128; d[k * 4 + 3] = 255; }
+    g.putImageData(im, 0, 0);
+    const id = 'lg-f' + (++nf), url = c.toDataURL(), area = caja ? 'x="0" y="0" width="1" height="1"' : 'x="0" y="0" width="' + w + '" height="' + h + '"';
+    const cab = '<filter id="' + id + '" ' + (caja ? 'filterUnits="objectBoundingBox" primitiveUnits="objectBoundingBox"' : 'filterUnits="userSpaceOnUse"') + ' ' + area + ' color-interpolation-filters="sRGB"><feImage href="' + url + '" ' + area + ' preserveAspectRatio="none" result="m"/>';
+    const canal = (n, s, mat) => '<feDisplacementMap in="SourceGraphic" in2="m" scale="' + s + '" xChannelSelector="R" yChannelSelector="G" result="d' + n + '"/><feColorMatrix in="d' + n + '" type="matrix" values="' + mat + '" result="c' + n + '"/>';
+    const cuerpo = o.color && !caja
+      ? canal(1, S, '1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0') + canal(2, S * (1 + o.color), '0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0') + canal(3, S * (1 + o.color * 2), '0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0') + '<feBlend in="c1" in2="c2" mode="screen" result="rg"/><feBlend in="rg" in2="c3" mode="screen"/>'
+      : '<feDisplacementMap in="SourceGraphic" in2="m" scale="' + S + '" xChannelSelector="R" yChannelSelector="G"/>';
+    defs().insertAdjacentHTML('beforeend', cab + cuerpo + '</filter>');
+    return (hechos[clave] = id);
+  }
+  /* La barra, en Chrome: dobla lo que pasa por debajo */
+  LG.barra = () => {
+    if (!LG.on || !LG.chromium) return;
+    const b = document.querySelector('#nav .rn-b5c'); if (!b) return;
+    const w = Math.round(b.offsetWidth), h = Math.round(b.offsetHeight); if (!w || !h) return;
+    try { document.documentElement.style.setProperty('--lg-barra', 'url(#' + filtro(w, h, h / 2, { bisel: 15, fuerza: 17 }) + ')'); } catch (e) { }
+  };
+
+  /* ---------- Lentes: muelles y pintado ---------- */
+  const ses = []; let raf = 0, tAnt = 0;
+  const mu = (v, k, c) => ({ v, o: v, vel: 0, k, c });
+  const paso = (m, dt) => { m.vel += (-m.k * (m.v - m.o) - m.c * m.vel) * dt; m.v += m.vel * dt; };
+  function bucle(t) {
+    raf = 0; const dt = cl((t - tAnt) / 1000, .001, .032); tAnt = t;
+    for (let i = ses.length - 1; i >= 0; i--) {
+      const s = ses[i];
+      for (let k = 0; k < 2; k++) { paso(s.x, dt / 2); paso(s.y, dt / 2); paso(s.lift, dt / 2); }
+      s.pinta();
+      if (s.fin && ((s.lift.v < .02 && Math.abs(s.lift.vel) < .4) || t - s.fin > 1500)) { s.quita(); ses.splice(i, 1); }
+    }
+    if (ses.length) raf = requestAnimationFrame(bucle);
+  }
+  function capa() { let c = document.getElementById('lg-capa'); if (!c) { c = document.createElement('div'); c.id = 'lg-capa'; c.setAttribute('aria-hidden', 'true'); document.body.appendChild(c); } return c; }
+  /* Una lente de LW × LH: dentro, una copia («espejo») de lo que tiene debajo, ampliada y doblada en el canto */
+  function sesion(LW, LH, html, cr, x, y, apagar, clase) {
+    /* El borde de colores solo sobre fondo opaco: sobre transparente (interruptor) saldría gris */
+    let f = ''; if (LG.refr) try { f = filtro(LW, LH, LH / 2, { bisel: Math.round(LH * .34), fuerza: Math.round(LH * .25), zoom: 1.18, color: clase ? 0 : .02 }); } catch (e) { f = ''; }
+    const lz = document.createElement('div'); lz.className = 'lg-lz' + (oscuro() ? ' lg-osc' : '') + (clase ? ' ' + clase : '');
+    lz.style.cssText = 'width:' + LW + 'px;height:' + LH + 'px;border-radius:' + (LH / 2) + 'px';
+    lz.innerHTML = '<div class="lg-cu"><div class="lg-ref"' + (f ? ' style="filter:url(#' + f + ')"' : '') + '><div class="lg-base"></div><div class="lg-esp">' + html + '</div></div><div class="lg-ti"></div></div><div class="lg-luz"></div><div class="lg-aro"></div>';
+    capa().appendChild(lz);
+    const esp = lz.querySelector('.lg-esp');
+    const s = { x: mu(x, 400, 31), y: mu(y, 400, 31), lift: mu(0, 330, 25), lz, esp, fin: 0, LW, LH };
+    s.pinta = () => {
+      const l = cl(s.lift.v, 0, 1.15), est = cl(Math.abs(s.x.vel) / 2400, 0, .2), k = .74 + .26 * l, lx = s.x.v - LW / 2, ly = s.y.v - LH / 2;
+      lz.style.opacity = cl(l * 1.7, 0, 1);
+      lz.style.transform = 'translate(' + lx + 'px,' + ly + 'px) scale(' + (k * (1 + est)) + ',' + (k * (1 - est * .45)) + ')';
+      esp.style.transformOrigin = (s.x.v - cr.left) + 'px ' + (s.y.v - cr.top) + 'px';
+      esp.style.transform = 'translate(' + (cr.left - lx) + 'px,' + (cr.top - ly) + 'px)' + (f ? '' : ' scale(1.16)');
+      if (apagar && apagar.isConnected) apagar.style.opacity = cl(1 - l * 1.5, 0, 1);
+    };
+    s.quita = () => { lz.remove(); if (apagar) apagar.style.opacity = ''; };
+    s.baja = espera => { setTimeout(() => { s.lift.o = 0; s.fin = performance.now(); if (!raf) { tAnt = performance.now(); raf = requestAnimationFrame(bucle); } }, espera); };
+    ses.push(s); s.pinta(); if (!raf) { tAnt = performance.now(); raf = requestAnimationFrame(bucle); }
+    return s;
+  }
+  const luz = c => { const m = /rgba?\((\d+)[, ]+(\d+)[, ]+(\d+)/.exec(c || ''); return m ? (.299 * m[1] + .587 * m[2] + .114 * m[3]) / 255 : .5; };
+  /* Copia de un botón para el espejo, sin depender de sus clases */
+  function copia(el, cr, color) {
+    const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+    return '<div style="position:absolute;left:' + (r.left - cr.left) + 'px;top:' + (r.top - cr.top) + 'px;width:' + r.width + 'px;height:' + r.height + 'px;display:flex;flex-direction:' + (cs.display.indexOf('flex') >= 0 ? cs.flexDirection : 'row') +
+      ';align-items:center;justify-content:center;gap:' + (cs.rowGap && cs.rowGap !== 'normal' ? cs.rowGap : '1px') + ';font-weight:' + cs.fontWeight + ';font-size:' + cs.fontSize + ';line-height:' + cs.lineHeight + ';font-family:' + String(cs.fontFamily).replace(/"/g, "'") +
+      ';letter-spacing:' + cs.letterSpacing + ';white-space:nowrap;color:' + color + '">' + el.innerHTML.replace(/<i>/g, '<i style="display:flex">').replace(/ data-a="[^"]*"/g, '').replace(/ id="[^"]*"/g, '') + '</div>';
+  }
+
+  /* ---------- Gestos (solo añaden la lente; el clic de siempre es el que cambia de pestaña) ---------- */
+  let A = null;
+  const centro = el => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width }; };
+  function clicSiFalta(el) {
+    let ok = false; const oye = e => { if (el.contains(e.target)) ok = true; };
+    document.addEventListener('click', oye, true);
+    setTimeout(() => { document.removeEventListener('click', oye, true); if (!ok && el.isConnected) el.click(); }, 70);
+  }
+  document.addEventListener('pointerdown', ev => {
+    try {
+      if (A) { const v = A; A = null; v.s.baja(0); }                       /* por si un toque anterior se quedó sin soltar */
+      if (!LG.on || REDUCIR || ev.button > 0 || ev.isPrimary === false || !ev.target.closest) return;
+      const t = ev.target; let op, cont, ops, pil, arr = true, extra = null;
+      if ((op = t.closest('#nav .rn-b5c .rn-tab'))) {
+        if (document.documentElement.classList.contains('rn-mas')) return;
+        cont = op.closest('.rn-b5c'); ops = [...cont.querySelectorAll('.rn-tab')]; pil = cont.querySelector('.rn-pil'); extra = cont.querySelector('.rn-plus5');
+        if (op.dataset.id === 'mas') arr = false;
+      } else if ((op = t.closest('.rn-fl.rn-fl-p > button'))) {
+        cont = op.parentNode; ops = [...cont.children].filter(x => x.tagName === 'BUTTON'); pil = cont.querySelector('.rn-flp'); arr = cont.classList.contains('lg-arr');
+      } else { const sw = t.closest('.rn-sw'); if (sw) interruptor(sw, ev); return; }
+      const sel = ops.find(x => x.classList.contains('rn-on')); if (!sel) return;
+      const cr = cont.getBoundingClientRect(), c0 = centro(pil && pil.offsetWidth ? pil : sel), c1 = centro(op), osc = oscuro();
+      const otro = ops.find(x => x !== sel) || sel, cSel = getComputedStyle(sel).color, cOtro = getComputedStyle(otro).color;
+      const color = osc ? cOtro : (luz(cSel) < .7 ? cSel : cOtro);
+      const LH = Math.round(cr.height + 12), LW = Math.round(cl(Math.max(c0.w, c1.w) + 26, LH + 8, 130));
+      const html = ops.map(x => copia(x, cr, color)).join('') + (extra ? copia(extra, cr, color) : '');
+      const s = sesion(LW, LH, html, cr, c0.x, c0.y, pil && pil.offsetWidth ? pil : null, '');
+      s.lift.o = 1; s.x.o = c1.x; s.y.o = c1.y;
+      A = { s, op, ops, arr, x0: ev.clientX, id: ev.pointerId, drag: false, t: performance.now(), cr };
+    } catch (e) { A = null; }
+  }, true);
+  document.addEventListener('pointermove', ev => {
+    if (!A || ev.pointerId !== A.id || !A.arr || A.sw) return;
+    if (!A.drag && Math.abs(ev.clientX - A.x0) > 7) { A.drag = true; A.s.x.k = 1100; A.s.x.c = 60; }
+    if (A.drag) A.s.x.o = cl(ev.clientX, A.cr.left + A.s.LW * .3, A.cr.right - A.s.LW * .3);
+  }, true);
+  const suelta = (ev, cancelado) => {
+    if (!A || ev.pointerId !== A.id) return;
+    const a = A; A = null;
+    try {
+      if (a.sw) {
+        const el = document.elementFromPoint(ev.clientX, ev.clientY), dentro = !cancelado && el && a.sw.contains(el);
+        if (dentro) { a.s.x.o = a.on ? a.r.left + 3 + a.kw / 2 : a.r.right - 3 - a.kw / 2; const p = a.s.lz.querySelector('.lg-pista'); if (p) p.style.background = a.on ? a.colOff : a.colOn; }
+      } else if (a.drag && !cancelado) {
+        a.s.x.k = 400; a.s.x.c = 31;
+        const d = a.ops.filter(x => x.isConnected).reduce((b, x) => Math.abs(centro(x).x - ev.clientX) < Math.abs(centro(b).x - ev.clientX) ? x : b, a.op), c = centro(d);
+        a.s.x.o = c.x; a.s.y.o = c.y;
+        if (!d.classList.contains('rn-on')) clicSiFalta(d);
+      }
+    } catch (e) { }
+    a.s.baja(cancelado ? 0 : Math.max(140, 280 - (performance.now() - a.t)));
+  };
+  document.addEventListener('pointerup', ev => suelta(ev, false), true);
+  document.addEventListener('pointercancel', ev => suelta(ev, true), true);
+
+  /* Interruptor: el círculo se levanta como una lente sobre la pista */
+  function interruptor(sw, ev) {
+    const i = sw.querySelector('i'); if (!i) return;
+    const r = sw.getBoundingClientRect(), kr = i.getBoundingClientRect(), on = sw.classList.contains('rn-on');
+    const colOn = (getComputedStyle(sw).getPropertyValue('--b') || '').trim() || '#B1CE5A', colOff = oscuro() ? 'rgba(255,255,255,.16)' : 'rgba(43,58,66,.16)';
+    const html = '<div class="lg-pista" style="position:absolute;left:0;top:0;width:' + r.width + 'px;height:' + r.height + 'px;border-radius:' + (r.height / 2) + 'px;background:' + (on ? colOn : colOff) + ';transition:background-color .22s ease"></div>';
+    const s = sesion(Math.round(kr.width + 24), Math.round(r.height + 10), html, r, kr.left + kr.width / 2, r.top + r.height / 2, i, 'lg-sw');
+    s.lift.o = 1;
+    A = { s, sw, id: ev.pointerId, r, on, colOn, colOff, kw: kr.width, t: performance.now() };
+  }
+
+  /* Los controles que caben enteros se pueden arrastrar (los que se deslizan de lado, no: ahí manda el desplazamiento) */
+  let tObs = 0;
+  function marcar() {
+    tObs = 0; if (!LG.on) return;
+    document.querySelectorAll('.rn-fl.rn-fl-p:not([data-lg])').forEach(f => { f.setAttribute('data-lg', '1'); const w = f.closest('.rn-flw') || f.parentNode; if (w && w.scrollWidth <= w.clientWidth + 2) f.classList.add('lg-arr'); });
+    LG.barra();
+  }
+  const pide = () => { if (!tObs) tObs = requestAnimationFrame(marcar); };
+  try {
+    const app = document.getElementById('app'), nav = document.getElementById('nav');
+    if (window.MutationObserver) { if (app) new MutationObserver(pide).observe(app, { childList: true, subtree: true }); if (nav) new MutationObserver(pide).observe(nav, { childList: true }); }
+    window.addEventListener('resize', pide); pide();
+  } catch (e) { }
+
+  /* ---------- Ajustes › Cristal líquido ---------- */
+  const aj0 = P.ajustes.html;
+  P.ajustes.html = function () {
+    let h = aj0.apply(this, arguments);
+    try {
+      const bloque = '<h2 class="rn-gt">Cristal líquido</h2><div class="rn-cd"><div class="rn-rw rn-li"><span class="rn-fat" style="flex:1"><span class="rn-t">Cristal líquido</span><span class="rn-n">La barra, las pestañas y los interruptores, como lentes de cristal</span></span>' + rnSw(LG.on, 'lgCambiar') + '</div>' +
+        (LG.on && !LG.chromium ? '<div class="rn-rw rn-li"><span class="rn-fat" style="flex:1"><span class="rn-t">Refracción completa (prueba)</span><span class="rn-n">La lente dobla la imagen en el borde. Si se ve raro o va lento, apágalo</span></span>' + rnSw(ls('ronda-lg-refr') === '1', 'lgRefr') + '</div>' : '') + '</div>';
+      const i = h.indexOf('<p class="rn-version">'); h = i >= 0 ? h.slice(0, i) + bloque + h.slice(i) : h + bloque;
+    } catch (e) { }
+    return h;
+  };
+  const pon = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } LG.leer(); LG.barra(); try { Nav.refrescar(true); } catch (e) { } };
+  ACC.lgCambiar = () => pon('ronda-lg', LG.on ? '0' : '1');
+  ACC.lgRefr = () => pon('ronda-lg-refr', ls('ronda-lg-refr') === '1' ? '0' : '1');
+})();
 
 /* ---- 58_rn_pc.js ---- */
 /* ===================== 1.1.0 · RONDA EN ORDENADOR =====================
