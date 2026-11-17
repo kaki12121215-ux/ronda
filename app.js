@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.2.0 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.2.1 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.2.0';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.2.1';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9732,18 +9732,17 @@ ACC.catBorrarPropia = el => {
 };
 
 /* ---- 58_rn_lg.js ---- */
-/* ===================== 1.2.0 · CRISTAL LÍQUIDO, PRIMER PASO =====================
-   Solo cambia la apariencia: la barra de abajo, el «+», los controles de pestañas (Todas / Mías…) y los interruptores.
-   No toca qué hace cada cosa: los toques siguen llegando a los mismos botones y a las mismas acciones.
-   - Al pulsar una pestaña, la elegida se levanta como una lente de cristal que amplía lo que tiene debajo; se puede
-     arrastrar a otra pestaña y, al soltar, cae en la más cercana (se le da el mismo «clic» de siempre).
-   - La óptica (un cristal con canto curvo que dobla la imagen) sigue la idea de @zakisheriff/liquid-glass y de
-     GlassSurface de React Bits (licencia MIT): un mapa de desplazamiento pasado por un filtro SVG.
-   - Chrome y Edge: la barra dobla de verdad lo que pasa por debajo (backdrop-filter con el filtro).
-   - Safari (iPhone): la barra es cristal esmerilado con borde de luz, y la lente amplía sin filtro. El filtro completo
-     en Safari se puede activar en Ajustes › Cristal líquido › «Refracción completa (prueba)».
+/* ===================== 1.2.x · CRISTAL LÍQUIDO =====================
+   Solo cambia la apariencia. Los toques siguen llegando a los mismos botones y a las mismas acciones.
+   1.2.1: la lente ya no lleva una copia dentro (cortaba letras y escondía iconos). Es un cristal transparente encima,
+   y lo que tiene debajo (los iconos y textos de verdad) crece un poco al pasar bajo ella, como bajo una lupa.
+   - Dónde: barra de abajo (se arrastra), controles de pestañas (se arrastran si caben), días de la semana en Tareas,
+     interruptores. Y, sin lente, brillo y borde de luz en botones redondos, botones grandes, chips elegidos y hojas.
+   - En Chrome y Edge, además, el cristal dobla lo que tiene detrás (filtro SVG en backdrop-filter, idea de
+     @zakisheriff/liquid-glass y GlassSurface de React Bits, licencia MIT). Safari no lo permite: allí la lupa la hacen
+     los propios iconos.
    - Con «Reducir movimiento» no hay lente. Se apaga entero en Ajustes › Cristal líquido. */
-const LG = { on: true, refr: false, chromium: false };
+const LG = { on: true, chromium: false };
 (function () {
   const ua = navigator.userAgent || '';
   LG.chromium = /Chrom(e|ium)\/|Edg\//.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
@@ -9751,12 +9750,12 @@ const LG = { on: true, refr: false, chromium: false };
   const cl = (v, a, b) => Math.max(a, Math.min(b, v));
   const oscuro = () => document.documentElement.getAttribute('data-tema') === 'oscuro';
   LG.leer = () => {
-    LG.on = ls('ronda-lg') !== '0'; LG.refr = LG.on && (LG.chromium || ls('ronda-lg-refr') === '1');
+    LG.on = ls('ronda-lg') !== '0';
     const r = document.documentElement; r.classList.toggle('lg', LG.on); r.classList.toggle('lg-refr', LG.on && LG.chromium);
   };
   LG.leer();
 
-  /* ---------- Óptica: mapa de desplazamiento de un cristal con canto curvo ---------- */
+  /* ---------- Óptica (solo Chrome): mapa de desplazamiento de un cristal con canto curvo ---------- */
   const hechos = {}; let nf = 0;
   function defs() {
     let s = document.getElementById('lg-defs');
@@ -9764,9 +9763,9 @@ const LG = { on: true, refr: false, chromium: false };
     return s.querySelector('defs');
   }
   function filtro(w, h, r, o) {
-    const caja = !LG.chromium, clave = [w, h, r, o.bisel, o.fuerza, o.zoom || 0, o.color || 0, caja].join('_');
+    const clave = [w, h, r, o.bisel, o.fuerza, o.zoom || 0, o.color || 0].join('_');
     if (hechos[clave] && document.getElementById(hechos[clave])) return hechos[clave];
-    const q = 2, W = w * q, H = h * q, hx = w / 2, hy = h / 2, ox = new Float32Array(W * H), oy = new Float32Array(W * H); let mx = .01, my = .01;
+    const q = 2, W = w * q, H = h * q, hx = w / 2, hy = h / 2, ox = new Float32Array(W * H), oy = new Float32Array(W * H); let mx = .01;
     for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
       const px = (i + .5) / q - hx, py = (j + .5) / q - hy, ax = Math.abs(px) - (hx - r), ay = Math.abs(py) - (hy - r);
       let dist, nx, ny;
@@ -9775,24 +9774,20 @@ const LG = { on: true, refr: false, chromium: false };
       if (dist > 0) continue;
       const t = cl(1 + dist / o.bisel, 0, 1), m = o.fuerza * (1 - Math.sqrt(1 - t * t)), z = o.zoom ? 1 - 1 / o.zoom : 0, k = j * W + i;
       ox[k] = -nx * m - px * z; oy[k] = -ny * m - py * z;
-      if (Math.abs(ox[k]) > mx) mx = Math.abs(ox[k]); if (Math.abs(oy[k]) > my) my = Math.abs(oy[k]);
+      mx = Math.max(mx, Math.abs(ox[k]), Math.abs(oy[k]));
     }
-    /* En Chrome el desplazamiento va en píxeles; en los demás, en fracciones de la caja (lo único que WebKit pinta bien) */
-    const S = caja ? 2 * Math.max(mx / w, my / h) : 2 * Math.max(mx, my), dx = caja ? S * w : S, dy = caja ? S * h : S;
-    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const S = 2 * mx, c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d'), im = g.createImageData(W, H), d = im.data;
-    for (let k = 0; k < W * H; k++) { d[k * 4] = 128 + ox[k] / dx * 255; d[k * 4 + 1] = 128 + oy[k] / dy * 255; d[k * 4 + 2] = 128; d[k * 4 + 3] = 255; }
+    for (let k = 0; k < W * H; k++) { d[k * 4] = 128 + ox[k] / S * 255; d[k * 4 + 1] = 128 + oy[k] / S * 255; d[k * 4 + 2] = 128; d[k * 4 + 3] = 255; }
     g.putImageData(im, 0, 0);
-    const id = 'lg-f' + (++nf), url = c.toDataURL(), area = caja ? 'x="0" y="0" width="1" height="1"' : 'x="0" y="0" width="' + w + '" height="' + h + '"';
-    const cab = '<filter id="' + id + '" ' + (caja ? 'filterUnits="objectBoundingBox" primitiveUnits="objectBoundingBox"' : 'filterUnits="userSpaceOnUse"') + ' ' + area + ' color-interpolation-filters="sRGB"><feImage href="' + url + '" ' + area + ' preserveAspectRatio="none" result="m"/>';
+    const id = 'lg-f' + (++nf), area = 'x="0" y="0" width="' + w + '" height="' + h + '"';
     const canal = (n, s, mat) => '<feDisplacementMap in="SourceGraphic" in2="m" scale="' + s + '" xChannelSelector="R" yChannelSelector="G" result="d' + n + '"/><feColorMatrix in="d' + n + '" type="matrix" values="' + mat + '" result="c' + n + '"/>';
-    const cuerpo = o.color && !caja
+    const cuerpo = o.color
       ? canal(1, S, '1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0') + canal(2, S * (1 + o.color), '0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0') + canal(3, S * (1 + o.color * 2), '0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0') + '<feBlend in="c1" in2="c2" mode="screen" result="rg"/><feBlend in="rg" in2="c3" mode="screen"/>'
       : '<feDisplacementMap in="SourceGraphic" in2="m" scale="' + S + '" xChannelSelector="R" yChannelSelector="G"/>';
-    defs().insertAdjacentHTML('beforeend', cab + cuerpo + '</filter>');
+    defs().insertAdjacentHTML('beforeend', '<filter id="' + id + '" filterUnits="userSpaceOnUse" ' + area + ' color-interpolation-filters="sRGB"><feImage href="' + c.toDataURL() + '" ' + area + ' preserveAspectRatio="none" result="m"/>' + cuerpo + '</filter>');
     return (hechos[clave] = id);
   }
-  /* La barra, en Chrome: dobla lo que pasa por debajo */
   LG.barra = () => {
     if (!LG.on || !LG.chromium) return;
     const b = document.querySelector('#nav .rn-b5c'); if (!b) return;
@@ -9808,48 +9803,43 @@ const LG = { on: true, refr: false, chromium: false };
     raf = 0; const dt = cl((t - tAnt) / 1000, .001, .032); tAnt = t;
     for (let i = ses.length - 1; i >= 0; i--) {
       const s = ses[i];
-      for (let k = 0; k < 2; k++) { paso(s.x, dt / 2); paso(s.y, dt / 2); paso(s.lift, dt / 2); }
-      s.pinta();
-      if (s.fin && ((s.lift.v < .02 && Math.abs(s.lift.vel) < .4) || t - s.fin > 1500)) { s.quita(); ses.splice(i, 1); }
+      for (let k = 0; k < 2; k++) { paso(s.x, dt / 2); paso(s.lift, dt / 2); }
+      try { s.pinta(); } catch (e) { s.fin = 1; s.lift.v = 0; }
+      if (s.fin && ((s.lift.v < .02 && Math.abs(s.lift.vel) < .5) || t - s.fin > 1200)) { s.quita(); ses.splice(i, 1); }
     }
     if (ses.length) raf = requestAnimationFrame(bucle);
   }
+  const anda = () => { if (!raf) { tAnt = performance.now(); raf = requestAnimationFrame(bucle); } };
   function capa() { let c = document.getElementById('lg-capa'); if (!c) { c = document.createElement('div'); c.id = 'lg-capa'; c.setAttribute('aria-hidden', 'true'); document.body.appendChild(c); } return c; }
-  /* Una lente de LW × LH: dentro, una copia («espejo») de lo que tiene debajo, ampliada y doblada en el canto */
-  function sesion(LW, LH, html, cr, x, y, apagar, clase) {
-    /* El borde de colores solo sobre fondo opaco: sobre transparente (interruptor) saldría gris */
-    let f = ''; if (LG.refr) try { f = filtro(LW, LH, LH / 2, { bisel: Math.round(LH * .34), fuerza: Math.round(LH * .25), zoom: 1.18, color: clase ? 0 : .02 }); } catch (e) { f = ''; }
-    const lz = document.createElement('div'); lz.className = 'lg-lz' + (oscuro() ? ' lg-osc' : '') + (clase ? ' ' + clase : '');
-    lz.style.cssText = 'width:' + LW + 'px;height:' + LH + 'px;border-radius:' + (LH / 2) + 'px';
-    lz.innerHTML = '<div class="lg-cu"><div class="lg-ref"' + (f ? ' style="filter:url(#' + f + ')"' : '') + '><div class="lg-base"></div><div class="lg-esp">' + html + '</div></div><div class="lg-ti"></div></div><div class="lg-luz"></div><div class="lg-aro"></div>';
+  /* Una lente: cristal transparente de LW × LH centrado en (x, y). «items» crecen al pasar bajo ella; «apagar» se oculta;
+     «sel» (el elegido) toma el color de los demás mientras su píldora está oculta, para que no desaparezca. */
+  function sesion(o) {
+    const { LW, LH, x, y, items, apagar, sel, colorSel } = o;
+    let f = ''; if (LG.chromium) try { f = filtro(LW, LH, LH / 2, { bisel: Math.round(LH * .32), fuerza: Math.round(LH * .2), zoom: 1.1, color: .03 }); } catch (e) { f = ''; }
+    const lz = document.createElement('div'); lz.className = 'lg-lz' + (oscuro() ? ' lg-osc' : '') + (o.clase ? ' ' + o.clase : '');
+    lz.style.cssText = 'width:' + LW + 'px;height:' + LH + 'px;border-radius:' + (LH / 2) + 'px' + (f ? ';-webkit-backdrop-filter:url(#' + f + ') saturate(1.5);backdrop-filter:url(#' + f + ') saturate(1.5)' : '');
+    lz.innerHTML = '<div class="lg-luz"></div><div class="lg-aro"></div>';
     capa().appendChild(lz);
-    const esp = lz.querySelector('.lg-esp');
-    const s = { x: mu(x, 400, 31), y: mu(y, 400, 31), lift: mu(0, 330, 25), lz, esp, fin: 0, LW, LH };
+    const cs = (items || []).map(el => { const r = el.getBoundingClientRect(); return { el, cx: r.left + r.width / 2 }; });
+    const crece = f ? .08 : .17;
+    const s = { x: mu(x, 420, 32), lift: mu(0, 420, 30), lz, fin: 0, LW, LH };
     s.pinta = () => {
-      const l = cl(s.lift.v, 0, 1.15), est = cl(Math.abs(s.x.vel) / 2400, 0, .2), k = .74 + .26 * l, lx = s.x.v - LW / 2, ly = s.y.v - LH / 2;
-      lz.style.opacity = cl(l * 1.7, 0, 1);
-      lz.style.transform = 'translate(' + lx + 'px,' + ly + 'px) scale(' + (k * (1 + est)) + ',' + (k * (1 - est * .45)) + ')';
-      esp.style.transformOrigin = (s.x.v - cr.left) + 'px ' + (s.y.v - cr.top) + 'px';
-      esp.style.transform = 'translate(' + (cr.left - lx) + 'px,' + (cr.top - ly) + 'px)' + (f ? '' : ' scale(1.16)');
-      if (apagar && apagar.isConnected) apagar.style.opacity = cl(1 - l * 1.5, 0, 1);
+      const l = cl(s.lift.v, 0, 1.12), est = cl(Math.abs(s.x.vel) / 2600, 0, .16), k = .8 + .2 * l;
+      lz.style.opacity = cl(l * 1.8, 0, 1);
+      lz.style.transform = 'translate(' + (s.x.v - LW / 2) + 'px,' + (y - LH / 2) + 'px) scale(' + (k * (1 + est)) + ',' + (k * (1 - est * .4)) + ')';
+      cs.forEach(c => { const p = cl(1 - Math.abs(c.cx - s.x.v) / (LW * .62), 0, 1); c.el.style.scale = 1 + crece * p * cl(l, 0, 1); });
+      if (apagar && apagar.isConnected) apagar.style.opacity = cl(1 - l * 1.6, 0, 1);
+      if (sel && sel.isConnected && colorSel) sel.style.color = l > .35 ? colorSel : '';
     };
-    s.quita = () => { lz.remove(); if (apagar) apagar.style.opacity = ''; };
-    s.baja = espera => { setTimeout(() => { s.lift.o = 0; s.fin = performance.now(); if (!raf) { tAnt = performance.now(); raf = requestAnimationFrame(bucle); } }, espera); };
-    ses.push(s); s.pinta(); if (!raf) { tAnt = performance.now(); raf = requestAnimationFrame(bucle); }
+    s.quita = () => { lz.remove(); cs.forEach(c => { c.el.style.scale = ''; }); if (apagar) apagar.style.opacity = ''; if (sel) sel.style.color = ''; };
+    s.baja = espera => { setTimeout(() => { s.lift.o = 0; s.fin = performance.now(); anda(); }, espera); };
+    ses.push(s); s.pinta(); anda();
     return s;
   }
-  const luz = c => { const m = /rgba?\((\d+)[, ]+(\d+)[, ]+(\d+)/.exec(c || ''); return m ? (.299 * m[1] + .587 * m[2] + .114 * m[3]) / 255 : .5; };
-  /* Copia de un botón para el espejo, sin depender de sus clases */
-  function copia(el, cr, color) {
-    const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
-    return '<div style="position:absolute;left:' + (r.left - cr.left) + 'px;top:' + (r.top - cr.top) + 'px;width:' + r.width + 'px;height:' + r.height + 'px;display:flex;flex-direction:' + (cs.display.indexOf('flex') >= 0 ? cs.flexDirection : 'row') +
-      ';align-items:center;justify-content:center;gap:' + (cs.rowGap && cs.rowGap !== 'normal' ? cs.rowGap : '1px') + ';font-weight:' + cs.fontWeight + ';font-size:' + cs.fontSize + ';line-height:' + cs.lineHeight + ';font-family:' + String(cs.fontFamily).replace(/"/g, "'") +
-      ';letter-spacing:' + cs.letterSpacing + ';white-space:nowrap;color:' + color + '">' + el.innerHTML.replace(/<i>/g, '<i style="display:flex">').replace(/ data-a="[^"]*"/g, '').replace(/ id="[^"]*"/g, '') + '</div>';
-  }
 
-  /* ---------- Gestos (solo añaden la lente; el clic de siempre es el que cambia de pestaña) ---------- */
+  /* ---------- Gestos (solo añaden la lente; el clic de siempre es el que hace la acción) ---------- */
   let A = null;
-  const centro = el => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width }; };
+  const centro = el => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; };
   function clicSiFalta(el) {
     let ok = false; const oye = e => { if (el.contains(e.target)) ok = true; };
     document.addEventListener('click', oye, true);
@@ -9857,60 +9847,62 @@ const LG = { on: true, refr: false, chromium: false };
   }
   document.addEventListener('pointerdown', ev => {
     try {
-      if (A) { const v = A; A = null; v.s.baja(0); }                       /* por si un toque anterior se quedó sin soltar */
+      if (A) { const v = A; A = null; v.s.baja(0); }
       if (!LG.on || REDUCIR || ev.button > 0 || ev.isPrimary === false || !ev.target.closest) return;
-      const t = ev.target; let op, cont, ops, pil, arr = true, extra = null;
+      const t = ev.target; let op, cont, ops, pil, arr = true, extra = null, tipo = '';
       if ((op = t.closest('#nav .rn-b5c .rn-tab'))) {
         if (document.documentElement.classList.contains('rn-mas')) return;
         cont = op.closest('.rn-b5c'); ops = [...cont.querySelectorAll('.rn-tab')]; pil = cont.querySelector('.rn-pil'); extra = cont.querySelector('.rn-plus5');
-        if (op.dataset.id === 'mas') arr = false;
+        if (op.dataset.id === 'mas') arr = false; tipo = 'barra';
       } else if ((op = t.closest('.rn-fl.rn-fl-p > button'))) {
         cont = op.parentNode; ops = [...cont.children].filter(x => x.tagName === 'BUTTON'); pil = cont.querySelector('.rn-flp'); arr = cont.classList.contains('lg-arr');
+      } else if ((op = t.closest('.rn-sem > .rn-sd'))) {
+        /* Días de la semana: la lente sale en el día tocado (no se arrastra: tocar un día solo lleva a él) */
+        const c = centro(op);
+        const s = sesion({ LW: Math.round(c.w + 12), LH: Math.round(c.h + 8), x: c.x, y: c.y, items: [op] });
+        s.lift.o = 1; A = { s, op, ops: [op], arr: false, x0: ev.clientX, id: ev.pointerId, t: performance.now() };
+        return;
       } else { const sw = t.closest('.rn-sw'); if (sw) interruptor(sw, ev); return; }
       const sel = ops.find(x => x.classList.contains('rn-on')); if (!sel) return;
-      const cr = cont.getBoundingClientRect(), c0 = centro(pil && pil.offsetWidth ? pil : sel), c1 = centro(op), osc = oscuro();
-      const otro = ops.find(x => x !== sel) || sel, cSel = getComputedStyle(sel).color, cOtro = getComputedStyle(otro).color;
-      const color = osc ? cOtro : (luz(cSel) < .7 ? cSel : cOtro);
-      const LH = Math.round(cr.height + 12), LW = Math.round(cl(Math.max(c0.w, c1.w) + 26, LH + 8, 130));
-      const html = ops.map(x => copia(x, cr, color)).join('') + (extra ? copia(extra, cr, color) : '');
-      const s = sesion(LW, LH, html, cr, c0.x, c0.y, pil && pil.offsetWidth ? pil : null, '');
-      s.lift.o = 1; s.x.o = c1.x; s.y.o = c1.y;
+      const cr = cont.getBoundingClientRect(), pv = pil && pil.offsetWidth ? pil : null, c0 = centro(pv || sel), c1 = centro(op);
+      const otro = ops.find(x => x !== sel) || sel, colorSel = getComputedStyle(otro).color;
+      const LH = Math.round(cr.height + (tipo === 'barra' ? 4 : 8)), LW = Math.round(cl(Math.max(c0.w, c1.w) + 16, LH + 4, 120));
+      const s = sesion({ LW, LH, x: c0.x, y: cr.top + cr.height / 2, items: ops.concat(extra ? [extra] : []), apagar: pv, sel, colorSel });
+      s.lift.o = 1; s.x.o = c1.x;
       A = { s, op, ops, arr, x0: ev.clientX, id: ev.pointerId, drag: false, t: performance.now(), cr };
     } catch (e) { A = null; }
   }, true);
   document.addEventListener('pointermove', ev => {
     if (!A || ev.pointerId !== A.id || !A.arr || A.sw) return;
     if (!A.drag && Math.abs(ev.clientX - A.x0) > 7) { A.drag = true; A.s.x.k = 1100; A.s.x.c = 60; }
-    if (A.drag) A.s.x.o = cl(ev.clientX, A.cr.left + A.s.LW * .3, A.cr.right - A.s.LW * .3);
+    if (A.drag) A.s.x.o = cl(ev.clientX, A.cr.left + A.s.LW * .32, A.cr.right - A.s.LW * .32);
   }, true);
   const suelta = (ev, cancelado) => {
     if (!A || ev.pointerId !== A.id) return;
     const a = A; A = null;
     try {
       if (a.sw) {
-        const el = document.elementFromPoint(ev.clientX, ev.clientY), dentro = !cancelado && el && a.sw.contains(el);
-        if (dentro) { a.s.x.o = a.on ? a.r.left + 3 + a.kw / 2 : a.r.right - 3 - a.kw / 2; const p = a.s.lz.querySelector('.lg-pista'); if (p) p.style.background = a.on ? a.colOff : a.colOn; }
+        const el = document.elementFromPoint(ev.clientX, ev.clientY);
+        if (!cancelado && el && a.sw.contains(el)) a.s.x.o = a.on ? a.r.left + 3 + a.kw / 2 : a.r.right - 3 - a.kw / 2;
       } else if (a.drag && !cancelado) {
-        a.s.x.k = 400; a.s.x.c = 31;
-        const d = a.ops.filter(x => x.isConnected).reduce((b, x) => Math.abs(centro(x).x - ev.clientX) < Math.abs(centro(b).x - ev.clientX) ? x : b, a.op), c = centro(d);
-        a.s.x.o = c.x; a.s.y.o = c.y;
+        a.s.x.k = 420; a.s.x.c = 32;
+        const d = a.ops.filter(x => x.isConnected).reduce((b, x) => Math.abs(centro(x).x - ev.clientX) < Math.abs(centro(b).x - ev.clientX) ? x : b, a.op);
+        a.s.x.o = centro(d).x;
         if (!d.classList.contains('rn-on')) clicSiFalta(d);
       }
     } catch (e) { }
-    a.s.baja(cancelado ? 0 : Math.max(140, 280 - (performance.now() - a.t)));
+    a.s.baja(cancelado ? 0 : Math.max(90, 200 - (performance.now() - a.t)));
   };
   document.addEventListener('pointerup', ev => suelta(ev, false), true);
   document.addEventListener('pointercancel', ev => suelta(ev, true), true);
 
-  /* Interruptor: el círculo se levanta como una lente sobre la pista */
+  /* Interruptor: el círculo se vuelve una lente transparente sobre la pista */
   function interruptor(sw, ev) {
     const i = sw.querySelector('i'); if (!i) return;
-    const r = sw.getBoundingClientRect(), kr = i.getBoundingClientRect(), on = sw.classList.contains('rn-on');
-    const colOn = (getComputedStyle(sw).getPropertyValue('--b') || '').trim() || '#B1CE5A', colOff = oscuro() ? 'rgba(255,255,255,.16)' : 'rgba(43,58,66,.16)';
-    const html = '<div class="lg-pista" style="position:absolute;left:0;top:0;width:' + r.width + 'px;height:' + r.height + 'px;border-radius:' + (r.height / 2) + 'px;background:' + (on ? colOn : colOff) + ';transition:background-color .22s ease"></div>';
-    const s = sesion(Math.round(kr.width + 24), Math.round(r.height + 10), html, r, kr.left + kr.width / 2, r.top + r.height / 2, i, 'lg-sw');
+    const r = sw.getBoundingClientRect(), kr = i.getBoundingClientRect();
+    const s = sesion({ LW: Math.round(kr.width + 18), LH: Math.round(r.height + 8), x: kr.left + kr.width / 2, y: r.top + r.height / 2, apagar: i, clase: 'lg-sw' });
     s.lift.o = 1;
-    A = { s, sw, id: ev.pointerId, r, on, colOn, colOff, kw: kr.width, t: performance.now() };
+    A = { s, sw, id: ev.pointerId, r, on: sw.classList.contains('rn-on'), kw: kr.width, t: performance.now() };
   }
 
   /* Los controles que caben enteros se pueden arrastrar (los que se deslizan de lado, no: ahí manda el desplazamiento) */
@@ -9932,15 +9924,62 @@ const LG = { on: true, refr: false, chromium: false };
   P.ajustes.html = function () {
     let h = aj0.apply(this, arguments);
     try {
-      const bloque = '<h2 class="rn-gt">Cristal líquido</h2><div class="rn-cd"><div class="rn-rw rn-li"><span class="rn-fat" style="flex:1"><span class="rn-t">Cristal líquido</span><span class="rn-n">La barra, las pestañas y los interruptores, como lentes de cristal</span></span>' + rnSw(LG.on, 'lgCambiar') + '</div>' +
-        (LG.on && !LG.chromium ? '<div class="rn-rw rn-li"><span class="rn-fat" style="flex:1"><span class="rn-t">Refracción completa (prueba)</span><span class="rn-n">La lente dobla la imagen en el borde. Si se ve raro o va lento, apágalo</span></span>' + rnSw(ls('ronda-lg-refr') === '1', 'lgRefr') + '</div>' : '') + '</div>';
+      const bloque = '<h2 class="rn-gt">Cristal líquido</h2><div class="rn-cd"><div class="rn-rw rn-li"><span class="rn-fat" style="flex:1"><span class="rn-t">Cristal líquido</span><span class="rn-n">La barra, las pestañas, los botones y los interruptores, como cristal</span></span>' + rnSw(LG.on, 'lgCambiar') + '</div></div>';
       const i = h.indexOf('<p class="rn-version">'); h = i >= 0 ? h.slice(0, i) + bloque + h.slice(i) : h + bloque;
     } catch (e) { }
     return h;
   };
-  const pon = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } LG.leer(); LG.barra(); try { Nav.refrescar(true); } catch (e) { } };
-  ACC.lgCambiar = () => pon('ronda-lg', LG.on ? '0' : '1');
-  ACC.lgRefr = () => pon('ronda-lg-refr', ls('ronda-lg-refr') === '1' ? '0' : '1');
+  ACC.lgCambiar = () => { try { localStorage.setItem('ronda-lg', LG.on ? '0' : '1'); } catch (e) { } LG.leer(); LG.barra(); try { Nav.refrescar(true); } catch (e) { } };
+})();
+
+/* ---------- 1.2.1 · Tareas: tocar un día que ya se ve no mueve la pantalla ----------
+   Antes, tocar «hoy» desplazaba la lista y la cabecera (título, semana, filtros) se iba y volvía. Ahora, si el grupo de
+   ese día ya está a la vista, se queda donde está; si no, se desplaza como siempre. */
+(function () {
+  const ir0 = ACC.rnIrDia;
+  ACC.rnIrDia = function (el) {
+    try {
+      const e = Nav.actual(), iso = el.dataset.v, k = iso < hoyISO() ? 'a' : iso, g = e && $('.rn-gr[data-g="' + k + '"]', e.el), c = e && $('.pgc', e.el);
+      if (g && c) {
+        const rg = g.getBoundingClientRect(), rc = c.getBoundingClientRect(), nav = document.getElementById('nav'), abajo = nav ? Math.min(rc.bottom, nav.getBoundingClientRect().top) : rc.bottom;
+        if (rg.top >= rc.top + 40 && rg.top + Math.min(rg.height, 120) <= abajo) return;
+      }
+    } catch (x) { }
+    return ir0.apply(this, arguments);
+  };
+})();
+
+/* ---------- 1.2.1 · Dilo: el micrófono vuelve a escuchar la segunda vez ----------
+   Al parar, el reconocimiento de voz del iPhone tarda un momento en soltar el micrófono. Si se volvía a mantener el «+»
+   antes de que lo soltara, el nuevo no oía nada. Ahora, el que se para se corta del todo (abort), y el nuevo espera a
+   que el anterior haya terminado (como mucho 0,8 s) antes de empezar. Si aun así no arranca, se reintenta una vez. */
+(function () {
+  const R0 = window.SpeechRecognition || window.webkitSpeechRecognition; if (!R0) return;
+  let vivo = null;
+  function Envuelto() {
+    const n = new R0(), start0 = n.start.bind(n), abort0 = n.abort.bind(n);
+    let terminado = false;
+    n.addEventListener('end', () => { terminado = true; if (vivo === n) vivo = null; });
+    n.stop = () => { try { abort0(); } catch (e) { } };
+    n.start = () => {
+      const arranca = intento => {
+        vivo = n; terminado = false;
+        try { start0(); } catch (e) {
+          if (intento < 1) return setTimeout(() => arranca(intento + 1), 350);
+          vivo = null; if (n.onerror) n.onerror({ error: 'start' }); if (n.onend) n.onend();
+        }
+      };
+      const prev = vivo;
+      if (prev && prev !== n) {
+        let hecho = false; const sigue = () => { if (hecho) return; hecho = true; arranca(0); };
+        prev.addEventListener('end', sigue, { once: true });
+        try { prev.abort(); } catch (e) { }
+        setTimeout(sigue, 800);
+      } else arranca(0);
+    };
+    return n;
+  }
+  try { if (window.SpeechRecognition) window.SpeechRecognition = Envuelto; if (window.webkitSpeechRecognition) window.webkitSpeechRecognition = Envuelto; } catch (e) { }
 })();
 
 /* ---- 58_rn_pc.js ---- */

@@ -1,4 +1,4 @@
-/* RONDA · prueba 1.2.0 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
+/* RONDA · prueba 1.2.1 · se genera con src/build.js a partir de src/css (tokens.css + diseno.css) */
 /* Ronda · diseño nuevo · valores aprobados. Ver 01_GUIA_DE_ESTILO.md.
    Nombres: --c-<color>-<tono>. Tonos: b bloque, f claro, fo muy claro, t tinta, fu fuerte, ico icono sobre blanco.
    --g-<color>-0/1/2 son los tres tonos del degradado de cabecera de cada sección. */
@@ -2450,28 +2450,24 @@ html.pc .pc-sem .rn-pt2 { text-align: left !important; font-size: 14px; line-hei
 @media (prefers-reduced-motion: reduce) { html.pc #app, html.pc #pc-lat, html.pc .pc-plegar { transition: none; } }
 html.pc .pg:not(.raiz) > .btns { left: max(16px, calc(50% - 374px)); right: max(16px, calc(50% - 374px)); }
 
-/* ===================== 1.2.0 · CRISTAL LÍQUIDO, PRIMER PASO (todo bajo html.lg; se apaga en Ajustes) ===================== */
-/* La lente (solo existe mientras se toca) */
+/* ===================== 1.2.x · CRISTAL LÍQUIDO (todo bajo html.lg; se apaga en Ajustes) ===================== */
+/* La lente (solo existe mientras se toca): cristal transparente, sin nada dentro */
 #lg-capa { position: fixed; inset: 0; pointer-events: none; z-index: 70; overflow: hidden; }
-.lg-lz { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform, opacity; box-shadow: 0 10px 22px rgba(25,40,45,.22), 0 2px 5px rgba(25,40,45,.14); }
-.lg-cu { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
-.lg-ref { position: absolute; inset: 0; overflow: hidden; }
-.lg-base { position: absolute; inset: 0; background: #FBFCFB; }
-.lg-osc .lg-base { background: #333D44; }
-.lg-sw .lg-base { display: none; }
-.lg-sw .lg-ti { background: linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,.16)); }
-.lg-sw.lg-osc .lg-ti { background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.08)); }
-.lg-esp { position: absolute; left: 0; top: 0; will-change: transform; }
-.lg-esp svg { flex: none; }
-.lg-ti { position: absolute; inset: 0; background: radial-gradient(closest-side, rgba(40,60,70,0) 58%, rgba(40,60,70,.12) 100%), linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,0) 45%); }
-.lg-osc .lg-ti { background: radial-gradient(closest-side, rgba(0,0,0,0) 58%, rgba(0,0,0,.22) 100%), linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,0) 45%); }
+.lg-lz { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform, opacity;
+  background: radial-gradient(closest-side, rgba(255,255,255,.05) 55%, rgba(255,255,255,.22) 100%), linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.04) 55%, rgba(255,255,255,.12));
+  -webkit-backdrop-filter: saturate(1.5) brightness(1.05); backdrop-filter: saturate(1.5) brightness(1.05);
+  box-shadow: 0 8px 20px rgba(25,40,45,.16), 0 1.5px 4px rgba(25,40,45,.12); }
+.lg-lz.lg-osc { background: radial-gradient(closest-side, rgba(255,255,255,.02) 55%, rgba(255,255,255,.1) 100%), linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.02) 55%, rgba(255,255,255,.06)); box-shadow: 0 8px 20px rgba(0,0,0,.4), 0 1.5px 4px rgba(0,0,0,.3); }
 .lg-luz { position: absolute; inset: 0; border-radius: inherit;
-  box-shadow: inset 0 0 0 .7px rgba(30,45,50,.2), inset 0 2.5px 2.5px rgba(255,255,255,1), inset 0 -2.5px 3px rgba(255,255,255,.85), inset 0 -9px 12px -8px rgba(255,255,255,.7), inset 3px 0 5px -2px rgba(255,255,255,.55), inset -3px 0 5px -2px rgba(255,255,255,.55); }
-.lg-osc .lg-luz { box-shadow: inset 0 0 0 .7px rgba(255,255,255,.16), inset 0 2px 2px rgba(255,255,255,.5), inset 0 -2px 3px rgba(255,255,255,.26), inset 0 -9px 12px -8px rgba(255,255,255,.2); }
-.lg-aro, html.lg:not(.rn-mas) .rn-b5c::after, html.lg .rn-fl.rn-fl-p::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; padding: 1.3px;
+  box-shadow: inset 0 0 0 .7px rgba(30,45,50,.14), inset 0 2.5px 2px rgba(255,255,255,.95), inset 0 -2.5px 3px rgba(255,255,255,.7), inset 0 -8px 12px -8px rgba(255,255,255,.6), inset 3px 0 5px -3px rgba(255,255,255,.6), inset -3px 0 5px -3px rgba(255,255,255,.6); }
+.lg-osc .lg-luz { box-shadow: inset 0 0 0 .7px rgba(255,255,255,.18), inset 0 2px 2px rgba(255,255,255,.45), inset 0 -2px 3px rgba(255,255,255,.22), inset 0 -8px 12px -8px rgba(255,255,255,.18); }
+.lg-sw .lg-luz { box-shadow: inset 0 0 0 .7px rgba(30,45,50,.18), inset 0 2px 2px rgba(255,255,255,1), inset 0 -2px 3px rgba(255,255,255,.8), inset 0 0 8px rgba(255,255,255,.45); }
+/* Borde de luz (aro) */
+.lg-aro, html.lg:not(.rn-mas) .rn-b5c::after, html.lg .rn-fl.rn-fl-p::after, html.lg .rn-rb.rn-gl::after, html.lg .rn-hj.rn-gl::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; padding: 1.3px;
   background: conic-gradient(from 215deg, rgba(255,255,255,1), rgba(255,255,255,.22) 18%, rgba(255,255,255,.7) 48%, rgba(255,255,255,.18) 70%, rgba(255,255,255,1));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-[data-tema="oscuro"] .lg-aro, html.lg[data-tema="oscuro"]:not(.rn-mas) .rn-b5c::after, html.lg[data-tema="oscuro"] .rn-fl.rn-fl-p::after { opacity: .38; }
+[data-tema="oscuro"] .lg-aro, html.lg[data-tema="oscuro"]:not(.rn-mas) .rn-b5c::after, html.lg[data-tema="oscuro"] .rn-fl.rn-fl-p::after, html.lg[data-tema="oscuro"] .rn-rb.rn-gl::after, html.lg[data-tema="oscuro"] .rn-hj.rn-gl::after { opacity: .36; }
+html.lg .rn-hj.rn-gl::after { z-index: 3; }
 /* La barra: cristal con borde de luz. En Chrome, además, dobla lo que pasa por debajo */
 html.lg:not(.rn-mas) .rn-b5c { background: linear-gradient(180deg, rgba(255,255,255,.66), rgba(255,255,255,.5)); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8);
   box-shadow: inset 0 1.2px 1px rgba(255,255,255,.95), inset 0 -1px 1px rgba(255,255,255,.55), inset 0 -8px 14px -8px rgba(255,255,255,.5), 0 14px 34px rgba(30,45,52,.17), 0 3px 9px rgba(30,45,52,.09); }
@@ -2489,3 +2485,14 @@ html.lg[data-tema="oscuro"] .rn-plus5 { background: rgba(255,255,255,.13); box-s
 html.lg .rn-fl.rn-fl-p.lg-arr { touch-action: pan-y; }
 html.lg .rn-sw { box-shadow: inset 0 1px 2px rgba(30,45,52,.16); }
 html.lg .rn-sw i { background-image: linear-gradient(180deg, #FFFFFF, #EEF2F1); box-shadow: 0 1px 3px rgba(0,0,0,.26), inset 0 -1px 1px rgba(0,0,0,.05), inset 0 1px 0 #FFFFFF; }
+
+/* 1.2.1 · Más cristal, solo apariencia: botones redondos, botones grandes, chips elegidos, día de hoy y hojas */
+html.lg .rn-rb.rn-gl { box-shadow: inset 0 1.2px 1px rgba(255,255,255,.9), inset 0 -1px 1px rgba(255,255,255,.35), 0 4px 12px rgba(30,45,52,.1); }
+html.lg[data-tema="oscuro"] .rn-rb.rn-gl { box-shadow: inset 0 1px 1px rgba(255,255,255,.22), 0 4px 12px rgba(0,0,0,.3); }
+html.lg .rn-btnp:not(.rn-tinte):not(.rn-peligro), html.lg .rn-qc.rn-on, html.lg .rn-sd.rn-hoy, html.lg .rn-sw.rn-on {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0) 60%); box-shadow: inset 0 1.2px 1px rgba(255,255,255,.7), inset 0 -1px 1px rgba(255,255,255,.2), 0 3px 9px rgba(30,45,52,.13); }
+html.lg[data-tema="oscuro"] .rn-btnp:not(.rn-tinte):not(.rn-peligro), html.lg[data-tema="oscuro"] .rn-qc.rn-on, html.lg[data-tema="oscuro"] .rn-sd.rn-hoy, html.lg[data-tema="oscuro"] .rn-sw.rn-on {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 60%); box-shadow: inset 0 1px 1px rgba(255,255,255,.35), 0 3px 9px rgba(0,0,0,.28); }
+html.lg .rn-hj.rn-gl { box-shadow: inset 0 1.5px 1px rgba(255,255,255,.95), 0 -10px 40px rgba(30,45,52,.14); }
+html.lg[data-tema="oscuro"] .rn-hj.rn-gl { box-shadow: inset 0 1px 1px rgba(255,255,255,.18), 0 -10px 40px rgba(0,0,0,.4); }
+html.lg .rn-aviso { box-shadow: inset 0 1px 1px rgba(255,255,255,.25), 0 10px 28px rgba(20,30,35,.28); }
