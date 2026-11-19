@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.1.0 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.1.1 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.1.0';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.1.1';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9624,6 +9624,143 @@ ACC.rnOcultarPersona = el => {
   Nav.refrescar(true);
   toast(o ? x.nombre + ' ya no sale en tareas ni repartos' : x.nombre + ' vuelve a salir en toda la app', null, null, 'hecho');
 };
+
+/* ---- 58_rn_111.js ---- */
+/* ===================== 1.1.1 · TOCAR ATRÁS, Y DOS ARREGLOS =====================
+   1. Ajustes › Tocar atrás: un atajo del iPhone que dicta y manda el texto al script (acción «dilo», script 1.8.0).
+      El script lo ordena con Gemini, lo guarda y el atajo enseña lo apuntado como notificación. El código del atajo
+      es de una persona y solo sirve para añadir.
+   2. Lo que entra por el atajo en la compra llega sin sección (las secciones las adivina el móvil): el primer móvil
+      que lo recibe se la pone.
+   3. Tareas: tocar un día que ya se ve no mueve la pantalla (estaba en la 1.2.1, se perdió al volver a la 1.1.0).
+   4. Dilo: el micrófono vuelve a escuchar la segunda vez (igual, de la 1.2.1). */
+
+/* ---------- 1. Ajustes › Tocar atrás ---------- */
+const rnAtajoCod = () => { try { return localStorage.getItem('ronda-atajo') || ''; } catch (e) { return ''; } };
+(function () {
+  const h0 = P.ajustes.html;
+  P.ajustes.html = () => {
+    const h = h0();
+    const fila = '<button class="rn-rw rn-fa" data-a="rnAjIr" data-ir="tocarAtras"><span class="rn-chip">' + rnIc('microfono', 26, 2) + '</span><span class="rn-fat"><span class="rn-t">Tocar atrás</span><span class="rn-n">' + (rnAtajoCod() ? 'Conectado en este móvil' : 'Dictar sin abrir Ronda') + '</span></span>' + rnFle + '</button>';
+    const i = h.indexOf('data-ir="tarjetasC"');
+    if (i < 0) return h;
+    const fin = h.indexOf('</button>', i) + 9;
+    return h.slice(0, fin) + fila + h.slice(fin);
+  };
+})();
+
+P.tocarAtras = {
+  clase: 'con-boton',
+  html: p => {
+    const cod = rnAtajoCod(), dir = (S.cfg && S.cfg.url) || '';
+    const paso = (x, i) => '<div class="row"><span class="nm">' + (i + 1) + '</span><span style="flex:1;min-width:0;display:block;font-weight:600;font-size:15px;line-height:1.4">' + x + '</span></div>';
+    return tope('Tocar atrás') +
+      '<p class="texto">Das tres toques en la parte de atrás del iPhone, hablas y Ronda lo reparte: compra, tareas, agenda, gastos o notas. Al terminar sale un aviso con lo que ha apuntado. Se monta una sola vez, unos 4 minutos.</p>' +
+      '<div class="card grp" style="margin-top:12px">' + [
+        'Abre <b>Atajos</b> › <b>+</b> (arriba a la derecha). Arriba, toca el nombre y llámalo <b>Dilo en Ronda</b>.',
+        'Busca <b>Dictar texto</b> y añádelo. En su flecha: Idioma <b>Español (España)</b> y Dejar de escuchar <b>Tras una pausa</b>.',
+        'Busca <b>Obtener contenido de URL</b>. Toca «URL» y pega la <b>dirección</b> (botón de abajo). En su flecha: Método <b>POST</b>, Cuerpo de la solicitud <b>JSON</b>.',
+        '<b>Añadir nuevo campo › Texto</b> tres veces. A la izquierda (Clave) y a la derecha (valor): <b>a</b> = dilo · <b>k</b> = el <b>código</b> · <b>texto</b> = la variable <i>Texto dictado</i> (sale encima del teclado).',
+        'Busca <b>Obtener valor del diccionario</b>: Obtener <b>Valor</b> para la clave <b>txt</b> en <i>Contenido de la URL</i>.',
+        'Busca <b>Mostrar notificación</b> y en el texto pon la variable <i>Valor del diccionario</i>. Toca <b>OK</b> para guardar el atajo.',
+        'En <b>Ajustes</b> del iPhone › <b>Accesibilidad</b> › <b>Tocar</b> › <b>Tocar atrás</b> › <b>Tocar tres veces</b> › elige <b>Dilo en Ronda</b>.'
+      ].map(paso).join('') + '</div>' +
+      '<div class="codex">' + ic('enlace', 20, 5) + '<span>Dirección del script</span><button class="mini" data-a="tCopiar" data-v="' + esc(dir) + '">Copiar</button></div>' +
+      '<div class="codex">' + ic('candado', 20, 4) + '<span>' + (cod ? 'Tu código del atajo' : 'Código: todavía no creado') + '</span>' + (cod ? '<button class="mini" data-a="tCopiar" data-v="' + esc(cod) + '">Copiar</button>' : '<button class="mini" data-a="rnAtajoCodigo">Crear</button>') + '</div>' +
+      '<p class="cap" style="text-align:left">El código es tuyo: lo que dictes se apunta a tu nombre. Solo sirve para añadir, no deja ver ni borrar nada. No lo pegues en ningún otro sitio ni lo enseñes en capturas.' + (cod ? ' Si lo has perdido o enseñado, <button class="lnk" data-a="rnAtajoCodigo">crea otro</button> y el anterior deja de valer.' : '') + '</p>' +
+      (p.prueba ? '<div class="aviso' + (p.prueba === 'ok' ? '' : ' mal') + '" style="margin-top:12px">' + ic(p.prueba === 'ok' ? 'hecho' : 'error', 22, p.prueba === 'ok' ? 3 : 0) + '<span>' + esc(p.pruebaTxt) + '</span></div>' : '') +
+      (cod ? '<button class="btn sec peligro" data-a="rnAtajoQuitar" style="margin-top:14px">Desconectar el atajo</button>' : '');
+  },
+  fijo: () => '<div class="btns">' + btn('Probar conexión', 'rnAtajoProbar') + '</div>'
+};
+const rnAtajoError = e => e && e.code === 'accion' ? 'El script es de antes de la 1.1.1. Actualízalo a la versión 1.8.0 (lo explica el paso a paso).' : (e && e.message) || 'No se ha podido.';
+ACC.rnAtajoCodigo = el => conEspera(el, async () => {
+  if (!EN_CASA) return toast('Tocar atrás necesita vuestra casa: conéctate en Ajustes › Tus datos.');
+  try { const r = await api('atajo-codigo', {}); try { localStorage.setItem('ronda-atajo', r.codigo); } catch (e) { } Nav.refrescar(true); toast('Código creado'); }
+  catch (e) { toast(rnAtajoError(e)); }
+});
+ACC.rnAtajoProbar = el => conEspera(el, async () => {
+  const p = Nav.actual().params, cod = rnAtajoCod();
+  if (!cod) { p.prueba = 'mal'; p.pruebaTxt = 'Primero crea el código.'; return Nav.refrescar(true); }
+  try {
+    const r = await api('dilo', { k: cod, prueba: true }, { sinToken: true });
+    if (r && r.prueba) { p.prueba = 'ok'; p.pruebaTxt = 'Conexión correcta: el script reconoce el código. Ahora da tres toques atrás y di algo.'; }
+    else { p.prueba = 'mal'; p.pruebaTxt = (r && r.txt) || 'El script no reconoce el código.'; }
+  } catch (e) { p.prueba = 'mal'; p.pruebaTxt = rnAtajoError(e); }
+  Nav.refrescar(true);
+});
+ACC.rnAtajoQuitar = async () => {
+  if (!(await preguntar('¿Desconectar el atajo?', 'Su código deja de valer al momento. Lo que ya apuntó se queda.', 'Desconectar', true))) return;
+  try { await api('atajo-quitar', {}); } catch (e) { if (e.code !== 'sinred') return toast(rnAtajoError(e)); }
+  try { localStorage.removeItem('ronda-atajo'); } catch (e) { }
+  const p = Nav.actual().params; delete p.prueba;
+  Nav.refrescar(true); toast('Atajo desconectado');
+};
+
+/* ---------- 2. Compra que llega del atajo: ponerle su sección ---------- */
+(function () {
+  const r0 = recibir;
+  const hechas = {};
+  const seccionar = () => {
+    try {
+      lista('compra').forEach(x => {
+        if (!x.porAtajo || x.seccion || x.hecho || hechas[x.id]) return;
+        hechas[x.id] = 1;
+        cambiar('compra', x.id, { seccion: adivinarSeccion(x.nombre || '') });
+      });
+    } catch (e) { }
+  };
+  recibir = function () { const r = r0.apply(this, arguments); setTimeout(seccionar, 0); return r; };
+})();
+
+/* ---------- 3. Tareas: tocar un día que ya se ve no mueve la pantalla ----------
+   Antes, tocar «hoy» desplazaba la lista y la cabecera (título, semana, filtros) se iba y volvía. Ahora, si el grupo de
+   ese día ya está a la vista, se queda donde está; si no, se desplaza como siempre. */
+(function () {
+  const ir0 = ACC.rnIrDia;
+  ACC.rnIrDia = function (el) {
+    try {
+      const e = Nav.actual(), iso = el.dataset.v, k = iso < hoyISO() ? 'a' : iso, g = e && $('.rn-gr[data-g="' + k + '"]', e.el), c = e && $('.pgc', e.el);
+      if (g && c) {
+        const rg = g.getBoundingClientRect(), rc = c.getBoundingClientRect(), nav = document.getElementById('nav'), abajo = nav ? Math.min(rc.bottom, nav.getBoundingClientRect().top) : rc.bottom;
+        if (rg.top >= rc.top + 40 && rg.top + Math.min(rg.height, 120) <= abajo) return;
+      }
+    } catch (x) { }
+    return ir0.apply(this, arguments);
+  };
+})();
+
+/* ---------- 4. Dilo: el micrófono vuelve a escuchar la segunda vez ----------
+   Al parar, el reconocimiento de voz del iPhone tarda un momento en soltar el micrófono. Si se volvía a mantener el «+»
+   antes de que lo soltara, el nuevo no oía nada. Ahora, el que se para se corta del todo (abort), y el nuevo espera a
+   que el anterior haya terminado (como mucho 0,8 s) antes de empezar. Si aun así no arranca, se reintenta una vez. */
+(function () {
+  const R0 = window.SpeechRecognition || window.webkitSpeechRecognition; if (!R0) return;
+  let vivo = null;
+  function Envuelto() {
+    const n = new R0(), start0 = n.start.bind(n), abort0 = n.abort.bind(n);
+    n.addEventListener('end', () => { if (vivo === n) vivo = null; });
+    n.stop = () => { try { abort0(); } catch (e) { } };
+    n.start = () => {
+      const arranca = intento => {
+        vivo = n;
+        try { start0(); } catch (e) {
+          if (intento < 1) return setTimeout(() => arranca(intento + 1), 350);
+          vivo = null; if (n.onerror) n.onerror({ error: 'start' }); if (n.onend) n.onend();
+        }
+      };
+      const prev = vivo;
+      if (prev && prev !== n) {
+        let hecho = false; const sigue = () => { if (hecho) return; hecho = true; arranca(0); };
+        prev.addEventListener('end', sigue, { once: true });
+        try { prev.abort(); } catch (e) { }
+        setTimeout(sigue, 800);
+      } else arranca(0);
+    };
+    return n;
+  }
+  try { if (window.SpeechRecognition) window.SpeechRecognition = Envuelto; if (window.webkitSpeechRecognition) window.webkitSpeechRecognition = Envuelto; } catch (e) { }
+})();
 
 /* ---- 58_rn_124.js ---- */
 /* ===================== 1.0.25 · Acuario: las medidas se guardan ===================== */
