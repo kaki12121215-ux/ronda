@@ -1,4 +1,4 @@
-/* RONDA · prueba del diseño nuevo · versión 1.1.1 · se genera con src/build.js a partir de src/app */
+/* RONDA · prueba del diseño nuevo · versión 1.1.2 · se genera con src/build.js a partir de src/app */
 (function () {
 'use strict';
 /* Generado por src/build.js: iconos e ilustraciones dentro del código, para que salgan siempre. */
@@ -28,7 +28,7 @@ const GLOSARIO = [
 
 /* ---- 01_base.js ---- */
 /* ============================ BASE ============================ */
-const VERSION = '1.1.1';  /* el diseño nuevo · tareas para varias personas */
+const VERSION = '1.1.2';  /* el diseño nuevo · tareas para varias personas */
 /* 0.3.0: dos modos. «ejemplo» (datos de mentira, como hasta ahora) o «casa» (la hoja de Google de verdad, con el mismo script).
    Cada modo guarda en su propio almacén del móvil: así los datos de ejemplo nunca se mezclan con los de casa. */
 /* 1.0.0: sin datos de ejemplo. La app guarda en los mismos sitios que la 1.8.0 (base «ronda», claves «ronda-…»):
@@ -9760,6 +9760,98 @@ ACC.rnAtajoQuitar = async () => {
     return n;
   }
   try { if (window.SpeechRecognition) window.SpeechRecognition = Envuelto; if (window.webkitSpeechRecognition) window.webkitSpeechRecognition = Envuelto; } catch (e) { }
+})();
+
+/* ---- 58_rn_112.js ---- */
+/* ===================== 1.1.2 · QUIÉN PAGA, Y TARJETAS CON AVISOS =====================
+   1. Al añadir un gasto, «Pagó» sale quien lo está añadiendo en su móvil. Ronda ya lo buscaba entre los participantes de la
+      cuenta por su persona, pero si el participante no estaba enlazado (añadido a mano con su nombre, o enlazado a una
+      persona que ya no existe porque volvió a entrar), caía en el primero de la lista. Ahora se enlaza solo por el nombre,
+      y eso arregla también Dilo, Tocar atrás, las tarjetas, los saldos y los colores.
+   2. Tarjetas conectadas › «Últimos avisos»: cada aviso que manda el atajo de una tarjeta, con lo que pasó (script 1.9.0).
+   3. El atajo de la tarjeta, con dos pasos más para que enseñe una notificación con lo apuntado o con lo que ha fallado. */
+
+/* ---------- 1. Enlazar participantes con su persona, por el nombre ---------- */
+const rnNomBase = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zñ0-9 ]/g, ' ').trim().split(/\s+/)[0] || '';
+function rnVincularParticipantes() {
+  try {
+    const activos = personas(), ids = activos.map(x => x.id);
+    lista('cuentas').forEach(c => {
+      const ps = c.participantes || [];
+      if (!ps.length) return;
+      let cambia = false;
+      const nuevos = ps.map(x => Object.assign({}, x));
+      activos.forEach(p => {
+        if (nuevos.some(x => x.persona === p.id)) return;
+        const b = rnNomBase(p.nombre); if (!b) return;
+        const cand = nuevos.filter(x => (!x.persona || ids.indexOf(x.persona) < 0) && rnNomBase(x.nombre) === b);
+        if (cand.length === 1) { cand[0].persona = p.id; cambia = true; }
+      });
+      if (cambia) cambiar('cuentas', c.id, { participantes: nuevos });
+    });
+  } catch (e) { }
+}
+/* Participante de una cuenta para una persona (por su enlace o, si no lo tiene, por el nombre). */
+function rnPartDe(c, persona) {
+  const ps = (c && c.participantes) || [];
+  const p = ps.find(x => x.persona === persona); if (p) return p;
+  const per = (personas().find(x => x.id === persona) || {}), b = rnNomBase(per.nombre);
+  const cand = b ? ps.filter(x => rnNomBase(x.nombre) === b) : [];
+  return cand.length === 1 ? cand[0] : null;
+}
+(function () {
+  const r0 = recibir;
+  recibir = function () { const r = r0.apply(this, arguments); setTimeout(rnVincularParticipantes, 0); return r; };
+  setTimeout(rnVincularParticipantes, 1500);
+  /* Gasto nuevo (desde la cuenta, el + de Gastos o el + general): «Pagó» = quien lo añade */
+  const ir0 = Nav.ir;
+  Nav.ir = function (id, p) {
+    if (id === 'mov' && p && !p.id && p.cid) {
+      const yo = rnPartDe(dato('cuentas', p.cid), S.cfg.persona);
+      if (yo) p.pagadoPor = yo.id;
+    }
+    return ir0.apply(this, arguments);
+  };
+})();
+
+/* ---------- 2. Tarjetas conectadas › Últimos avisos ---------- */
+(function () {
+  const h0 = P.tarjetasC.html;
+  const fecha = ms => { const d = new Date(ms), h = new Date(); const dia = d.toDateString() === h.toDateString() ? 'Hoy' : (new Date(h - 864e5).toDateString() === d.toDateString() ? 'Ayer' : d.getDate() + ' ' + ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'][d.getMonth()]); return dia + ', ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  P.tarjetasC.html = p => {
+    let h = h0(p);
+    if (!EN_CASA) return h;
+    let av = '<p class="lab2" style="margin-top:22px">Últimos avisos</p>';
+    if (p.avErr) av += '<p class="cap" style="text-align:left">' + esc(p.avErr) + '</p>';
+    else if (!p.avisos) av += '<p class="cap" style="text-align:left">Cargando…</p>';
+    else if (!p.avisos.length) av += '<p class="cap" style="text-align:left">Todavía no ha llegado ningún aviso de una tarjeta. Si has pagado y no sale aquí, el atajo no ha llegado a Ronda: revisa que la automatización esté activada y en «Ejecutar inmediatamente».</p>';
+    else av += '<div class="card grp">' + p.avisos.map(a => {
+      const t = a.t ? dato('tarjetas', a.t) : null, mal = a.e === 'error';
+      const tit = a.e === 'prueba' ? 'Prueba de conexión' : (a.i ? euros(a.i) : '') + (a.m ? ' · ' + a.m : '');
+      return '<div class="row" style="align-items:flex-start"><span style="flex:1;min-width:0;display:block"><b style="display:block">' + esc(tit || 'Aviso sin importe') + '</b><small style="display:block;color:' + (mal ? '#C8402B' : 'var(--mu)') + ';font-weight:600;line-height:1.35">' + esc(a.x) + '</small></span><small style="flex:none;color:var(--mu);text-align:right;line-height:1.35">' + fecha(a.c) + '<br>' + esc(t ? t.nombre : (a.t ? 'Tarjeta borrada' : 'Código que no vale')) + '</small></div>';
+    }).join('') + '</div><p class="cap" style="text-align:left">Cada vez que el atajo de una tarjeta llega a Ronda, sale aquí con lo que pasó. Si un pago no sale, el atajo no llegó.</p>';
+    return h + av;
+  };
+  P.tarjetasC.montar = (el, p) => {
+    if (!EN_CASA || p.avPidiendo || (p.avisos && Date.now() - (p.avCuando || 0) < 15000)) return;
+    p.avPidiendo = true;
+    api('tarjeta-avisos', {}).then(r => { p.avisos = r.avisos || []; p.avErr = ''; p.avCuando = Date.now(); })
+      .catch(e => { p.avErr = e && e.code === 'accion' ? 'Para ver los avisos, actualiza el script a la versión 1.9.0 (lo explica el paso a paso).' : 'No se han podido cargar los avisos: ' + ((e && e.message) || 'sin conexión') + '.'; p.avisos = null; })
+      .then(() => { p.avPidiendo = false; const a = Nav.actual(); if (a && a.id === 'tarjetasC') Nav.refrescar(true); });
+  };
+})();
+
+/* ---------- 3. El atajo de la tarjeta enseña una notificación ---------- */
+(function () {
+  const h0 = P.tarjetaConectar.html;
+  const fila = (n, x) => '<div class="row"><span class="nm">' + n + '</span><span style="flex:1;min-width:0;display:block;font-weight:600;font-size:15px;line-height:1.4">' + x + '</span></div>';
+  P.tarjetaConectar.html = p => {
+    const h = h0(p), m = '<div class="row"><span class="nm">5</span>';
+    if (h.indexOf(m) < 0) return h;
+    return h.replace(m, fila(5, 'Debajo, busca <b>Obtener valor del diccionario</b>: Obtener <b>Valor</b> para la clave <b>txt</b> en <i>Contenido de la URL</i>.') +
+      fila(6, 'Busca <b>Mostrar notificación</b> y en el texto pon la variable <i>Valor del diccionario</i>. Así, al pagar, el iPhone te dice dónde se ha apuntado o qué ha fallado.') +
+      '<div class="row"><span class="nm">7</span>');
+  };
 })();
 
 /* ---- 58_rn_124.js ---- */
